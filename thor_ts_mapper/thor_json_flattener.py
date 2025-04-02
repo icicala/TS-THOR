@@ -26,7 +26,7 @@ class JSONFlattener:
         queue = deque([(json_line, "")])
         try:
             while queue:
-                current, key_path = queue.popleft()  # FIFO order preserves original sequence
+                current, key_path = queue.popleft()
 
                 if isinstance(current, dict):
                     for key, value in current.items():
