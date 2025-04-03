@@ -1,27 +1,37 @@
+import os
 import json
 from typing import List, Dict, Any
+
 from thor_ts_mapper.logger_config import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)
 
-
 class THORJSONOutputWriter:
+    def __init__(self, output_file: str):
+        self.output_file = output_file
+        self.mode = 'a' if os.path.exists(output_file) else 'w'
+        self.file = None
 
+    def open(self):
+        if self.file is None:
+            self.file = open(self.output_file, self.mode, encoding='utf-8')
+            logger.debug(f"Opened file {self.output_file} in mode {self.mode}")
+        return self
+    def close(self) -> None:
+        if self.file is not None:
+            self.file.close()
+            self.file = None
+            logger.debug(f"Closed file {self.output_file}")
 
-    @staticmethod
-    def write_timesketch_data(mapped_data: List[Dict[str, Any]], output_file: str) -> bool:
+    def write_mapped_logs(self, mapped_logs: List[Dict[str, Any]]) -> None:
+        if not mapped_logs:
+            return
+        if self.file is None:
+            self.open()
+
         try:
-            THORJSONOutputWriter._write_json_lines(mapped_data, output_file)
-            logger.info(f"Successfully wrote {len(mapped_data)} events to {output_file}")
-            return True
+            self.file.writelines(json.dumps(entry) + '\n' for entry in mapped_logs)
+            self.file.flush()
+            logger.info(f"Successfully wrote {len(mapped_logs)} events to {self.output_file}")
         except IOError as e:
-            logger.error(f"Error writing to {output_file}: {e}")
-            return False
-
-
-
-    @staticmethod
-    def _write_json_lines(data: List[Dict[str, Any]], output_file: str) -> None:
-        with open(output_file, 'w', encoding='utf-8') as file:
-            for entry in data:
-                file.write(json.dumps(entry) + '\n')
+            logger.error(f"Error writing to {self.output_file}: {e}")

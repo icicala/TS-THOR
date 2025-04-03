@@ -1,7 +1,5 @@
 import re
-from typing import Dict, Any
-from dateutil import parser
-from datetime import timezone
+from typing import Dict, Any, List
 
 from thor_ts_mapper.logger_config import LoggerConfig
 
@@ -11,17 +9,15 @@ class ThorTimestampExtractor:
     ISO8601_PATTERN = re.compile(r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[+-]\d{2}:\d{2}|Z)?$)', re.IGNORECASE) # ISO 8601 format
 
     @staticmethod
-    def _extract_datetime(thor_json_line: Dict[str, Any]) -> Dict[str, str]:
-        datetime_thor: Dict[str, str] = {}
+    def extract_datetime(thor_json_line: Dict[str, Any]) -> List[str]:
+        timestamp_fields: List[str] = []
 
-        for key, value in thor_json_line.items():
+        for field, value in thor_json_line.items():
             if isinstance(value, str) and ThorTimestampExtractor.ISO8601_PATTERN.match(value):
-                try:
-                    timestamp = parser.isoparse(value)
-                    if timestamp.tzinfo is None:
-                        timestamp = timestamp.replace(tzinfo=timezone.utc)
-                    datetime_thor[key] = timestamp.isoformat()
-                except ValueError:
-                    logger.warning(f"Invalid datetime format at {key}: {value}")
-
-        return datetime_thor
+                timestamp_fields.append(field)
+        has_multiple_timestamps = len(timestamp_fields) > 1
+        if has_multiple_timestamps:
+            logger.debug(f"Multiple timestamp fields found: {timestamp_fields}")
+        else:
+            logger.debug(f"THOR timestamp field found only: {timestamp_fields}")
+        return timestamp_fields

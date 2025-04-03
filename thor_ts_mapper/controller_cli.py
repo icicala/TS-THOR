@@ -1,12 +1,14 @@
 # python
 import argparse
+import json
 import os
 import logging
-from typing import Dict, List
+from typing import Dict
+
 from thor_ts_mapper.thor_input_reader import THORJSONInputReader
+from thor_ts_mapper.thor_json_flattener import JSONFlattener
+from thor_ts_mapper.thor_json_log_version import THORJSONLogVersionMapper
 from thor_ts_mapper.thor_output_writer import THORJSONOutputWriter
-from thor_ts_mapper.thor_timesketch_mapper import ThorTimesketchMapper
-from thor_ts_mapper.event_category import EventCategory
 from thor_ts_mapper.logger_config import LoggerConfig
 
 
@@ -17,16 +19,15 @@ logger = LoggerConfig.get_logger(__name__)
 class MainControllerCLI:
     @staticmethod
     def parse_arguments() -> Dict[str, str]:
-        default_folder = os.path.join(os.getcwd(), "timesketch_thor_logs")
         parser = argparse.ArgumentParser(
-            description="THOR-TS-Mapper is a high-performance tool that converts THOR security scanner logs into Timesketch-compatible timeline format."
+            description="THOR-TS-Mapper converts THOR security scanner logs into Timesketch-compatible format."
         )
         parser.add_argument("input_file", help="Path to THOR JSON file")
         parser.add_argument(
             "-o",
-            dest="output_folder",
-            help="Output folder path",
-            default=default_folder
+            dest="output_file",
+            help="Output file path (default:<input_file>_mapped.jsonl)",
+            default=None
         )
         parser.add_argument(
             "-v", "--verbose",
@@ -35,79 +36,83 @@ class MainControllerCLI:
         )
         args = parser.parse_args()
 
-
         if args.verbose:
             LoggerConfig.setup_root_logger(level=logging.DEBUG)
         else:
             LoggerConfig.setup_root_logger(level=logging.INFO)
 
-        if not os.path.isdir(args.output_folder):
-            logger.info(f"Creating output directory: {args.output_folder}")
-            os.makedirs(args.output_folder, exist_ok=True)
+        if not args.output_file:
+            input_file_name = os.path.splitext(args.input_file)[0]
+            args.output_file = f"{input_file_name}_mapped.jsonl"
 
-        return {"input_file": args.input_file,
-                "output_folder": args.output_folder,
-                "verbose": args.verbose}
+        output_dir = os.path.dirname(args.output_file)
+        if output_dir and not os.path.isdir(output_dir):
+            logger.info(f"Creating output directory: {output_dir}")
+            os.makedirs(output_dir, exist_ok=True)
 
-    @staticmethod
-    def generate_output_files(output_folder: str) -> Dict[str, str]:
-        output_file = {}
-        for category in EventCategory:
-            filename = EventCategory.get_output_filename(category)
-            output_file[category.value] = os.path.join(output_folder, filename)
-        return output_file
-
-    @staticmethod
-    def read_logs(input_file: str) -> List[Dict]:
-        success, logs = THORJSONInputReader.read_file(input_file)
-        if not success or not logs:
-            logger.error("Failed to read input file or no valid logs found.")
-            exit(1)
-        return logs
-
-    @staticmethod
-    def map_logs(logs: List[Dict]) -> Dict[str, List[Dict]]:
-        categorized_events = {category.value: [] for category in EventCategory}
-
-        for log in logs:
-            mapped = ThorTimesketchMapper.map_and_categorize(log)
-            for category, events in mapped.items():
-                if category in categorized_events:
-                    categorized_events[category].extend(events)
-        return categorized_events
-
-    @staticmethod
-    def write_outputs(categorized_events: Dict[str, List[Dict]], output_files: Dict[str, str]) -> bool:
-        overall_success = True
-        for category, events in categorized_events.items():
-            if events:
-                logger.info(f"Writing {len(events)} {category} events to {output_files[category]}")
-                if not THORJSONOutputWriter.write_timesketch_data(events, output_files[category]):
-                    logger.error(f"Failed to write {category} events")
-                    overall_success = False
-            else:
-                logger.info(f"No {category} events to write.")
-        return overall_success
+        return {
+            "input_file": args.input_file,
+            "output_file": args.output_file,
+            "verbose": args.verbose
+        }
 
     @staticmethod
     def run():
         args = MainControllerCLI.parse_arguments()
         input_file = args["input_file"]
-        output_folder = args["output_folder"]
+        output_file = args["output_file"]
 
-        output_files = MainControllerCLI.generate_output_files(output_folder)
-        THOR_logs = MainControllerCLI.read_logs(input_file)
-
-        categorized_events = MainControllerCLI.map_logs(THOR_logs)
-        overall_success = MainControllerCLI.write_outputs(categorized_events, output_files)
-
-        if overall_success:
-            logger.info("THOR-TS-Mapper completed successfully.")
-            exit(0)
-        else:
-            logger.error("THOR-TS-Mapper encountered errors during procesing.")
+        success, thor_logs = THORJSONInputReader.get_valid_json(input_file)
+        if not success:
+            logger.error("Failed to open or read input file.")
             exit(1)
+
+        flattener = JSONFlattener()
+        output_writer = THORJSONOutputWriter(output_file)
+        try:
+            for json_line in thor_logs:
+
+                flattened_json = flattener.flatten_jsonl(json_line)
+                mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
+                mapped_events = mapper.map_thor_events(flattened_json)
+
+                if mapped_events:
+                    output_writer.write_mapped_logs(mapped_events)
+
+            logger.info(f"THOR-TS-Mapper completed successfully.")
+
+        except Exception as e:
+            logger.error(f"Error processing THOR logs: {e}")
+            exit(1)
+        finally:
+            output_writer.close()
 
 
 if __name__ == "__main__":
-    MainControllerCLI.run()
+    # MainControllerCLI.run()
+
+    input_file = "../thor10march.json"
+    output_file = "../thor10march_mapped.jsonl"
+    success, thor_logs = THORJSONInputReader.get_valid_json(input_file)
+    if not success:
+        logger.error("Failed to open or read input file.")
+        exit(1)
+    flattener = JSONFlattener()
+
+
+    output_file = THORJSONOutputWriter(output_file).open()
+    try:
+        for json_line in thor_logs:
+
+            flattened_json = flattener.flatten_jsonl(json_line)
+            mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
+            mapped_events = mapper.map_thor_events(flattened_json)
+            if mapped_events:
+                output_file.write_mapped_logs(mapped_events)
+
+        logger.info(f"THOR-TS-Mapper completed successfully.")
+    except Exception as e:
+        logger.error(f"Error processing THOR logs: {e}")
+        exit(1)
+    finally:
+        output_file.close()
