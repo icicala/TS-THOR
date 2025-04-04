@@ -1,6 +1,6 @@
 import os
 from thor_ts_mapper.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
-from logger_config import LoggerConfig
+from thor_ts_mapper.logger_config import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)
 

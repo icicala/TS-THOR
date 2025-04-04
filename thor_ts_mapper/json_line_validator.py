@@ -1,6 +1,6 @@
 import json
 from typing import Dict, Any, Tuple, Optional
-from logger_config import LoggerConfig
+from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper.exceptions import JsonValidationError
 
 logger = LoggerConfig.get_logger(__name__)
