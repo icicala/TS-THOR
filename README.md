@@ -19,12 +19,12 @@ This utility maps the following fields from THOR logs to Timesketch's required f
 
 * **timestamp_desc**:
   * If datetime refers to the THOR scan start time → "Timestamp of THOR scan execution"
-  * If datetime originates from a specific module field → "ModuleName - FieldName" (e.g., FileScan - modified)
+  * If datetime originates from a specific module field → "ModuleName - FieldName" (e.g., Filescan - modified)
 
-**Note**: **ruledate** are not mapped to datetime.
+**Note**: **ruledate** field is not mapped to datetime.
 
 This utility supports THOR JSON log format v2 and is designed with forward compatibility for JSON log format v3.
-## HOW the utility works
+## Features
 
 1. Validates and reads the input THOR JSON file
 2. Flattening THOR logs for efficient indexing and searching
@@ -50,5 +50,8 @@ thor_ts_mapper /path/to/thor_logs.json -o /path/to/output/filename -v
 * **input_file** - Path to THOR JSON file (required)
 * **-o output_file** - Output file path (optional, default: <input_file_name>_mapped.jsonl)
 * **-v, --verbose** - Enable verbose output (optional)
+
+## Input Files
+- THOR scan log file (`.json`) log version **v2** or **v3**
 ## Output Files
 The tool converts THOR JSON logs to Timesketch-compatible format. If no output file is specified, the output will be written to the same location as the input file with **"<input_file_name>_mapped.jsonl"** appended.

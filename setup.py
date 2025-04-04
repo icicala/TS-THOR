@@ -26,7 +26,7 @@ setup(
     long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
-            'thor2ts=mapper=thor_ts_mapper.__main__:main',
+            'thor2ts=thor_ts_mapper.__main__:main',
         ],
     },
 
