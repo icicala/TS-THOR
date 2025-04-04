@@ -1,6 +1,5 @@
 import re
 from typing import Dict, Any, List
-
 from thor_ts_mapper.logger_config import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)

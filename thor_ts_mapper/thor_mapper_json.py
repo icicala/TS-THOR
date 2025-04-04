@@ -1,10 +1,9 @@
 from abc import abstractmethod, ABC
 from typing import Dict, Any, List, Optional
-
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper.thor_timestamp_extractor import ThorTimestampExtractor
 
-
+logger = LoggerConfig.get_logger(__name__)
 
 class THORMapperJson(ABC):
     def map_thor_events(self, json_line: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -22,7 +21,7 @@ class THORMapperJson(ABC):
                 event = self._create_additional_timestamp_event(json_line, field_name)
                 events.append(event)
 
-
+        logger.debug(f"Mapped {len(events)} events")
         return events
 
 

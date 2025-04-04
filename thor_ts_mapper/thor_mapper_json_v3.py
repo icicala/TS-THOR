@@ -1,5 +1,4 @@
 from typing import Dict, Any, Optional
-
 from thor_ts_mapper.thor_mapper_json import THORMapperJson
 
 

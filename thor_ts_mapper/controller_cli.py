@@ -1,6 +1,4 @@
-# python
 import argparse
-import json
 import os
 import logging
 from typing import Dict
@@ -89,30 +87,4 @@ class MainControllerCLI:
 
 
 if __name__ == "__main__":
-    # MainControllerCLI.run()
-
-    input_file = "../thor10march.json"
-    output_file = "../thor10march_mapped.jsonl"
-    success, thor_logs = THORJSONInputReader.get_valid_json(input_file)
-    if not success:
-        logger.error("Failed to open or read input file.")
-        exit(1)
-    flattener = JSONFlattener()
-
-
-    output_file = THORJSONOutputWriter(output_file).open()
-    try:
-        for json_line in thor_logs:
-
-            flattened_json = flattener.flatten_jsonl(json_line)
-            mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
-            mapped_events = mapper.map_thor_events(flattened_json)
-            if mapped_events:
-                output_file.write_mapped_logs(mapped_events)
-
-        logger.info(f"THOR-TS-Mapper completed successfully.")
-    except Exception as e:
-        logger.error(f"Error processing THOR logs: {e}")
-        exit(1)
-    finally:
-        output_file.close()
+    MainControllerCLI.run()

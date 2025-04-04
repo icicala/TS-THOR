@@ -1,10 +1,8 @@
-import json
 from typing import Dict, Any, Optional
 from dateutil import parser
 from datetime import timezone
 
 from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.thor_json_flattener import JSONFlattener
 from thor_ts_mapper.thor_mapper_json import THORMapperJson
 
 logger = LoggerConfig.get_logger(__name__)
@@ -18,6 +16,7 @@ class THORMapperJsonV2(THORMapperJson):
     def _get_message(self, json_line: Dict[str, Any]) -> str:
         message = json_line.get(self.THOR_MESSAGE_FIELD)
         if not message:
+            logger.debug(f"No message found in THOR event, using default message.")
             message = "THOR APT scanner did not provide a message."
         return message
 

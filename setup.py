@@ -6,25 +6,27 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 
 setup(
-    name='thor-ts-mapper',
+    name='thor_ts_mapper',
     version='0.1.1',
+    keywords='thor, timesketch, mapper, converter, nextron',
     packages=find_packages(),
     url='https',
-    author='Ion Cicala',
+    author='Ion Cicala (Nextron Systems GmbH)',
     author_email='ion.cicala@nextron-systems.com',
-    description='Convert THOR security scanner logs to Timesketch-compatible format',
+    description='Convert THOR security scanner logs to Timesketch format',
+    license='Proprietary',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Other/Proprietary License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     install_requires=requirements,
     long_description=long_description,
     long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
-            'thor-ts-mapper=thor-ts-mapper.__main__:main',
+            'thor2ts=mapper=thor_ts_mapper.__main__:main',
         ],
     },
 

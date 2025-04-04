@@ -1,7 +1,6 @@
 import os
 import json
 from typing import List, Dict, Any
-
 from thor_ts_mapper.logger_config import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)

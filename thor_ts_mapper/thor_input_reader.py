@@ -1,4 +1,3 @@
-
 from typing import Iterator, Dict, Tuple, Optional
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper.exceptions import FileValidationError, JsonValidationError
