@@ -100,7 +100,7 @@ class MainControllerCLI:
                         pbar.set_postfix({"mapped": events_processed})
 
             output_writer.get_logs_written_summary()
-            logger.info(f"Nextron’s mission continues — we detect hackers. Launch Timesketch via Web UI or CLI and let the hunt begin.")
+            logger.info(f"Nextron’s mission continues -> we detect hackers <-. Launch Timesketch and ingest THOR logs via Web UI or CLI and let the hunt begin.")
         except Exception as e:
             logger.error(f"Error processing THOR logs: {e}")
             exit(1)

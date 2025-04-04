@@ -13,9 +13,9 @@ for cmd in git python3; do
 done
 
 
-REPO="https://github.com/icicala/TS-THOR.git"
-REPO_DIR="TS-THOR" # need to change to nextron project name
-VENV_NAME="thortsvenv"
+REPO="https://github.com/TBD/TS-THOR.git"
+REPO_DIR="thor-ts-mapper" # need to change to nextron project name
+VENV_NAME="venv-thor2ts"
 
 
 if [ -f "setup.py" ]; then
