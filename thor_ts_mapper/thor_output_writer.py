@@ -10,6 +10,7 @@ class THORJSONOutputWriter:
         self.output_file = output_file
         self.mode = 'a' if os.path.exists(output_file) else 'w'
         self.file = None
+        self. total_events_written = 0
 
     def open(self):
         if self.file is None:
@@ -31,6 +32,10 @@ class THORJSONOutputWriter:
         try:
             self.file.writelines(json.dumps(entry) + '\n' for entry in mapped_logs)
             self.file.flush()
-            logger.info(f"Successfully wrote {len(mapped_logs)} events to {self.output_file}")
+            logger.debug(f"Successfully wrote {len(mapped_logs)} events to {self.output_file}")
+            self.total_events_written += len(mapped_logs)
         except IOError as e:
             logger.error(f"Error writing to {self.output_file}: {e}")
+
+    def get_logs_written_summary(self) -> None:
+        logger.info(f"Successfully mapped {self.total_events_written} THOR findings to {self.output_file} and ready to be landed into Timesketch.")

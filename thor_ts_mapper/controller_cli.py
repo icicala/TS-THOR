@@ -8,10 +8,9 @@ from thor_ts_mapper.thor_json_flattener import JSONFlattener
 from thor_ts_mapper.thor_json_log_version import THORJSONLogVersionMapper
 from thor_ts_mapper.thor_output_writer import THORJSONOutputWriter
 from thor_ts_mapper.logger_config import LoggerConfig
-
+from tqdm import tqdm
 
 logger = LoggerConfig.get_logger(__name__)
-
 
 
 class MainControllerCLI:
@@ -39,7 +38,12 @@ class MainControllerCLI:
         else:
             LoggerConfig.setup_root_logger(level=logging.INFO)
 
-        if not args.output_file:
+        if args.output_file:
+            if not args.output_file.lower().endswith('.jsonl'):
+                original = args.output_file
+                args.output_file = f"{os.path.splitext(args.output_file)[0]}.jsonl"
+                logger.info(f"Changed output file from '{original}' to '{args.output_file}' to ensure JSONL format")
+        else:
             input_file_name = os.path.splitext(args.input_file)[0]
             args.output_file = f"{input_file_name}_mapped.jsonl"
 
@@ -60,6 +64,9 @@ class MainControllerCLI:
         input_file = args["input_file"]
         output_file = args["output_file"]
 
+        file_size = os.path.getsize(input_file)
+        logger.info(f"Processing input file: {input_file} ({file_size / 1024:.2f} KB)")
+
         success, thor_logs = THORJSONInputReader.get_valid_json(input_file)
         if not success:
             logger.error("Failed to open or read input file.")
@@ -67,18 +74,23 @@ class MainControllerCLI:
 
         flattener = JSONFlattener()
         output_writer = THORJSONOutputWriter(output_file)
+        events_processed = 0
         try:
-            for json_line in thor_logs:
+            with tqdm(total=None, unit=' events', desc='Mapping THOR logs') as pbar:
+                for json_line in thor_logs:
 
-                flattened_json = flattener.flatten_jsonl(json_line)
-                mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
-                mapped_events = mapper.map_thor_events(flattened_json)
+                    flattened_json = flattener.flatten_jsonl(json_line)
+                    mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
+                    mapped_events = mapper.map_thor_events(flattened_json)
 
-                if mapped_events:
-                    output_writer.write_mapped_logs(mapped_events)
+                    if mapped_events:
+                        output_writer.write_mapped_logs(mapped_events)
+                        events_processed += len(mapped_events)
+                        pbar.update(1)
+                        pbar.set_postfix({"mapped": events_processed})
 
-            logger.info(f"THOR-TS-Mapper completed successfully.")
-
+            output_writer.get_logs_written_summary()
+            logger.info(f"Nextron’s mission continues — we detect hackers. \\nLaunch Timesketch via Web UI or CLI and let the hunt begin.")
         except Exception as e:
             logger.error(f"Error processing THOR logs: {e}")
             exit(1)
