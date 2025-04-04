@@ -6,8 +6,8 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 
 setup(
-    name='thor_ts_mapper',
-    version='0.1.0',
+    name='thor-ts-mapper',
+    version='0.1.1',
     packages=find_packages(),
     url='https',
     author='Ion Cicala',
@@ -24,7 +24,7 @@ setup(
     long_description_content_type="text/markdown",
     entry_points={
         'console_scripts': [
-            'thor_ts_mapper=thor_ts_mapper.__main__:main',
+            'thor-ts-mapper=thor-ts-mapper.__main__:main',
         ],
     },
 
