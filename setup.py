@@ -10,11 +10,10 @@ setup(
     version='0.1.1',
     keywords='thor, timesketch, mapper, converter, nextron',
     packages=find_packages(),
-    url='https',
+    url='TBD',
     author='Ion Cicala (Nextron Systems GmbH)',
     author_email='ion.cicala@nextron-systems.com',
     description='Convert THOR security scanner logs to Timesketch format',
-    license='Proprietary',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: Other/Proprietary License",

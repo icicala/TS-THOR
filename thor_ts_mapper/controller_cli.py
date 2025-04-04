@@ -19,7 +19,7 @@ class MainControllerCLI:
         parser = argparse.ArgumentParser(
             description="THOR-TS-Mapper converts THOR security scanner logs into Timesketch-compatible format."
         )
-        parser.add_argument("input_file", help="Path to THOR JSON file")
+        parser.add_argument("input_file", help="Path to THOR JSON file", nargs="?")
         parser.add_argument(
             "-o",
             dest="output_file",
@@ -31,6 +31,12 @@ class MainControllerCLI:
             action="store_true",
             help="Enable verbose output"
         )
+        parser.add_argument(
+            "--version",
+            action="version",
+            version=f"%(prog)s {__import__('thor_ts_mapper').__version__}",
+            help="Show the version number and exit"
+        )
         args = parser.parse_args()
 
         if args.verbose:
@@ -38,8 +44,12 @@ class MainControllerCLI:
         else:
             LoggerConfig.setup_root_logger(level=logging.INFO)
 
+        if args.input_file is None:
+            logger.error("Input file is required unless --version is specified")
+            exit(1)
+
         if args.output_file:
-            if not args.output_file.lower().endswith('.jsonl'):
+            if not str(args.output_file).lower().endswith('.jsonl'):
                 original = args.output_file
                 args.output_file = f"{os.path.splitext(args.output_file)[0]}.jsonl"
                 logger.info(f"Changed output file from '{original}' to '{args.output_file}' to ensure JSONL format")
@@ -90,7 +100,7 @@ class MainControllerCLI:
                         pbar.set_postfix({"mapped": events_processed})
 
             output_writer.get_logs_written_summary()
-            logger.info(f"Nextron’s mission continues — we detect hackers. \\nLaunch Timesketch via Web UI or CLI and let the hunt begin.")
+            logger.info(f"Nextron’s mission continues — we detect hackers. Launch Timesketch via Web UI or CLI and let the hunt begin.")
         except Exception as e:
             logger.error(f"Error processing THOR logs: {e}")
             exit(1)
