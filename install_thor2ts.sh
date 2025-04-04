@@ -54,3 +54,5 @@ echo -e "\e[32mInstallation complete!\e[0m"
 echo "Use 'thor2ts --help' for usage information."
 echo "To use thor2ts in the future, activate the virtual environment first:"
 echo "  source $PWD/$VENV_NAME/bin/activate"
+
+set +e
