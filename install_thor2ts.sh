@@ -14,7 +14,7 @@ done
 
 
 REPO="https://github.com/icicala/TS-THOR.git"
-REPO_DIR="thor_ts_mapper"
+REPO_DIR="TS-THOR" # need to change to nextron project name
 VENV_NAME="thortsvenv"
 
 
