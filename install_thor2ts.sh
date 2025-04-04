@@ -18,16 +18,19 @@ REPO_DIR="TS-THOR" # need to change to nextron project name
 VENV_NAME="thortsvenv"
 
 
-if [ -d "$REPO_DIR" ]; then
-    echo "Repository already exists. Updating..."
-    (cd "$REPO_DIR" && git pull) || error "Failed to update repository"
+if [ -f "setup.py" ]; then
+    echo "Already inside the repository. Skipping clone."
 else
-    echo "Cloning thor_ts_mapper repository..."
-    git clone "$REPO" || error "Failed to clone repository"
+    if [ -d "$REPO_DIR" ]; then
+        echo "Repository already exists. Updating..."
+        (cd "$REPO_DIR" && git pull) || error "Failed to update repository"
+    else
+        echo "Cloning TS-THOR repository..."
+        git clone "$REPO" || error "Failed to clone repository"
+    fi
+    cd "$REPO_DIR" || error "Failed to enter repository directory"
 fi
 
-
-cd "$REPO_DIR" || error "Failed to enter repository directory"
 
 
 if [ ! -d "$VENV_NAME" ]; then
