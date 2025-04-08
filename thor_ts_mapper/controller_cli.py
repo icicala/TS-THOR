@@ -1,112 +1,118 @@
-import argparse
 import os
-import logging
-from typing import Dict
+import sys
 
-from thor_ts_mapper.thor_input_reader import THORJSONInputReader
-from thor_ts_mapper.thor_json_flattener import JSONFlattener
-from thor_ts_mapper.thor_json_log_version import THORJSONLogVersionMapper
-from thor_ts_mapper.thor_output_writer import THORJSONOutputWriter
+import click
+
 from thor_ts_mapper.logger_config import LoggerConfig
-from tqdm import tqdm
+# from thor_ts_mapper.thor_output_to_file import THORConverterToFile
+from thor_ts_mapper.thor_output_to_ts import THORIngestToTS
 
 logger = LoggerConfig.get_logger(__name__)
 
 
 class MainControllerCLI:
-    @staticmethod
-    def parse_arguments() -> Dict[str, str]:
-        parser = argparse.ArgumentParser(
-            description="THOR-TS-Mapper converts THOR security scanner logs into Timesketch-compatible format."
-        )
-        parser.add_argument("input_file", help="Path to THOR JSON file", nargs="?")
-        parser.add_argument(
-            "-o",
-            dest="output_file",
-            help="Output file path (default:<input_file>_mapped.jsonl)",
-            default=None
-        )
-        parser.add_argument(
-            "-v", "--verbose",
-            action="store_true",
-            help="Enable verbose output"
-        )
-        parser.add_argument(
-            "--version",
-            action="version",
-            version=f"%(prog)s {__import__('thor_ts_mapper').__version__}",
-            help="Show the version number and exit"
-        )
-        args = parser.parse_args()
+    @click.group(context_settings={"help_option_names": ["-h", "--help"]})
+    @click.version_option(version=__import__('thor_ts_mapper').__version__, prog_name="thor2ts")
+    def cli():
+        """THOR to Timesketch Mapper.
 
-        if args.verbose:
-            LoggerConfig.setup_root_logger(level=logging.DEBUG)
+        This tool converts THOR security scanner logs to Timesketch-compatible format.
+        """
+        pass
+
+
+    @cli.command()
+    @click.argument('input_file', type=click.Path(exists=True))
+    @click.option('-o', '--output-file', type=click.Path(), help="Output file path (default:<input_file>_mapped.jsonl)")
+    @click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
+    def convert(input_file, output_file, verbose):
+        """Convert THOR logs to Timesketch format."""
+        if verbose:
+            LoggerConfig.setup_root_logger(level="DEBUG")
         else:
-            LoggerConfig.setup_root_logger(level=logging.INFO)
+            LoggerConfig.setup_root_logger(level="INFO")
 
-        if args.input_file is None:
-            logger.error("Input file is required unless --version is specified")
-            exit(1)
+        if not output_file:
+            input_file_name = os.path.splitext(input_file)[0]
+            output_file = f"{input_file_name}_mapped.jsonl"
+        elif not output_file.lower().endswith('.jsonl'):
+            original = output_file
+            output_file = f"{os.path.splitext(output_file)[0]}.jsonl"
+            logger.info(f"Changed output file from '{original}' to '{output_file}' to ensure JSONL format")
 
-        if args.output_file:
-            if not str(args.output_file).lower().endswith('.jsonl'):
-                original = args.output_file
-                args.output_file = f"{os.path.splitext(args.output_file)[0]}.jsonl"
-                logger.info(f"Changed output file from '{original}' to '{args.output_file}' to ensure JSONL format")
-        else:
-            input_file_name = os.path.splitext(args.input_file)[0]
-            args.output_file = f"{input_file_name}_mapped.jsonl"
-
-        output_dir = os.path.dirname(args.output_file)
+        output_dir = os.path.dirname(output_file)
         if output_dir and not os.path.isdir(output_dir):
             logger.info(f"Creating output directory: {output_dir}")
             os.makedirs(output_dir, exist_ok=True)
 
-        return {
-            "input_file": args.input_file,
-            "output_file": args.output_file,
-            "verbose": args.verbose
-        }
+        # processor = THORConverterToFile() redo it
+        success, events_count = processor.converter_to_file(input_file, output_file)
 
-    @staticmethod
-    def run():
-        args = MainControllerCLI.parse_arguments()
-        input_file = args["input_file"]
-        output_file = args["output_file"]
+        if success:
+            logger.info(f"Successfully mapped {events_count} events to {output_file}")
+            logger.info(
+                "Nextron's mission continues -> we detect hackers <-. Launch Timesketch and ingest THOR logs via Web UI or CLI and let the hunt begin.")
+        else:
+            sys.exit(1)
 
-        file_size = os.path.getsize(input_file)
-        logger.info(f"Processing input file: {input_file} ({file_size / 1024:.2f} KB)")
 
-        success, thor_logs = THORJSONInputReader.get_valid_json(input_file)
+    @cli.command()
+    @click.argument('input_file', type=click.Path(exists=True))
+    @click.option('-o', '--output-file', type=click.Path(),
+                  help="Temporary output file path (default:<input_file>_mapped.jsonl)")
+    @click.option('--sketch', type=int, help="Sketch ID to ingest into")
+    @click.option('-v', '--verbose', is_flag=True, help="Enable verbose output")
+    @click.option('--timeline-name', help="Name for the timeline in Timesketch (default: input filename)")
+    def ingest(input_file, output_file, sketch, verbose, timeline_name):
+        """Convert THOR logs and ingest them into Timesketch."""
+        if verbose:
+            LoggerConfig.setup_root_logger(level="DEBUG")
+        else:
+            LoggerConfig.setup_root_logger(level="INFO")
+
+        # Set default output file if not specified
+        if not output_file:
+            input_file_name = os.path.splitext(input_file)[0]
+            output_file = f"{input_file_name}_mapped.jsonl"
+        elif not output_file.lower().endswith('.jsonl'):
+            original = output_file
+            output_file = f"{os.path.splitext(output_file)[0]}.jsonl"
+            logger.info(f"Changed output file from '{original}' to '{output_file}' to ensure JSONL format")
+
+        # Set default timeline name if not specified
+        if not timeline_name:
+            timeline_name = os.path.basename(input_file)
+
+        # Process the THOR logs first
+        processor = THORConverterToFile()
+        success, events_count = processor.converter_to_file(input_file, output_file)
+
         if not success:
-            logger.error("Failed to open or read input file.")
-            exit(1)
+            logger.error("Failed to process THOR logs, aborting ingestion")
+            sys.exit(1)
 
-        flattener = JSONFlattener()
-        output_writer = THORJSONOutputWriter(output_file)
-        events_processed = 0
-        try:
-            with tqdm(total=None, unit=' events', desc='Mapping THOR logs') as pbar:
-                for json_line in thor_logs:
+        # Connect to Timesketch and ingest the file
+        ts_client = THORIngestToTS()
+        if not ts_client.connect():
+            logger.error("Failed to connect to Timesketch")
+            sys.exit(1)
 
-                    flattened_json = flattener.flatten_jsonl(json_line)
-                    mapper = THORJSONLogVersionMapper.get_mapper(flattened_json)
-                    mapped_events = mapper.map_thor_events(flattened_json)
+        sketch_obj = ts_client.get_sketch(sketch)
+        if not sketch_obj:
+            logger.error("Failed to get sketch")
+            sys.exit(1)
 
-                    if mapped_events:
-                        output_writer.write_mapped_logs(mapped_events)
-                        events_processed += len(mapped_events)
-                        pbar.update(1)
-                        pbar.set_postfix({"mapped": events_processed})
+        success, ingested_count = ts_client.ingest_file(sketch_obj, output_file, timeline_name)
+        if not success:
+            logger.error("Failed to ingest file into Timesketch")
+            sys.exit(1)
 
-            output_writer.get_logs_written_summary()
-            logger.info(f"Nextron’s mission continues -> we detect hackers <-. Launch Timesketch and ingest THOR logs via Web UI or CLI and let the hunt begin.")
-        except Exception as e:
-            logger.error(f"Error processing THOR logs: {e}")
-            exit(1)
-        finally:
-            output_writer.close()
+        logger.info(f"Successfully ingested {ingested_count} events into Timesketch sketch '{sketch_obj.name}'")
+
+
+def main():
+    cli()
 
 
 if __name__ == "__main__":
-    MainControllerCLI.run()
+    main()
