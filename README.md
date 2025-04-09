@@ -39,6 +39,7 @@ This utility supports THOR JSON log format v2 and is designed with forward compa
 Ensure you have the following installed on your system:
 * [Git](https://git-scm.com/downloads)
 * [Python 3.9](https://www.python.org/downloads/) or higher
+* Python venv package (on Ubuntu/Debian: `sudo apt install python3-venv`)
 * [THOR](https://www.nextron-systems.com/thor/) JSON logs (v2 or v3)
 ### Steps
 1. Clone the repository:
