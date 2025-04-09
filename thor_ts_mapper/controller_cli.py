@@ -69,13 +69,13 @@ class MainControllerCLI:
         args = MainControllerCLI.parse_arguments()
         input_file = args["input_file"]
         output_file = args["output_file"]
-        sketch = args["ts_sketch"]
+        ts_sketch = args["ts_sketch"]
 
         output_to_file = output_file is not None
-        output_to_ts = sketch is not None
+        output_to_ts = ts_sketch is not None
 
         if not (output_to_file or output_to_ts):
-            logger.error("No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
+            logger.error("No output destination specified. Use -o/--output-file for file output or --ts_sketch for Timesketch ingestion.")
             sys.exit(1)
 
 
@@ -84,13 +84,13 @@ class MainControllerCLI:
 
             if output_to_file:
                 logger.info(f"Writing mapped events to file: {output_file}")
-                file_writer = THOROutputToFile(output_file, ProgressBar(desc=f"Writing to {output_to_file}") )
-                file_writer.write_to_file(mapped_events)
+                write_to_file = THOROutputToFile(output_file, ProgressBar(desc=f"Writing to {output_to_file}") )
+                write_to_file.write_to_file(mapped_events)
 
             if output_to_ts:
-                logger.info(f"Ingesting events to Timesketch with sketch identifier: {sketch}")
-                ts_ingester = THORIngestToTS(thor_file=input_file, sketch=sketch, progress_bar=ProgressBar(desc="Uploading to Timesketch"))
-                ts_ingester.ingest_events(mapped_events)
+                logger.info(f"Ingesting events to Timesketch with sketch identifier: {ts_sketch}")
+                upload_to_ts = THORIngestToTS(thor_file=input_file, sketch=ts_sketch, progress_bar=ProgressBar(desc="Uploading to Timesketch"))
+                upload_to_ts.ingest_events(mapped_events)
 
             logger.info("THOR log processing completed successfully")
 
