@@ -8,7 +8,6 @@ from thor_ts_mapper.progress_bar import ProgressBar
 
 logger = LoggerConfig.get_logger(__name__)
 
-logger = LoggerConfig.get_logger(__name__)
 
 class THOROutputToFile:
     def __init__(self, output_file: str, progress_bar: ProgressBar):
@@ -47,14 +46,3 @@ class THOROutputToFile:
                     logger.error("Error writing event: %s", e)
         logger.info("Successfully written events to %s", self.output_file)
         self.progress_bar.close()
-
-
-from thor_ts_mapper.thor_input_reader import THORJSONInputReader
-from thor_ts_mapper.thor_json_transformer import THORJSONTransformer
-input_file = "../thor10_7_old_json.json"
-valid_json = THORJSONInputReader.get_valid_json(input_file)
-progress_bar = ProgressBar("Writing to output file")
-output_file = "output.jsonl"
-thor_output_to_file = THOROutputToFile(output_file, progress_bar)
-transformer = THORJSONTransformer.transform_thor_logs(input_file)
-thor_output_to_file.write_to_file(transformer)

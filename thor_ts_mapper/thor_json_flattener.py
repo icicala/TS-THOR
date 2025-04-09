@@ -8,11 +8,11 @@ class THORJSONFlattener:
     DELIMITER = '_'
 
     @staticmethod
-    def _index_to_letter(idx: int) -> str:
+    def _index_to_letter(index: int) -> str:
         result = ""
-        idx += 1
-        while idx > 0:
-            idx, remainder = divmod(idx - 1, 26)
+        index += 1
+        while index > 0:
+            index, remainder = divmod(index - 1, 26)
             result = chr(65 + remainder) + result
         return result
 
@@ -33,8 +33,8 @@ class THORJSONFlattener:
                         new_key = f"{key_path}{THORJSONFlattener.DELIMITER}{key}" if key_path else key
                         queue.append((value, new_key))
                 elif isinstance(current, list):
-                    for idx, item in enumerate(current):
-                        alpha_index = THORJSONFlattener._index_to_letter(idx)
+                    for index, item in enumerate(current):
+                        alpha_index = THORJSONFlattener._index_to_letter(index)
                         new_key = f"{key_path}{THORJSONFlattener.DELIMITER}{alpha_index}"
                         queue.append((item, new_key))
                 else:

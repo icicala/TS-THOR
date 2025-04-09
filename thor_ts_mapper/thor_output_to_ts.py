@@ -1,77 +1,66 @@
-import json
+import os.path
+from typing import Dict, Union
 
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
-from tqdm import tqdm
-
 from thor_ts_mapper.logger_config import LoggerConfig
+from thor_ts_mapper.progress_bar import ProgressBar
+
 logger = LoggerConfig.get_logger(__name__)
 
-
-
 class THORIngestToTS:
-    """Handles communication with Timesketch"""
 
-    def __init__(self):
-        self.api = None
-        self.config_assistant = None
+    TS_SCOPE = ['user', 'shared']
 
-    def connect(self):
-        """Connect to Timesketch API"""
-        try:
-            self.api = timesketch_config.get_client(load_cli_config=True)
-            if not self.api:
-                raise ConnectionError("Failed to initialize Timesketch client")
+    def __init__(self, thor_file: str, sketch: Union[int, str] = None, progress_bar: ProgressBar = None):
+        self.timeline_name = self._get_timeline_name(thor_file)
+        self.my_sketch = self._load_sketch(sketch)
+        self.ts_client = timesketch_config.get_client()
+        self.progress_bar = progress_bar
 
-            self.config_assistant = timesketch_config.ConfigAssistant()
-            self.config_assistant.load_config_file(load_cli_config=True)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to connect to Timesketch: {e}")
-            return False
+    def _get_timeline_name(self, thor_file) -> str:
+            return os.path.splitext(os.path.basename(thor_file))[0]
 
-    def get_sketch(self, sketch_id=None):
-        """Get sketch by ID or from config"""
-        if not self.api:
-            return None
+    def _get_available_sketches(self) -> Dict[str, int]:
+        sketches = {}
+        for scope in self.TS_SCOPE:
+            for sketch in self.ts_client.list_sketches(scope=scope, include_archived=False):
+                sketches[sketch.name] = int(sketch.id)
+        return sketches
 
-        try:
-            if sketch_id:
-                sketch = self.api.get_sketch(sketch_id=int(sketch_id))
-            else:
-                sketch_from_config = self.config_assistant.get_config("sketch")
-                if not sketch_from_config:
-                    logger.error("No sketch ID provided or found in config")
-                    return None
-                sketch = self.api.get_sketch(sketch_id=int(sketch_from_config))
 
-            # Check if we have access
-            sketch.name
-            return sketch
-        except Exception as e:
-            logger.error(f"Error accessing sketch: {e}")
-            return None
+    def _load_sketch(self, sketch: Union[int, str] = None):
 
-    def ingest_file(self, sketch, file_path, timeline_name):
-        """Ingest a file into Timesketch"""
-        try:
-            with open(file_path, 'r') as f:
-                data = f.read()
+        sketches = self._get_available_sketches()
 
-            with importer.ImportStreamer() as streamer:
-                streamer.set_sketch(sketch)
-                streamer.set_timeline_name(timeline_name)
+        if isinstance(sketch, int):
+            if sketch in sketches.values():
+                my_sketch = self.ts_client.get_sketch(sketch)
+                logger.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
+                return my_sketch
 
-                logger.info(f"Ingesting events into Timesketch timeline '{timeline_name}'")
-                events_count = 0
+        elif isinstance(sketch, str):
+            if sketch in sketches.keys():
+                my_sketch = self.ts_client.get_sketch(sketches[sketch])
+                logger.info(f"Found sketch with name '{sketch}': ID {my_sketch.id}")
+                return my_sketch
 
-                for line in tqdm(data.strip().split('\n'), desc="Ingesting events"):
-                    event = json.loads(line)
+        logger.info("No matching sketch found ... creating a default sketch.")
+        my_sketch = self.ts_client.create_sketch("THOR APT Logs", "Default sketch")
+        logger.info(f"New sketch created with name: '{my_sketch.name}' and ID: {my_sketch.id}")
+        return my_sketch
+
+
+    def ingest_events(self, events) -> None:
+
+        with importer.ImportStreamer() as streamer:
+            streamer.set_sketch(self.my_sketch)
+            streamer.set_timeline_name(self.timeline_name)
+            for event in events:
+                try:
                     streamer.add_dict(event)
-                    events_count += 1
-
-            logger.info(f"Successfully ingested {events_count} events into Timesketch")
-            return True, events_count
-        except Exception as e:
-            logger.error(f"Error ingesting file into Timesketch: {e}")
-            return False, 0
+                    self.progress_bar.update(1)
+                except Exception as e:
+                    logger.error("Error adding event to streamer: %s", e)
+        logger.info("Successfully ingested events into sketch ""%s", self.my_sketch.name)
+        self.progress_bar.close()
