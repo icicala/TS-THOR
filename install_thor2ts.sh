@@ -13,7 +13,7 @@ for cmd in git python3; do
 done
 
 
-REPO="https://github.com/TBD/TS-THOR.git" # need to be changed
+REPO="https://github.com/icicala/thor-ts-mapper.git" # need to be changed
 REPO_DIR="thor-ts-mapper" # need to change to nextron project name
 VENV_NAME="venv-thor2ts"
 
