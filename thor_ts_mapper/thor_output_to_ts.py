@@ -13,9 +13,9 @@ class THORIngestToTS:
     TS_SCOPE = ['user', 'shared']
 
     def __init__(self, thor_file: str, sketch: Union[int, str] = None, progress_bar: ProgressBar = None):
+        self.ts_client = timesketch_config.get_client()
         self.timeline_name = self._get_timeline_name(thor_file)
         self.my_sketch = self._load_sketch(sketch)
-        self.ts_client = timesketch_config.get_client()
         self.progress_bar = progress_bar
 
     def _get_timeline_name(self, thor_file) -> str:
