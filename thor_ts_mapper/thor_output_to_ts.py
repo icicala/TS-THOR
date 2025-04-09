@@ -45,9 +45,9 @@ class THORIngestToTS:
                 logger.info(f"Found sketch with name '{sketch}': ID {my_sketch.id}")
                 return my_sketch
 
-        logger.info("No matching sketch found ... creating a default sketch.")
+        logger.info("Creating a new sketch with name '{}'".format(sketch))
         my_sketch = self.ts_client.create_sketch(sketch, "New sketch created by thor2ts")
-        logger.info(f"New sketch created with name: '{my_sketch.name}' and ID: {my_sketch.id}")
+        logger.info(f"New sketch has been created with name: '{my_sketch.name}' and ID: {my_sketch.id}")
         return my_sketch
 
 
