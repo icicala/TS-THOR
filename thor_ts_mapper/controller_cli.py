@@ -71,6 +71,9 @@ class MainControllerCLI:
         output_file = args["output_file"]
         ts_sketch = args["ts_sketch"]
 
+        if ts_sketch and ts_sketch.isdigit():
+            ts_sketch = int(ts_sketch)
+
         output_to_file = output_file is not None
         output_to_ts = ts_sketch is not None
 
@@ -80,16 +83,18 @@ class MainControllerCLI:
 
 
         try:
-            mapped_events = THORJSONTransformer.transform_thor_logs(input_file, ProgressBar(desc="Mapping THOR logs"))
+            mapped_events = THORJSONTransformer.transform_thor_logs(input_file)
+
+            pb_bar = ProgressBar(desc="Writing data")
 
             if output_to_file:
                 logger.info(f"Writing mapped events to file: {output_file}")
-                write_to_file = THOROutputToFile(output_file, ProgressBar(desc=f"Writing to {output_to_file}") )
+                write_to_file = THOROutputToFile(output_file, pb_bar )
                 write_to_file.write_to_file(mapped_events)
 
             if output_to_ts:
                 logger.info(f"Ingesting events to Timesketch with sketch identifier: {ts_sketch}")
-                upload_to_ts = THORIngestToTS(thor_file=input_file, sketch=ts_sketch, progress_bar=ProgressBar(desc="Uploading to Timesketch"))
+                upload_to_ts = THORIngestToTS(thor_file=input_file, sketch=ts_sketch, progress_bar=pb_bar)
                 upload_to_ts.ingest_events(mapped_events)
 
             logger.info("THOR log processing completed successfully")
