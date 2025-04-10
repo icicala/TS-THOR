@@ -58,6 +58,7 @@ class THORIngestToTS:
         with importer.ImportStreamer() as streamer:
             streamer.set_sketch(self.my_sketch)
             streamer.set_timeline_name(self.timeline_name)
+            streamer.set_upload_context(self.timeline_name)
             for event in events:
                 try:
                     streamer.add_dict(event)
@@ -65,4 +66,5 @@ class THORIngestToTS:
                 except Exception as e:
                     logger.error("Error adding event to streamer: %s", e)
         logger.info("Successfully ingested events into sketch ""%s", self.my_sketch.name)
+        logger.info("The timeline will continue to be indexed in the background")
         self.progress_bar.close()
