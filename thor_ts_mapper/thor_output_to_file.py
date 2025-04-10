@@ -3,16 +3,15 @@ import json
 from typing import Dict, Generator
 
 from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.progress_bar import ProgressBar
+from alive_progress import alive_bar
 
 
 logger = LoggerConfig.get_logger(__name__)
 
 
 class THOROutputToFile:
-    def __init__(self, output_file: str, progress_bar: ProgressBar):
+    def __init__(self, output_file: str):
         self.output_file = output_file
-        self.progress_bar = progress_bar
         self._prepare_output_dir()
         self.mode = 'a' if os.path.exists(self.output_file) else 'w'
 
@@ -37,12 +36,13 @@ class THOROutputToFile:
     def write_to_file(self, events: Generator[Dict[str, any], None, None]) -> None:
         self._validate_output_file()
         self._prepare_output_dir()
-        with open(self.output_file, self.mode, encoding='utf-8') as file:
-            for event in events:
-                try:
-                    file.write(json.dumps(event) + "\n")
-                    self.progress_bar.update(1)
-                except Exception as e:
-                    logger.error("Error writing event: %s", e)
-        logger.info("Successfully written events to %s", self.output_file)
-        self.progress_bar.close()
+        with alive_bar(spinner='dots', title=f"Writing to {self.output_file}") as bar:
+            with open(self.output_file, self.mode, encoding='utf-8') as file:
+                for event in events:
+                    try:
+                        file.write(json.dumps(event) + "\n")
+                        bar.text = f"Writing events"
+                        bar()
+                    except Exception as e:
+                        logger.error("Error writing event: %s", e)
+            logger.info("Successfully written events to %s", self.output_file)

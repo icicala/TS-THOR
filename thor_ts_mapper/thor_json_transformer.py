@@ -10,10 +10,10 @@ logger = LoggerConfig.get_logger(__name__)
 
 
 class THORJSONTransformer:
-    total_events = 0
+
     @staticmethod
     def transform_thor_logs(input_file: str) -> Generator[dict, None, None]:
-        THORJSONTransformer.total_events = 0
+
         valid_thor_logs = THORJSONInputReader.get_valid_json(input_file)
         if valid_thor_logs is None:
             logger.error("No valid thor logs found")
@@ -31,7 +31,7 @@ class THORJSONTransformer:
 
                     for event in mapped_events:
                         yield event
-                        THORJSONTransformer.total_events += 1
+
                 except Exception as e:
                     logger.error(f"Error processing THOR log: {e}")
                     raise
@@ -40,6 +40,3 @@ class THORJSONTransformer:
 
         return generate_mapped_logs()
 
-    @staticmethod
-    def get_total_events() -> int:
-        return THORJSONTransformer.total_events
