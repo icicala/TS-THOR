@@ -64,5 +64,5 @@ class THORIngestToTS:
                         bar()
                     except Exception as e:
                         logger.error("Error adding event to streamer: %s", e)
-            logger.info("Successfully ingested events into sketch ""%s", self.my_sketch.name)
+            logger.info(f"Successfully ingested events into sketch '{self.my_sketch.name}'")
             logger.info("The timeline will continue to be indexed in the background")
