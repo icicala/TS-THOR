@@ -40,7 +40,7 @@ Ensure you have the following installed on your system:
 * [Git](https://git-scm.com/downloads)
 * [Python 3.9](https://www.python.org/downloads/) or higher
 * Python venv package (on Ubuntu/Debian: `sudo apt install python3-venv`)
-* [THOR](https://www.nextron-systems.com/thor/) JSON logs (v2 or v3)
+* [THOR](https://www.nextron-systems.com/thor/) JSON logs (v2 or v3) as input for thor2ts
 ### Steps
 1. Clone the repository:
 ```bash
@@ -69,10 +69,10 @@ To use thor2ts in the new terminal, activate the virtual environment:
 source /path/to/thor-ts-mapper/venv-thor2ts/bin/activate
 ```
 ## Usage
-Once the virtual environment is active, use the tool to convert THOR logs:
+Once the virtual environment is active, run the tool by specifying the path to the THOR JSON file along with one of output parameters.:
 
 ```bash
-thor2ts <input_file> -o <output_file>
+thor2ts <input_file> [-o <output_file>] [--ts_sketch <sketch_id_or_name>] [-v]
 ```
 
 ### Arguments
@@ -81,10 +81,20 @@ thor2ts <input_file> -o <output_file>
 ```bash
 thor2ts thor_scan.json
 ```
-* `-o output_file` - Output file path (optional, default: <input_file_name>_mapped.jsonl)
+* `-o output_file` - Output file path
 #### Example
 ```bash
 thor2ts thor_scan.json -o /path/to/output/thor2timesketch.jsonl
+```
+* `--ts_sketch <sketch_id_or_name>` - Send the mapped events to Timesketch by specifying the sketch ID or name.
+Give the existing sketch name, otherwise the sketch will be created with the given name.
+#### Example
+```bash
+thor2ts thor_scan.json --ts_sketch "THOR Sketch"
+```
+or by using a valid sketch ID otherwise the sketch will be created with Sketch_<sketch_id>:
+```bash
+thor2ts thor_scan.json --ts_sketch 1
 ```
 * `-v, --verbose` - Enable verbose output (optional)
 #### Example
@@ -98,15 +108,15 @@ thor2ts --version
 ```
 
 ## Input Files
-THOR scan log file (`.json`) log version **v2** or **v3**
+THOR scan log file `.json` log version **v2** or **v3**
 
 ## Output Files
-The tool converts THOR JSON logs to Timesketch-compatible format. If no output file is specified, the output will be written to the same location as the input file with **"<input_file_name>_mapped.jsonl"** appended.
+The tool writes mapped events to a JSONL file. If the provided output file does not have a `.jsonl` extension, the file extension is updated to the JSONL format. If the file already exists, events are appended to it, otherwise, a new file is created. The tool also creates the output directory if it does not exist.
 ## Warning
 The mapped file extension must end with .jsonl for successful ingestion into Timesketch. Files with other extensions (e.g json) may cause the import to fail.
 ## Ingesting into Timesketch
-After conversion, the resulting (`.jsonl`) file can be ingested into Timesketch using either the Web UI or the `tsctl` [Importer CLI tool](https://timesketch.org/guides/user/cli-client/).
-
+1. File - the resulting (`.jsonl`) file can be ingested into Timesketch using either the Web UI or the `tsctl` [Importer CLI tool](https://timesketch.org/guides/user/cli-client/).
+2. Sketch - If you specify the `--ts_sketch` option, the tool will automatically ingest the mapped events into the specified Timesketch sketch. The sketch will be created if it does not exist.
 ## Contributing
 Contributions to TS-THOR Mapper are welcome! If you'd like to contribute:
 * Fork the repository.
