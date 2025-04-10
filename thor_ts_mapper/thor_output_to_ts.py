@@ -1,6 +1,6 @@
 import os.path
 from typing import Dict, Union
-
+from alive_progress import alive_bar
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
 from thor_ts_mapper.logger_config import LoggerConfig
@@ -53,15 +53,16 @@ class THORIngestToTS:
 
 
     def ingest_events(self, events) -> None:
-
-        with importer.ImportStreamer() as streamer:
-            streamer.set_sketch(self.my_sketch)
-            streamer.set_timeline_name(self.timeline_name)
-            streamer.set_upload_context(self.timeline_name)
-            for event in events:
-                try:
-                    streamer.add_dict(event)
-                except Exception as e:
-                    logger.error("Error adding event to streamer: %s", e)
-        logger.info("Successfully ingested events into sketch ""%s", self.my_sketch.name)
-        logger.info("The timeline will continue to be indexed in the background")
+        with alive_bar(spinner='dots', title=f"Ingesting to sketch '{self.my_sketch.name}'") as bar:
+            with importer.ImportStreamer() as streamer:
+                streamer.set_sketch(self.my_sketch)
+                streamer.set_timeline_name(self.timeline_name)
+                streamer.set_upload_context(self.timeline_name)
+                for event in events:
+                    try:
+                        streamer.add_dict(event)
+                        bar()
+                    except Exception as e:
+                        logger.error("Error adding event to streamer: %s", e)
+            logger.info("Successfully ingested events into sketch ""%s", self.my_sketch.name)
+            logger.info("The timeline will continue to be indexed in the background")

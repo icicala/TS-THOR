@@ -83,16 +83,10 @@ class MainControllerCLI:
 
         try:
             mapped_events = THORJSONTransformer.transform_thor_logs(input_file)
-
-
-
             if output_to_file:
-                logger.info(f"Writing mapped events to file: {output_file}")
                 write_to_file = THOROutputToFile(output_file)
                 write_to_file.write_to_file(mapped_events)
-
             if output_to_ts:
-                logger.info(f"Ingesting events to Timesketch with sketch identifier: {ts_sketch}")
                 upload_to_ts = THORIngestToTS(thor_file=input_file, sketch=ts_sketch)
                 upload_to_ts.ingest_events(mapped_events)
 

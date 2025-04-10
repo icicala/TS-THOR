@@ -41,8 +41,7 @@ class THOROutputToFile:
                 for event in events:
                     try:
                         file.write(json.dumps(event) + "\n")
-                        bar.text = f"Writing events"
                         bar()
                     except Exception as e:
                         logger.error("Error writing event: %s", e)
-            logger.info("Successfully written events to %s", self.output_file)
+            logger.debug("Successfully written events to %s", self.output_file)
