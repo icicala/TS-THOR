@@ -38,6 +38,8 @@ class THORIngestToTS:
                 my_sketch = self.ts_client.get_sketch(sketch)
                 logger.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
                 return my_sketch
+            else:
+                sketch = f"Sketch_{sketch}"
 
         elif isinstance(sketch, str):
             if sketch in sketches.keys():
