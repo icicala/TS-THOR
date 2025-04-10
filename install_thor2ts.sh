@@ -13,7 +13,6 @@ info() {
     echo -e "${GREEN}$1${NC}"
 }
 
-# Function for installation
 install_thor2ts() {
     info "Checking prerequisites..."
     command -v python3 &>/dev/null || { error "python3 is not installed. Please install it before continuing."; return 1; }
@@ -36,15 +35,18 @@ install_thor2ts() {
 
 
 if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
-
-    install_thor2ts
-    echo "Virtual environment is now active."
+    install_thor2ts && {
+        info "Successfully installed thor_ts_mapper"
+        info "Virtual environment is now active."
+    }
 else
-    install_thor2ts
-    echo ""
-    echo "To use thor2ts, you need to activate the environment with:"
-    echo "  source $VENV_NAME/bin/activate"
-    echo ""
-    echo "For automatic activation, you can run:"
-    echo "  source $(basename "$0")"
-fi
+    install_thor2ts && {
+        info "Successfully installed thor_ts_mapper"
+        echo ""
+        info "To use thor2ts, you need to activate the environment with:"
+        info "  source $VENV_NAME/bin/activate"
+        echo ""
+        info "For automatic activation, you can run:"
+        info "  source $(basename "$0")"
+    }
+fii
