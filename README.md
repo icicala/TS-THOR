@@ -76,7 +76,6 @@ Once the virtual environment is active, run the tool by specifying the path to t
 ```bash
 thor2ts <input_file> [-o <output_file>] [--ts_sketch <sketch_id_or_name>] [-v]
 ```
-
 ### Arguments
 * `input_file` - Path to the THOR JSON file that you want to convert
 #### Example
