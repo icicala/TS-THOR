@@ -49,4 +49,4 @@ else
         info "For automatic activation, you can run:"
         info "  source $(basename "$0")"
     }
-fii
+fi
