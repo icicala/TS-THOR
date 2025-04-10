@@ -21,7 +21,6 @@ class ProgressBar:
     def update(self, num=1):
         self.events_count += num
         self.pbar.update(num)
-        self.pbar.set_postfix({"processed": self.events_count}, refresh=True)
 
     def close(self):
         if hasattr(self, 'pbar'):

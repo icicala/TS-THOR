@@ -90,7 +90,7 @@ class MainControllerCLI:
             if output_to_file:
                 file_progress_bar = ProgressBar(desc=f"Writing to {output_file}", total=total_events, color="green")
                 logger.info(f"Writing mapped events to file: {output_file}")
-                write_to_file = THOROutputToFile(output_file, file_progress_bar )
+                write_to_file = THOROutputToFile(output_file, file_progress_bar)
                 write_to_file.write_to_file(mapped_events)
 
             if output_to_ts:

@@ -20,8 +20,8 @@ class THOROutputToFile:
         try:
             if not self.output_file.lower().endswith('.jsonl'):
                 original = self.output_file
-                output_file = os.path.splitext(self.output_file)[0] + '.jsonl'
-                logger.info(f"Changed output file from `{original}` to `{output_file}` to ensure JSONL format")
+                self.output_file = os.path.splitext(self.output_file)[0] + '.jsonl'
+                logger.info(f"Changed output file from `{original}` to `{self.output_file}` to ensure JSONL format")
         except Exception as e:
             logger.error("Error validating or modifying the output file: %s", e)
 
