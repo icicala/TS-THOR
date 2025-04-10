@@ -1,28 +1,27 @@
 from tqdm import tqdm
 
+
 class ProgressBar:
-    _instance = None
+    def __init__(self, desc="Progress", total=None, color="green", leave=True):
+        self.events_count = 0
 
-    def __new__(cls, desc: str = "Progress"):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._initialized = False
-        return cls._instance
+        bar_format = '[{elapsed}<{remaining}] {n_fmt}/{total_fmt} | {l_bar}{bar} {rate_fmt}{postfix}'
 
-    def __init__(self, desc: str = "Progress"):
-        if not self._initialized:
-            self.desc = desc
-            self.events_count = 0
-            self.pbar = tqdm(unit=" event", desc=self.desc, dynamic_ncols=True)
-            self._initialized = True
-        elif desc != self.desc:
-            self.pbar.set_description(desc)
-            self.desc = desc
+        self.pbar = tqdm(
+            total=total,
+            unit=" event",
+            desc=desc,
+            dynamic_ncols=True,
+            position=0,
+            leave=leave,
+            bar_format=bar_format,
+            colour=color
+        )
 
-    def update(self, num: int = 1):
+    def update(self, num=1):
         self.events_count += num
         self.pbar.update(num)
-        self.pbar.set_postfix({"processed": self.events_count})
+        self.pbar.set_postfix({"processed": self.events_count}, refresh=True)
 
     def close(self):
         if hasattr(self, 'pbar'):
