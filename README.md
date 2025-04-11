@@ -89,9 +89,29 @@ thor2ts thor_scan.json -o /path/to/output/thor2timesketch.jsonl
 ```
 * `--ts_sketch <sketch_id_or_name>` - Send the mapped events to Timesketch by specifying the sketch ID or name.
 Give the existing sketch name, otherwise the sketch will be created with the given name.
+ 
+**First-time configuration**: When using this flag for the first time, you'll be prompted to configure Timesketch settings:
+* `host_uri` - The URL of the Timesketch server.
+* `auth_mode` - Authentication mode, valid choices are: "userpass" (user/pass) or "oauth"
+* `username` - Your Timesketch username.
+* `password` - Your Timesketch password. **Note:** The password will be tokenized.
+This creates two configuration files in the user's home directory `$HOME/`:
+
+`~/.timesketch.token` - Stores authentication tokens
+`~/.timesketchrc` - Stores connection configuration with the following format:
+```ini
+[timesketch]
+host_uri = http://timessketch.example.com
+username = yourusername
+verify = True
+client_id = 
+client_secret = 
+auth_mode = userpass
+cred_key = <generated_key>
+```
 #### Example
 ```bash
-thor2ts thor_scan.json --ts_sketch "THOR Sketch"
+thor2ts thor_scan.json --ts_sketch "THOR APT Sketch"
 ```
 or by using a valid sketch ID otherwise the sketch will be created with name `Sketch_<sketch_id>`:
 ```bash
@@ -112,11 +132,11 @@ thor2ts --version
 **THOR** scan log file `.json` log version **v2** or **v3**
 
 ## Output Files
-The tool writes mapped events to a JSONL file. If the provided output file does not have a `.jsonl` extension, the file extension is updated to the JSONL format. If the file already exists, events are appended to it, otherwise, a new file is created. The tool also creates the output directory if it does not exist.
+The tool writes converted events to a JSONL file. If the provided output file does not have a `.jsonl` extension, the file extension is updated to the JSONL format. If the file already exists, events are appended to it, otherwise, a new file is created. The tool also creates the output directory if it does not exist.
 ## Warning
-The mapped file extension must end with `.jsonl` for successful ingestion into Timesketch. Files with other extensions (e.g `json`) may cause the import to fail.
+The output file extension must end with `.jsonl` for successful ingestion into Timesketch. Files with other extensions (e.g `json`) may cause the import to fail.
 ## Ingesting into Timesketch
-1. File - the resulting (`.jsonl`) file can be ingested into Timesketch using either the Web UI or the [Importer CLI tool](https://timesketch.org/guides/user/cli-client/).
+1. File `jsonl` - the resulting (`.jsonl`) file can be ingested into Timesketch using either the Web UI or the [Importer CLI tool](https://timesketch.org/guides/user/cli-client/).
 2. Sketch - If you specify the `--ts_sketch` flag, the tool will automatically ingest the mapped events into the specified Timesketch sketch. The sketch will be created if it does not exist.
 ## Contributing
 Contributions to `thor2ts` are welcome! If you'd like to contribute:
