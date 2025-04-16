@@ -18,7 +18,9 @@ class THORIngestToTS:
         self.my_sketch = self._load_sketch(sketch)
 
     def _get_timeline_name(self, thor_file) -> str:
-            return os.path.splitext(os.path.basename(thor_file))[0]
+        file_basename = os.path.basename(thor_file)
+        file_name, _ = os.path.splitext(file_basename)
+        return file_name
 
     def _get_available_sketches(self) -> Dict[str, int]:
         sketches = {}

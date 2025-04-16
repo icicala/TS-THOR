@@ -83,7 +83,7 @@ class MainControllerCLI:
 
 
         try:
-            mapped_events = THORJSONTransformer.transform_thor_logs(input_file)
+            mapped_events = THORJSONTransformer().transform_thor_logs(input_json_file=input_file)
             if output_to_file:
                 write_to_file = THOROutputToFile(output_file)
                 write_to_file.write_to_file(mapped_events)

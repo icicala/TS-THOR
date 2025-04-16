@@ -1,5 +1,5 @@
 import os
-from typing import Generator, Dict, Any, Iterator
+from typing import Dict, Any, Iterator
 from thor_ts_mapper import constants
 from thor_ts_mapper.exceptions import ProcessingError, MappingError, JsonFlatteningError
 from thor_ts_mapper.thor_input_reader import THORJSONInputReader
@@ -49,9 +49,3 @@ class THORJSONTransformer:
                 raise MappingError(message_err)
 
         logger.debug("Finished transforming THOR logs")
-
-input_file = "../thor10_7_old_json.json"
-transformer = THORJSONTransformer()
-mapped_logs = transformer.transform_thor_logs(input_file)
-for log in mapped_logs:
-    print(log)

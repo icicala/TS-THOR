@@ -1,7 +1,7 @@
-from typing import Iterator, Dict, Generator, Any
+from typing import Iterator, Dict, Any
 
 from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import FileValidationError, JsonValidationError, InputError
+from thor_ts_mapper.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
 from thor_ts_mapper.file_validator import FileValidator
 from thor_ts_mapper.json_validator import JsonValidator
 from thor_ts_mapper.logger_config import LoggerConfig

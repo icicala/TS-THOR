@@ -1,7 +1,6 @@
 import os
 import json
-from typing import Dict, Generator
-
+from typing import Dict, Any, Iterator
 from thor_ts_mapper.logger_config import LoggerConfig
 from alive_progress import alive_bar
 
@@ -33,7 +32,8 @@ class THOROutputToFile:
             except Exception as e:
                 logger.error(f"Failed to create output directory `{output_dir}`: {e}")
 
-    def write_to_file(self, events: Generator[Dict[str, any], None, None]) -> None:
+
+    def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
         self._validate_output_file()
         self._prepare_output_dir()
         with alive_bar(spinner='dots', title=f"Writing to {self.output_file}") as bar:
