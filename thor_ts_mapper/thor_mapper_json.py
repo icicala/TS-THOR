@@ -11,9 +11,12 @@ class THORMapperJson:
     THOR_MESSAGE_FIELD: str = ""
     THOR_MODULE_FIELD: str = ""
 
+    def __init__(self):
+        self.timestamp_extractor = ThorTimestampExtractor()
+
     def map_thor_events(self, json_line: Dict[str, Any]) -> List[Dict[str, Any]]:
 
-        timestamps_fields = THORMapperJson._get_timestamp_extract(json_line)
+        timestamps_fields = self._get_timestamp_extract(json_line)
         thor_timestamp = self._get_thor_timestamp_field()
         additional_timestamp_fields = [field for field in timestamps_fields if field != thor_timestamp]
 
@@ -50,9 +53,9 @@ class THORMapperJson:
         event.update(self._get_additional_fields(json_line, field_name))
         return event
 
-    @staticmethod
-    def _get_timestamp_extract(json_line: Dict[str, Any]) -> List[str]:
-        return ThorTimestampExtractor.extract_datetime(json_line)
+
+    def _get_timestamp_extract(self, json_line: Dict[str, Any]) -> List[str]:
+        return self.timestamp_extractor.extract_datetime(json_line)
 
 
     def _get_message(self, json_line: Dict[str, Any]) -> str:

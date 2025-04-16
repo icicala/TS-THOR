@@ -1,50 +1,51 @@
 import os
 from thor_ts_mapper.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
 from thor_ts_mapper.logger_config import LoggerConfig
+from thor_ts_mapper import constants
 
 logger = LoggerConfig.get_logger(__name__)
 
 
 class FileValidator:
+    def __init__(self):
+        self.valid_extensions = constants.VALID_JSON_EXTENSIONS
+        self.empty_file = constants.EMPTY_FILE
 
-    VALID_EXTENSIONS = (".json", ".jsonl")
+    def validate_file(self, file_path: str) -> str:
+        self._check_file_exists(file_path)
+        self._check_file_readable(file_path)
+        self._check_file_not_empty(file_path)
+        self._check_file_extension(file_path)
+        logger.info(f"File {file_path} is valid and ready for processing.")
+        return file_path
 
-    @staticmethod
-    def validate_file(thor_json_file: str) -> str:
 
-        FileValidator._check_file_exists(thor_json_file)
-        FileValidator._check_file_readable(thor_json_file)
-        FileValidator._check_file_not_empty(thor_json_file)
-        FileValidator._check_file_extension(thor_json_file)
+    def _check_file_exists(self, file_path: str) -> None:
+        if not os.path.isfile(file_path):
+            error_msg = f"File {file_path} does not exist."
+            logger.error(error_msg)
+            raise JsonFileNotFoundError(error_msg)
 
-        logger.info(f"File validation successful: {thor_json_file}")
-        return thor_json_file
+    def _check_file_readable(self, file_path: str) -> None:
+        if not os.access(file_path, os.R_OK):
+            error_msg = f"File {file_path} is not readable."
+            logger.error(error_msg)
+            raise JsonFileNotReadableError(error_msg)
 
-    @staticmethod
-    def _check_file_exists(thor_json_file: str) -> None:
-        if not os.path.isfile(thor_json_file):
-            logger.error(f"File {thor_json_file} does not exist.")
-            raise JsonFileNotFoundError(f"File {thor_json_file} does not exist")
+    def _check_file_not_empty(self, file_path: str) -> None:
+        if os.path.getsize(file_path) == self.empty_file:
+            error_msg = f"File {file_path} is empty."
+            logger.error(error_msg)
+            raise JsonEmptyFileError(error_msg)
 
-    @staticmethod
-    def _check_file_readable(thor_json_file: str) -> None:
-        if not os.access(thor_json_file, os.R_OK):
-            logger.error(f"File {thor_json_file} is not readable.")
-            raise JsonFileNotReadableError(f"File {thor_json_file} is not readable")
-
-    @staticmethod
-    def _check_file_not_empty(thor_json_file: str) -> None:
-        if os.path.getsize(thor_json_file) == 0:
-            logger.error(f"File {thor_json_file} is empty.")
-            raise JsonEmptyFileError(f"File {thor_json_file} is empty")
-
-    @staticmethod
-    def _check_file_extension(file_path: str) -> None:
-        file_extension = os.path.splitext(file_path)[1].lower()
-        if file_extension not in FileValidator.VALID_EXTENSIONS:
-            logger.error(
-                f"File {file_path} does not have a .json or .jsonl extension"
+    def _check_file_extension(self, file_path: str) -> None:
+        _, file_extension = os.path.splitext(file_path)
+        file_extension = file_extension.lower()
+        if file_extension not in self.valid_extensions:
+            expected = ", ".join(self.valid_extensions)
+            error_msg = (
+                f"Invalid file extension for '{file_path}'. "
+                f"Expected one of: [{expected}], but got: '{file_extension}'"
             )
-            raise JsonInvalidFileExtensionError(
-                f"File {file_path} does not have a .json or .jsonl extension"
-            )
+            logger.error(error_msg)
+            raise JsonInvalidFileExtensionError(error_msg)

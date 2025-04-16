@@ -2,8 +2,9 @@ import argparse
 import os
 import logging
 import sys
-from typing import Dict, Optional, Set
+from typing import Dict, Optional
 
+from thor_ts_mapper.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper.thor_json_transformer import THORJSONTransformer
 from thor_ts_mapper.thor_output_to_file import THOROutputToFile
@@ -95,8 +96,22 @@ class MainControllerCLI:
         except KeyboardInterrupt:
             logger.warning("Processing interrupted by user")
             sys.exit(130)
+        except InputError as e:
+            logger.error(f"Input validation error: {e}", exc_info=args["verbose"])
+            sys.exit(2)
+        except ProcessingError as e:
+            logger.error(f"Processing error: {e}", exc_info=args["verbose"])
+            sys.exit(3)
+        except OutputError as e:
+            logger.error(f"Output error: {e}", exc_info=args["verbose"])
+            sys.exit(4)
+        except Thor2tsError as e:
+            # Catch any other custom exceptions
+            logger.error(f"Thor2ts error: {e}", exc_info=args["verbose"])
+            sys.exit(1)
         except Exception as e:
-            logger.error(f"Error processing THOR logs: {e}", exc_info=args["verbose"])
+            # Fallback for unexpected errors
+            logger.error(f"Unexpected error: {e}", exc_info=args["verbose"])
             sys.exit(1)
 
 
