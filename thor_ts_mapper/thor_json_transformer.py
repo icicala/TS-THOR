@@ -32,7 +32,7 @@ class THORJSONTransformer:
         for json_line in valid_thor_logs:
             try:
                 flattened_json = self.flattener.flatten_jsonl(json_line)
-                version_mapper = self.log_version_mapper.get_mapper(flattened_json)
+                version_mapper = self.log_version_mapper.get_mapper_for_version(flattened_json)
                 mapped_events = version_mapper.map_thor_events(flattened_json)
 
                 for event in mapped_events:
