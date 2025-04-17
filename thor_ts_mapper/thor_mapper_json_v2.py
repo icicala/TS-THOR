@@ -1,8 +1,8 @@
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper.thor_mapper_json import THORMapperJson
+from thor_ts_mapper.thor_json_log_version import THORJSONLogVersionMapper
 
-logger = LoggerConfig.get_logger(__name__)
-
+@THORJSONLogVersionMapper.log_version("v1")
 class THORMapperJsonV2(THORMapperJson):
 
     THOR_TIMESTAMP_FIELD = "time"
