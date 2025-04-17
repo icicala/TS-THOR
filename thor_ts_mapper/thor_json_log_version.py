@@ -3,8 +3,6 @@ from thor_ts_mapper.exceptions import VersionError
 from thor_ts_mapper.thor_mapper_json import THORMapperJson
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper import constants
-from thor_ts_mapper.thor_mapper_json_v2 import THORMapperJsonV2
-from thor_ts_mapper.thor_mapper_json_v3 import THORMapperJsonV3
 
 logger = LoggerConfig.get_logger(__name__)
 
