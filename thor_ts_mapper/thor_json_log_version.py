@@ -3,6 +3,8 @@ from thor_ts_mapper.exceptions import VersionError
 from thor_ts_mapper.thor_mapper_json import THORMapperJson
 from thor_ts_mapper.logger_config import LoggerConfig
 from thor_ts_mapper import constants
+from thor_ts_mapper.thor_mapper_json_v2 import THORMapperJsonV2
+from thor_ts_mapper.thor_mapper_json_v3 import THORMapperJsonV3
 
 logger = LoggerConfig.get_logger(__name__)
 
@@ -11,24 +13,24 @@ class THORJSONLogVersionMapper:
     _mapper_log_version: Dict[str, Type["THORMapperJson"]] = {}
 
     @classmethod
-    def log_version(cls, prefix: str):
+    def log_version(cls, version: str):
         def map_log_version(mapper_cls: Type["THORMapperJson"]) -> Type["THORMapperJson"]:
-            cls._mapper_log_version[prefix.lower()] = mapper_cls
+            cls._mapper_log_version[version.lower()] = mapper_cls
             return mapper_cls
         return map_log_version
 
     def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "THORMapperJson":
-        version = json_line.get(constants.LOG_VERSION)
-        if not isinstance(version, str):
-            raise VersionError(f"Invalid or missing log_version: {version}")
-        version = version.lower()
+        thor_version = json_line.get(constants.LOG_VERSION)
+        if not isinstance(thor_version, str):
+            raise VersionError(f"Invalid or missing log_version: {thor_version}")
+        thor_version = version.lower()
 
         thor_mapper = next(
-            (mapper for prefix, mapper in self._mapper_log_version.items() if version.startswith(prefix)),
+            (mapper for version, mapper in self._mapper_log_version.items() if thor_version == version),
             None
         )
         if thor_mapper is not None:
-            logger.debug(f"Using {thor_mapper.__name__} for version '{version}'")
+            logger.debug(f"Using {thor_mapper.__name__} for version '{thor_version}'")
             return thor_mapper()
 
-        raise VersionError(f"Unsupported log_version: '{version}'")
+        raise VersionError(f"Unsupported log_version: '{thor_version}'")
