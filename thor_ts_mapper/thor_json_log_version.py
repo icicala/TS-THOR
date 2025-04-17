@@ -14,7 +14,7 @@ class THORJSONLogVersionMapper:
     def log_version(cls, log_version: str):
         def map_log_version(mapper_cls: Type["THORMapperJson"]) -> Type["THORMapperJson"]:
             cls._mapper_log_version[log_version.lower()] = mapper_cls
-            logger.error("Registering mapper for version: %s", log_version)
+            logger.debug(f"Mapping log version {log_version} to {mapper_cls}")
             return mapper_cls
         return map_log_version
 
