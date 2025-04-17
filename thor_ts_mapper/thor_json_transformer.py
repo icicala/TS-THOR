@@ -1,7 +1,7 @@
 import os
 from typing import Dict, Any, Iterator
 from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import ProcessingError, MappingError, JsonFlatteningError
+from thor_ts_mapper.exceptions import ProcessingError, MappingError, JsonFlatteningError, VersionError
 from thor_ts_mapper.thor_input_reader import THORJSONInputReader
 from thor_ts_mapper.thor_json_flattener import THORJSONFlattener
 from thor_ts_mapper.logger_config import LoggerConfig
@@ -40,6 +40,11 @@ class THORJSONTransformer:
 
             except JsonFlatteningError as e:
                 message_err = f"Error flattening JSON log: {e}"
+                logger.error(message_err)
+                raise MappingError(message_err)
+
+            except VersionError as e:
+                message_err = f"Error mapping THOR log version: {e}"
                 logger.error(message_err)
                 raise MappingError(message_err)
 

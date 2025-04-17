@@ -11,9 +11,10 @@ class THORJSONLogVersionMapper:
     _mapper_log_version: Dict[str, Type["THORMapperJson"]] = {}
 
     @classmethod
-    def log_version(cls, version: str):
+    def log_version(cls, log_version: str):
         def map_log_version(mapper_cls: Type["THORMapperJson"]) -> Type["THORMapperJson"]:
-            cls._mapper_log_version[version.lower()] = mapper_cls
+            cls._mapper_log_version[log_version.lower()] = mapper_cls
+            logger.error("Registering mapper for version: %s", log_version)
             return mapper_cls
         return map_log_version
 
@@ -24,8 +25,7 @@ class THORJSONLogVersionMapper:
         thor_version = thor_version.lower()
 
         thor_mapper = next((mapper for version, mapper in self._mapper_log_version.items() if thor_version == version), None)
-        if thor_mapper is not None:
-            logger.debug(f"Using {thor_mapper.__name__} for version '{thor_version}'")
-            return thor_mapper()
-
-        raise VersionError(f"Unsupported log_version: '{thor_version}'")
+        if thor_mapper is None:
+            raise VersionError(f'The mapper for version "{thor_version}" is not implemented')
+        logger.debug(f"Using {thor_mapper.__name__} for version '{thor_version}'")
+        return thor_mapper()
