@@ -1,16 +1,16 @@
 import os
 import json
 from typing import Dict, Any, Iterator
-from thor_ts_mapper.logger_config import LoggerConfig
+from src.thor2timesketch.config.logger import LoggerConfig
 from alive_progress import alive_bar
-from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import OutputError
+from src.thor2timesketch import constants
+from src.thor2timesketch.exceptions import OutputError
 
 
 logger = LoggerConfig.get_logger(__name__)
 
 
-class THOROutputToFile:
+class FileWriter:
     def __init__(self, output_file: str):
         self.output_file = output_file
         self.mode = 'a' if os.path.exists(self.output_file) else 'w'
@@ -45,7 +45,7 @@ class THOROutputToFile:
                         file.write(json.dumps(event) + "\n")
                         bar()
                 logger.debug(f"Successfully written events to {self.output_file}")
-        except Exception as e:
+        except Exception as exp:
             if self.output_file and os.path.exists(self.output_file):
                 try:
                     os.remove(self.output_file)
@@ -53,6 +53,6 @@ class THOROutputToFile:
                     error_msg = f"Failed to remove output file: {e}"
                     logger.error(error_msg)
                     raise OutputError(error_msg)
-            error_msg = f"Error writing to file: {e}"
+            error_msg = f"Error writing to file: {exp}"
             logger.error(error_msg)
             raise OutputError(error_msg)

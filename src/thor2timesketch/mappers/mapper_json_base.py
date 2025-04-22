@@ -1,18 +1,18 @@
-from abc import abstractmethod, ABC
 from typing import Dict, Any, List, Optional
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.thor_timestamp_extractor import ThorTimestampExtractor
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch.exceptions import TimestampError
+from src.thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 from dateutil import parser
 from datetime import timezone
 logger = LoggerConfig.get_logger(__name__)
 
-class THORMapperJson:
+class MapperJsonBase:
     THOR_TIMESTAMP_FIELD: str = ""
     THOR_MESSAGE_FIELD: str = ""
     THOR_MODULE_FIELD: str = ""
 
-    def __init__(self):
-        self.timestamp_extractor = ThorTimestampExtractor()
+    def __init__(self) -> None:
+        self.timestamp_extractor: TimestampExtractor = TimestampExtractor()
 
     def map_thor_events(self, json_line: Dict[str, Any]) -> List[Dict[str, Any]]:
 
@@ -68,15 +68,20 @@ class THORMapperJson:
     def _get_datetime(self, json_line: Dict[str, Any], field_name: Optional[str] = None) -> str:
         field = field_name if field_name is not None else self._get_thor_timestamp_field()
         value = json_line.get(field)
+        if value is None:
+            error_msg = f"Missing timestamp field: {field}"
+            logger.error(error_msg)
+            raise TimestampError(error_msg)
+
         try:
             timestamp = parser.isoparse(value)
             if timestamp.tzinfo is None:
                 timestamp = timestamp.replace(tzinfo=timezone.utc)
             return timestamp.isoformat()
         except (ValueError, TypeError):
-            logger.error(f"Invalid datetime format at {field}: {value}")
-            return value
-
+            error_msg = f"Invalid datetime format at {field}: {value}"
+            logger.error(error_msg)
+            raise TimestampError(error_msg)
 
     def _get_timestamp_desc(self, json_line: Dict[str, Any], field_name: Optional[str] = None) -> str:
         module = json_line.get(self.THOR_MODULE_FIELD)

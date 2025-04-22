@@ -1,24 +1,24 @@
-from typing import Dict, Any, Type
-from thor_ts_mapper.exceptions import VersionError
-from thor_ts_mapper.thor_mapper_json import THORMapperJson
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper import constants
+from typing import Dict, Any, Type, Callable
+from src.thor2timesketch.exceptions import VersionError
+from src.thor2timesketch.mappers.mapper_json_base import MapperJsonBase
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch import constants
 
 logger = LoggerConfig.get_logger(__name__)
 
-class THORJSONLogVersionMapper:
+class JsonLogVersion:
 
-    _mapper_log_version: Dict[str, Type["THORMapperJson"]] = {}
+    _mapper_log_version: Dict[str, Type["MapperJsonBase"]] = {}
 
     @classmethod
-    def log_version(cls, log_version: str):
-        def map_log_version(mapper_cls: Type["THORMapperJson"]) -> Type["THORMapperJson"]:
+    def log_version(cls, log_version: str) -> Callable[[Type["MapperJsonBase"]], Type["MapperJsonBase"]]:
+        def map_log_version(mapper_cls: Type["MapperJsonBase"]) -> Type["MapperJsonBase"]:
             cls._mapper_log_version[log_version.lower()] = mapper_cls
             logger.debug(f"Mapping log version {log_version} to {mapper_cls}")
             return mapper_cls
         return map_log_version
 
-    def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "THORMapperJson":
+    def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "MapperJsonBase":
         thor_version = json_line.get(constants.LOG_VERSION)
         if not isinstance(thor_version, str):
             raise VersionError(f"Invalid or missing log_version: {thor_version}")

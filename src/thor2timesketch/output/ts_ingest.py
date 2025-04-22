@@ -1,37 +1,36 @@
 import os.path
-from typing import Dict, Union
+from typing import Dict, Union, Any, Iterable
 from alive_progress import alive_bar
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
-from thor_ts_mapper.logger_config import LoggerConfig
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch import constants
 
 
 logger = LoggerConfig.get_logger(__name__)
 
-class THORIngestToTS:
+class TSIngest:
 
-    TS_SCOPE = ['user', 'shared']
 
-    def __init__(self, thor_file: str, sketch: Union[int, str] = None):
+    def __init__(self, thor_file: str, sketch: Union[int, str]) -> None:
         self.ts_client = timesketch_config.get_client()
-        self.timeline_name = self._get_timeline_name(thor_file)
-        self.my_sketch = self._load_sketch(sketch)
+        self.timeline_name: str = self._get_timeline_name(thor_file)
+        self.my_sketch: Any = self._load_sketch(sketch)
 
-    def _get_timeline_name(self, thor_file) -> str:
-        file_basename = os.path.basename(thor_file)
+    def _get_timeline_name(self, thor_file: str) -> str:
+        file_basename: str = os.path.basename(thor_file)
         file_name, _ = os.path.splitext(file_basename)
         return file_name
 
     def _get_available_sketches(self) -> Dict[str, int]:
         sketches = {}
-        for scope in self.TS_SCOPE:
+        for scope in constants.TS_SCOPE:
             for sketch in self.ts_client.list_sketches(scope=scope, include_archived=False):
                 sketches[sketch.name] = int(sketch.id)
         return sketches
 
 
-    def _load_sketch(self, sketch: Union[int, str] = None):
-
+    def _load_sketch(self, sketch: Union[int, str]) -> Any:
         sketches = self._get_available_sketches()
 
         if isinstance(sketch, int):
@@ -54,7 +53,7 @@ class THORIngestToTS:
         return my_sketch
 
 
-    def ingest_events(self, events) -> None:
+    def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
         with alive_bar(spinner='dots', title=f"Ingesting to sketch '{self.my_sketch.name}'") as bar:
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
@@ -65,6 +64,6 @@ class THORIngestToTS:
                         streamer.add_dict(event)
                         bar()
                     except Exception as e:
-                        logger.error("Error adding event to streamer: %s", e)
+                        logger.error(f"Error adding event to streamer: '{e}'")
             logger.info(f"Successfully ingested events into sketch '{self.my_sketch.name}'")
             logger.info("The timeline will continue to be indexed in the background")

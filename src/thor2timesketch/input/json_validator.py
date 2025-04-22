@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.exceptions import JsonValidationError, JsonParseError
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch.exceptions import JsonValidationError, JsonParseError
 
 logger = LoggerConfig.get_logger(__name__)
 

@@ -1,17 +1,17 @@
 from typing import Iterator, Dict, Any
 
-from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
-from thor_ts_mapper.file_validator import FileValidator
-from thor_ts_mapper.json_validator import JsonValidator
-from thor_ts_mapper.logger_config import LoggerConfig
+from src.thor2timesketch import constants
+from src.thor2timesketch.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
+from src.thor2timesketch.input.file_validator import FileValidator
+from src.thor2timesketch.input.json_validator import JsonValidator
+from src.thor2timesketch.config.logger import LoggerConfig
 
 
 logger = LoggerConfig.get_logger(__name__)
 
-class THORJSONInputReader:
+class JsonReader:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.file_validator = FileValidator()
         self.json_validator = JsonValidator()
         self.file_encoder = constants.DEFAULT_ENCODING

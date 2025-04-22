@@ -1,13 +1,13 @@
 import os
-from thor_ts_mapper.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper import constants
+from src.thor2timesketch.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch import constants
 
 logger = LoggerConfig.get_logger(__name__)
 
 
 class FileValidator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.valid_extensions = constants.VALID_JSON_EXTENSIONS
         self.empty_file = constants.EMPTY_FILE
 

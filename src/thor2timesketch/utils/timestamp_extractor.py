@@ -1,13 +1,13 @@
 import re
 from typing import Dict, Any, List
-from thor_ts_mapper import constants
-from thor_ts_mapper.logger_config import LoggerConfig
+from src.thor2timesketch import constants
+from src.thor2timesketch.config.logger import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)
 
-class ThorTimestampExtractor:
+class TimestampExtractor:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.ISO8601 = re.compile(constants.ISO8601_PATTERN, re.IGNORECASE)
 
 

@@ -1,14 +1,14 @@
 from typing import Any, Dict
 from collections import deque
-from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import JsonFlatteningError
-from thor_ts_mapper.logger_config import LoggerConfig
+from src.thor2timesketch import constants
+from src.thor2timesketch.exceptions import JsonFlatteningError
+from src.thor2timesketch.config.logger import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)
 
-class THORJSONFlattener:
+class JsonFlattener:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.delimiter = constants.DELIMITER
 
 

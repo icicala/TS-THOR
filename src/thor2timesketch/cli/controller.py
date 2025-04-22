@@ -2,13 +2,13 @@ import argparse
 import os
 import logging
 import sys
-from typing import Dict, Optional
+from typing import Dict, Optional, Any, Union
 
-from thor_ts_mapper.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.thor_json_transformer import THORJSONTransformer
-from thor_ts_mapper.thor_output_to_file import THOROutputToFile
-from thor_ts_mapper.thor_output_to_ts import THORIngestToTS
+from src.thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch.transformation.json_transformer import JsonTransformer
+from src.thor2timesketch.output.file_writer import FileWriter
+from src.thor2timesketch.output.ts_ingest import TSIngest
 
 logger = LoggerConfig.get_logger(__name__)
 
@@ -65,13 +65,13 @@ class MainControllerCLI:
         }
 
     @staticmethod
-    def run():
-        args = MainControllerCLI.parse_arguments()
-        input_file = args["input_file"]
-        output_file = args["output_file"]
-        ts_sketch = args["ts_sketch"]
+    def run() -> None:
+        args: Dict[str, Any] = MainControllerCLI.parse_arguments()
+        input_file: str = args["input_file"]
+        output_file: str = args["output_file"]
+        ts_sketch: Union[int, str] = args["ts_sketch"]
 
-        if ts_sketch and ts_sketch.isdigit():
+        if ts_sketch and isinstance(ts_sketch, str) and ts_sketch.isdigit():
             ts_sketch = int(ts_sketch)
 
         output_to_file = output_file is not None
@@ -83,12 +83,12 @@ class MainControllerCLI:
 
 
         try:
-            mapped_events = THORJSONTransformer().transform_thor_logs(input_json_file=input_file)
+            mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
             if output_to_file:
-                write_to_file = THOROutputToFile(output_file)
+                write_to_file = FileWriter(output_file)
                 write_to_file.write_to_file(mapped_events)
             if output_to_ts:
-                upload_to_ts = THORIngestToTS(thor_file=input_file, sketch=ts_sketch)
+                upload_to_ts = TSIngest(thor_file=input_file, sketch=ts_sketch)
                 upload_to_ts.ingest_events(mapped_events)
 
             logger.info("THOR log processing completed successfully")

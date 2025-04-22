@@ -1,23 +1,26 @@
 import os
 from typing import Dict, Any, Iterator
-from thor_ts_mapper import constants
-from thor_ts_mapper.exceptions import ProcessingError, MappingError, JsonFlatteningError, VersionError
-from thor_ts_mapper.thor_input_reader import THORJSONInputReader
-from thor_ts_mapper.thor_json_flattener import THORJSONFlattener
-from thor_ts_mapper.logger_config import LoggerConfig
-from thor_ts_mapper.thor_json_log_version import THORJSONLogVersionMapper
+from src.thor2timesketch import constants
+from src.thor2timesketch.exceptions import ProcessingError, MappingError, JsonFlatteningError, VersionError
+from src.thor2timesketch.input.json_reader import JsonReader
+from src.thor2timesketch.utils.json_flattener import JsonFlattener
+from src.thor2timesketch.config.logger import LoggerConfig
+from src.thor2timesketch.mappers.json_log_version import JsonLogVersion
+from src.thor2timesketch.mappers.mapper_loader import load_all_mappers
 
 logger = LoggerConfig.get_logger(__name__)
 
 
-class THORJSONTransformer:
-    def __init__(self):
-        self.input_reader = THORJSONInputReader()
-        self.flattener = THORJSONFlattener()
-        self.log_version_mapper = THORJSONLogVersionMapper()
+class JsonTransformer:
+    def __init__(self) -> None:
+        load_all_mappers()
+        self.input_reader = JsonReader()
+        self.flattener = JsonFlattener()
+        self.log_version_mapper = JsonLogVersion()
         self.mb_converter = constants.MB_CONVERTER
 
-    def transform_thor_logs(self, input_json_file) -> Iterator[Dict[str, Any]]:
+
+    def transform_thor_logs(self, input_json_file: str) -> Iterator[Dict[str, Any]]:
         valid_thor_logs = self.input_reader.get_valid_data(input_json_file)
         if valid_thor_logs is None:
             message_err = "No valid THOR logs found"
