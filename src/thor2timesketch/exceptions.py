@@ -53,9 +53,6 @@ class MappingError(ProcessingError):
     def __init__(self, error_msg: str = "Error mapping THOR data") -> None:
         super().__init__(error_msg)
 
-class JsonFlatteningError(ProcessingError):
-    def __init__(self, error_msg: str = "Error flattening JSON log") -> None:
-        super().__init__(error_msg)
 
 class VersionError(ProcessingError):
     def __init__(self, error_msg: str = "Unsupported THOR log version") -> None:

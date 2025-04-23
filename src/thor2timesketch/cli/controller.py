@@ -3,7 +3,6 @@ import os
 import logging
 import sys
 from typing import Dict, Optional, Any, Union
-
 from src.thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
 from src.thor2timesketch.config.logger import LoggerConfig
 from src.thor2timesketch.transformation.json_transformer import JsonTransformer

@@ -1,104 +1,112 @@
 from typing import Dict, Any, List, Optional
 from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch.exceptions import TimestampError
+from src.thor2timesketch.exceptions import TimestampError, MappingError
+from src.thor2timesketch.utils.datetime_field import DatetimeField
 from src.thor2timesketch.utils.timestamp_extractor import TimestampExtractor
-from dateutil import parser
-from datetime import timezone
+
 logger = LoggerConfig.get_logger(__name__)
 
+
 class MapperJsonBase:
-    THOR_TIMESTAMP_FIELD: str = ""
-    THOR_MESSAGE_FIELD: str = ""
-    THOR_MODULE_FIELD: str = ""
+    THOR_TIMESTAMP_FIELD: List[str] = []
+    THOR_MESSAGE_FIELD: List[str] = []
+    THOR_MODULE_FIELD: List[str] = []
 
     def __init__(self) -> None:
         self.timestamp_extractor: TimestampExtractor = TimestampExtractor()
 
-    def map_thor_events(self, json_line: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def map_thor_events(self, json_log: Dict[str, Any]) -> List[Dict[str, Any]]:
 
-        timestamps_fields = self._get_timestamp_extract(json_line)
-        thor_timestamp = self._get_thor_timestamp_field()
-        additional_timestamp_fields = [field for field in timestamps_fields if field != thor_timestamp]
+        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(json_log)
+
+        thor_timestamp: str = self._get_thor_timestamp(json_log)
+
+        additional_timestamp: List[DatetimeField] = [ts_field for ts_field in all_timestamps if ts_field.datetime != thor_timestamp and ts_field.path != self.THOR_TIMESTAMP_FIELD]
 
         events: List[Dict[str, Any]] = []
 
-        thor_event_map = self._create_thor_scan_event(json_line)
+        thor_event_map = self._create_thor_scan_event(json_log, thor_timestamp)
+
         events.append(thor_event_map)
-        if additional_timestamp_fields:
-            for field_name in additional_timestamp_fields:
-                event = self._create_additional_timestamp_event(json_line, field_name)
+        if additional_timestamp:
+            for datetime in additional_timestamp:
+                event = self._create_additional_timestamp_event(json_log, datetime, thor_timestamp)
                 events.append(event)
 
         logger.debug(f"Mapped {len(events)} events")
         return events
 
-
-    def _create_thor_scan_event(self, json_line: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_thor_scan_event(self, json_log: Dict[str, Any], thor_timestamp: str) -> Dict[str, Any]:
         event = {
-            'message': self._get_message(json_line),
-            'datetime': self._get_datetime(json_line),
-            'timestamp_desc': self._get_timestamp_desc(json_line),
+            'message': self._get_message(json_log),
+            'datetime': thor_timestamp,
+            'timestamp_desc': self._get_timestamp_desc(json_log),
         }
-        event.update(self._get_additional_fields(json_line))
+        event.update(self._get_additional_fields(json_log))
         return event
 
-    def _create_additional_timestamp_event(self, json_line: Dict[str, Any],
-                                          field_name: str) -> Dict[str, Any]:
+    def _create_additional_timestamp_event(self, json_log: Dict[str, Any],
+                                           ts_data: DatetimeField, thor_datetime: str) -> Dict[str, Any]:
         event = {
-            'message': self._get_message(json_line),
-            'datetime': self._get_datetime(json_line, field_name),
-            'timestamp_desc': self._get_timestamp_desc(json_line, field_name),
-            'time_thor_scan': self._get_datetime(json_line)
+            'message': self._get_message(json_log),
+            'datetime': ts_data.datetime,
+            'timestamp_desc': self._get_timestamp_desc(json_log, ts_data),
+            'time_thor_scan': thor_datetime
         }
-        event.update(self._get_additional_fields(json_line, field_name))
+        event.update(self._get_additional_fields(json_log))
         return event
 
+    def _get_timestamp_extract(self, json_log: Dict[str, Any]) -> List[DatetimeField]:
+        return self.timestamp_extractor.extract_datetime(json_log)
 
-    def _get_timestamp_extract(self, json_line: Dict[str, Any]) -> List[str]:
-        return self.timestamp_extractor.extract_datetime(json_line)
-
-
-    def _get_message(self, json_line: Dict[str, Any]) -> str:
-        message = json_line.get(self.THOR_MESSAGE_FIELD)
+    def _get_message(self, json_log: Dict[str, Any]) -> str:
+        message = self._get_value_from_json(json_log, self.THOR_MESSAGE_FIELD)
         if not message:
             logger.debug("No message found in THOR event, using default message.")
             message = "THOR APT scanner message."
-        return message
+        return str(message)
 
-    def _get_datetime(self, json_line: Dict[str, Any], field_name: Optional[str] = None) -> str:
-        field = field_name if field_name is not None else self._get_thor_timestamp_field()
-        value = json_line.get(field)
-        if value is None:
-            error_msg = f"Missing timestamp field: {field}"
-            logger.error(error_msg)
-            raise TimestampError(error_msg)
+    def _get_timestamp_desc(self, json_log: Dict[str, Any], ts_data: Optional[DatetimeField] = None) -> str:
 
-        try:
-            timestamp = parser.isoparse(value)
-            if timestamp.tzinfo is None:
-                timestamp = timestamp.replace(tzinfo=timezone.utc)
-            return timestamp.isoformat()
-        except (ValueError, TypeError):
-            error_msg = f"Invalid datetime format at {field}: {value}"
-            logger.error(error_msg)
-            raise TimestampError(error_msg)
-
-    def _get_timestamp_desc(self, json_line: Dict[str, Any], field_name: Optional[str] = None) -> str:
-        module = json_line.get(self.THOR_MODULE_FIELD)
-        if field_name is None or field_name == self._get_thor_timestamp_field():
+        if ts_data is None or ts_data.path == self.THOR_TIMESTAMP_FIELD:
             return "Timestamp of THOR scan execution"
-        else:
-            return f"{module} - {field_name}"
+        module = self._get_value_from_json(json_log, self.THOR_MODULE_FIELD)
+        time_fields = " ".join([ts.capitalize() for ts in ts_data.path])
+        return f'{module} - {time_fields}'
 
-    def _get_additional_fields(self, json_line: Dict[str, Any], field_name: Optional[str] = None) -> Dict[str, Any]:
-        exclude_fields = {self.THOR_MESSAGE_FIELD, self._get_thor_timestamp_field()}
+    def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
+        mandatory_fields = [self.THOR_TIMESTAMP_FIELD, self.THOR_MESSAGE_FIELD, self.THOR_MODULE_FIELD]
+        flat = {fields[0] for fields in mandatory_fields if len(fields) == 1}
+        parents = {fields[0] for fields in mandatory_fields if len(fields) == 2}
+        children = {fields[1] for fields in mandatory_fields if len(fields) == 2}
+
         return {
-            field: value for field, value in json_line.items()
-            if field not in exclude_fields
+            key: (
+                {subkey: subvalue for subkey, subvalue in value.items() if subkey not in children}
+                if key in parents and isinstance(value, dict)
+                else value
+            )
+            for key, value in json_log.items()
+            if key not in flat and (key not in parents or isinstance(value, dict))
         }
 
-    def _get_thor_timestamp_field(self) -> str:
-        return self.THOR_TIMESTAMP_FIELD
+    def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> str:
+        thor_timestamp = self._get_value_from_json(json_log, self.THOR_TIMESTAMP_FIELD)
+        if thor_timestamp is None:
+            error_msg = f"Missing THOR timestamp field: {self.THOR_TIMESTAMP_FIELD}"
+            logger.error(error_msg)
+            raise TimestampError(error_msg)
+        return str(thor_timestamp)
 
-
+    def _get_value_from_json(self, json_log: Dict[str, Any], mandatory_fields: List[str]) -> Any:
+        values: Any = json_log
+        for field in mandatory_fields:
+            try:
+                if isinstance(values, dict):
+                    values = values.get(field)
+            except KeyError:
+                error_msg = f"Field '{field}' not found in THOR data: {values}"
+                logger.error(error_msg)
+                raise MappingError(error_msg)
+        return values
 

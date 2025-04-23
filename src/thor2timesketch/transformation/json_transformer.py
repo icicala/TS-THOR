@@ -1,9 +1,8 @@
 import os
 from typing import Dict, Any, Iterator
 from src.thor2timesketch import constants
-from src.thor2timesketch.exceptions import ProcessingError, MappingError, JsonFlatteningError, VersionError
+from src.thor2timesketch.exceptions import ProcessingError, MappingError, VersionError
 from src.thor2timesketch.input.json_reader import JsonReader
-from src.thor2timesketch.utils.json_flattener import JsonFlattener
 from src.thor2timesketch.config.logger import LoggerConfig
 from src.thor2timesketch.mappers.json_log_version import JsonLogVersion
 from src.thor2timesketch.mappers.mapper_loader import load_all_mappers
@@ -15,10 +14,8 @@ class JsonTransformer:
     def __init__(self) -> None:
         load_all_mappers()
         self.input_reader = JsonReader()
-        self.flattener = JsonFlattener()
         self.log_version_mapper = JsonLogVersion()
         self.mb_converter = constants.MB_CONVERTER
-
 
     def transform_thor_logs(self, input_json_file: str) -> Iterator[Dict[str, Any]]:
         valid_thor_logs = self.input_reader.get_valid_data(input_json_file)
@@ -34,17 +31,11 @@ class JsonTransformer:
     def _generate_mapped_logs(self, valid_thor_logs: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
         for json_line in valid_thor_logs:
             try:
-                flattened_json = self.flattener.flatten_jsonl(json_line)
-                version_mapper = self.log_version_mapper.get_mapper_for_version(flattened_json)
-                mapped_events = version_mapper.map_thor_events(flattened_json)
+                version_mapper = self.log_version_mapper.get_mapper_for_version(json_line)
+                mapped_events = version_mapper.map_thor_events(json_line)
 
                 for event in mapped_events:
                     yield event
-
-            except JsonFlatteningError as e:
-                message_err = f"Error flattening JSON log: {e}"
-                logger.error(message_err)
-                raise MappingError(message_err)
 
             except VersionError as e:
                 message_err = f"Error mapping THOR log version: {e}"
@@ -56,4 +47,4 @@ class JsonTransformer:
                 logger.error(message_err)
                 raise MappingError(message_err)
 
-        logger.debug("Finished transforming THOR logs")
+    logger.debug("Finished transforming THOR logs")
