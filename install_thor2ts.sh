@@ -27,6 +27,7 @@ install_thor2ts() {
 
     info "Installing thor_ts_mapper..."
     source "$VENV_NAME/bin/activate" || { error "Failed to activate virtual environment"; return 1; }
+    pip install --upgrade pip || { error "Failed to upgrade pip"; return 1; }
     pip install . || { error "Failed to install thor_ts_mapper"; return 1; }
 
     command -v thor2ts &>/dev/null || { error "Installation failed: thor2ts command not found"; return 1; }
