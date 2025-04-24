@@ -1,10 +1,10 @@
 import os
 import json
 from typing import Dict, Any, Iterator
-from src.thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.logger import LoggerConfig
 from alive_progress import alive_bar
-from src.thor2timesketch import constants
-from src.thor2timesketch.exceptions import OutputError
+from thor2timesketch import constants
+from thor2timesketch.exceptions import OutputError
 
 
 logger = LoggerConfig.get_logger(__name__)

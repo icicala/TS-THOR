@@ -1,8 +1,8 @@
 from typing import Dict, Any, List, Optional
-from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch.exceptions import TimestampError, MappingError
-from src.thor2timesketch.utils.datetime_field import DatetimeField
-from src.thor2timesketch.utils.timestamp_extractor import TimestampExtractor
+from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.exceptions import TimestampError, MappingError
+from thor2timesketch.utils.datetime_field import DatetimeField
+from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 
 logger = LoggerConfig.get_logger(__name__)
 

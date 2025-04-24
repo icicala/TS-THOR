@@ -3,10 +3,10 @@ from collections import deque
 from datetime import timezone
 from typing import Dict, Any, List, Tuple
 from dateutil import parser
-from src.thor2timesketch import constants
-from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch.exceptions import TimestampError
-from src.thor2timesketch.utils.datetime_field import DatetimeField
+from thor2timesketch import constants
+from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.exceptions import TimestampError
+from thor2timesketch.utils.datetime_field import DatetimeField
 
 logger = LoggerConfig.get_logger(__name__)
 

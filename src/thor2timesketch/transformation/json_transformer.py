@@ -1,11 +1,11 @@
 import os
 from typing import Dict, Any, Iterator
-from src.thor2timesketch import constants
-from src.thor2timesketch.exceptions import ProcessingError, MappingError, VersionError
-from src.thor2timesketch.input.json_reader import JsonReader
-from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch.mappers.json_log_version import JsonLogVersion
-from src.thor2timesketch.mappers.mapper_loader import load_all_mappers
+from thor2timesketch import constants
+from thor2timesketch.exceptions import ProcessingError, MappingError, VersionError
+from thor2timesketch.input.json_reader import JsonReader
+from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.mappers.json_log_version import JsonLogVersion
+from thor2timesketch.mappers.mapper_loader import load_all_mappers
 
 logger = LoggerConfig.get_logger(__name__)
 

@@ -1,10 +1,10 @@
 from typing import Iterator, Dict, Any
 
-from src.thor2timesketch import constants
-from src.thor2timesketch.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
-from src.thor2timesketch.input.file_validator import FileValidator
-from src.thor2timesketch.input.json_validator import JsonValidator
-from src.thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch import constants
+from thor2timesketch.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
+from thor2timesketch.input.file_validator import FileValidator
+from thor2timesketch.input.json_validator import JsonValidator
+from thor2timesketch.config.logger import LoggerConfig
 
 
 logger = LoggerConfig.get_logger(__name__)

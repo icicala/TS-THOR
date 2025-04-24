@@ -3,8 +3,8 @@ from typing import Dict, Union, Any, Iterable
 from alive_progress import alive_bar
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
-from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch import constants
+from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch import constants
 
 
 logger = LoggerConfig.get_logger(__name__)

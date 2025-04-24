@@ -1,5 +1,5 @@
-from src.thor2timesketch.mappers.mapper_json_base import MapperJsonBase
-from src.thor2timesketch.mappers.json_log_version import JsonLogVersion
+from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
+from thor2timesketch.mappers.json_log_version import JsonLogVersion
 
 @JsonLogVersion.log_version("v3.0.0")
 class MapperJsonV3(MapperJsonBase):

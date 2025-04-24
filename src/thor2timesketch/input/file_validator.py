@@ -1,7 +1,7 @@
 import os
-from src.thor2timesketch.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
-from src.thor2timesketch.config.logger import LoggerConfig
-from src.thor2timesketch import constants
+from thor2timesketch.exceptions import JsonFileNotFoundError, JsonFileNotReadableError, JsonEmptyFileError, JsonInvalidFileExtensionError
+from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch import constants
 
 logger = LoggerConfig.get_logger(__name__)
 

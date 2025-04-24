@@ -1,6 +1,6 @@
 import importlib
 import pkgutil
-from src.thor2timesketch import mappers
+from thor2timesketch import mappers
 
 def load_all_mappers() -> None:
     for _, module_name, _ in pkgutil.iter_modules(mappers.__path__):
