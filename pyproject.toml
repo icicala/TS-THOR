@@ -3,35 +3,42 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "thor_ts_mapper"
+name = "thor2timesketch"
 version = "0.1.1"
+authors = [
+  { name = "Ion Cicala (Nextron Systems GmbH)", email = "ion.cicala@nextron-systems.com" }
+]
 description = "Convert THOR security scanner logs to Timesketch format"
 readme = "README.md"
-authors = [
-    {name = "Ion Cicala (Nextron Systems GmbH)", email = "ion.cicala@nextron-systems.com"}
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Environment :: Console",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
 ]
 keywords = ["thor", "timesketch", "mapper", "converter", "nextron"]
-classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
-    "Environment :: Console",
-    "Programming Language :: Python :: 3",
-    "License :: Other/Proprietary License",
-    "Operating System :: OS Independent",
-]
-requires-python = ">=3.9"
 dependencies = [
-    "colorlog~=6.9.0",
-    "python-dateutil~=2.9.0.post0",
-    "setuptools~=68.2.0",
-    "alive-progress~=3.2.0",
-    "timesketch_import_client",
+  "colorlog~=6.9.0",
+  "python-dateutil~=2.9.0.post0",
+  "setuptools~=68.2.0",
+  "alive-progress~=3.2.0",
+  "timesketch_import_client"
 ]
+packages = ["thor2timesketch"]
 
 [project.urls]
-Homepage = "TBD"
+Homepage = "tbd"
+Issues = "tbd"
 
 [project.scripts]
 thor2ts = "thor2timesketch.__main__:main"
+
+[tool.setuptools]
+package-dir = {"": "src"}
 
 [tool.ruff]
 line-length = 79

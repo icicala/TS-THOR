@@ -1,5 +1,4 @@
 from typing import Iterator, Dict, Any
-
 from thor2timesketch import constants
 from thor2timesketch.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
 from thor2timesketch.input.file_validator import FileValidator
