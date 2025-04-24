@@ -22,7 +22,6 @@ class JsonLogVersion:
         thor_version = json_line.get(constants.LOG_VERSION)
         if not isinstance(thor_version, str):
             raise VersionError(f"Invalid or missing log_version: {thor_version}")
-        thor_version = thor_version.lower()
 
         thor_mapper = next((mapper for version, mapper in self._mapper_log_version.items() if thor_version == version), None)
         if thor_mapper is None:
