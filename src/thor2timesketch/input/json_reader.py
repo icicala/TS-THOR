@@ -19,7 +19,7 @@ class JsonReader:
 
     def _validate_file(self,input_file: str) -> str:
         try:
-            valid_file = self.file_validator.validate_file(input_file)
+            valid_file: str = self.file_validator.validate_file(input_file)
         except FileValidationError as e:
             message_err = f"File validation error: {e}"
             logger.error(message_err)

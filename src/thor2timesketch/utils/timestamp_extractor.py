@@ -23,7 +23,7 @@ class TimestampExtractor:
             raise TimestampError(error_msg)
 
         timestamps: List[DatetimeField] = []
-        queue: deque[Tuple[Dict[str, Any], List[str]]] = deque([(data_json, [])])
+        queue: deque[Tuple[Dict[str, Any], str]] = deque([(data_json, "")])
 
         try:
             while queue:
@@ -31,7 +31,7 @@ class TimestampExtractor:
 
                 if isinstance(log_json, dict):
                     for log_field, log_value in log_json.items():
-                        new_path = path + [log_field]
+                        new_path = f"{path} {log_field}" if path else log_field
                         queue.append((log_value, new_path))
                 elif isinstance(log_json, list):
                     for log_value in log_json:
