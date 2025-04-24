@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling >= 1.26"]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -36,9 +36,6 @@ Issues = "tbd"
 
 [project.scripts]
 thor2ts = "thor2timesketch.__main__:main"
-
-[tool.setuptools]
-package-dir = {"": "src"}
 
 [tool.ruff]
 line-length = 79
