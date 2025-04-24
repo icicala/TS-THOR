@@ -1,4 +1,4 @@
-from src.thor2timesketch.cli.controller import MainControllerCLI
+from thor2timesketch.cli.controller import MainControllerCLI
 
 def main() -> None:
     MainControllerCLI.run()
