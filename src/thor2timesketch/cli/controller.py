@@ -43,7 +43,7 @@ class MainControllerCLI:
         parser.add_argument(
             "--version",
             action="version",
-            version=f"%(prog)s {__import__('thor_ts_mapper').__version__}",
+            version=f"%(prog)s {__import__('thor2timesketch').__version__}",
             help="Show version number and exit"
         )
 
