@@ -10,15 +10,26 @@ from thor2timesketch.output.file_writer import FileWriter
 from thor2timesketch.output.ts_ingest import TSIngest
 from thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
 
-app = typer.Typer(help="THOR-TS-Mapper: Convert THOR security scanner logs to Timesketch format")
+app = typer.Typer(help="thor2ts: Convert THOR security scanner logs to Timesketch format", add_completion=True)
 console = Console()
 
-@app.command()
-def convert(
-    input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
-    output_file: Optional[str] = typer.Option(None, "--output-file", "-o", help="Write output to specified JSONL file"),
-    sketch: Optional[str] = typer.Option(None, "--sketch", help="Sketch ID or name for ingesting events into Timesketch"),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output")
+def version_callback(value: bool):
+    if value:
+        from thor2timesketch import __version__
+        typer.echo(f"thor2timesketch version: {__version__}")
+        raise typer.Exit()
+
+@app.callback(invoke_without_command=True)
+def main(
+        input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
+        output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
+                                                  help="Write output to specified JSONL file"),
+        sketch: Optional[str] = typer.Option(None, "--sketch",
+                                             help="Sketch ID or name for ingesting events into Timesketch"),
+        verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
+        version: Optional[bool] = typer.Option(
+            None, "--version", callback=version_callback, is_eager=True, help="Show version and exit"
+        )
 ):
 
     log_level = logging.DEBUG if verbose else logging.INFO
@@ -70,20 +81,3 @@ def convert(
     except Exception as e:
         logger.error(f"Unexpected error: {e}", exc_info=verbose)
         raise typer.Exit(code=1)
-
-def version_callback(value: bool):
-    if value:
-        from thor2timesketch import __version__
-        typer.echo(f"thor2timesketch version: {__version__}")
-        raise typer.Exit()
-
-@app.callback()
-def main(
-    version: Optional[bool] = typer.Option(
-        None, "--version", callback=version_callback, is_eager=True, help="Show version and exit"
-    )
-):
-    pass
-
-if __name__ == "__main__":
-    app()
