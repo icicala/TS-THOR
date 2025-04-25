@@ -47,7 +47,7 @@ class FileWriter:
                 with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
                         file.write(json.dumps(event) + "\n")
-                        progress.update(task, advance=1)
+                        progress.update(task)
                 logger.debug(f"Successfully written events to {self.output_file}")
         except Exception as exp:
             if self.output_file and os.path.exists(self.output_file):

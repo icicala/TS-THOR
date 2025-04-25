@@ -66,11 +66,12 @@ class TSIngest:
                 for event in events:
                     try:
                         ok = streamer.add_dict(event)
-                        if not ok:
-                            logger.error("SKIPPED event: %s", {
-                                key: event.get(key) for key in ("message", "datetime", "timestamp_desc")
-                            })
-                        progress.update(task, advance=1)
+                        logger.info(f'Data ingested answer from TS{ok}')
+                        # if not ok:
+                        #     logger.error("SKIPPED event: %s", {
+                        #         key: event.get(key) for key in ("message", "datetime", "timestamp_desc")
+                        #     })
+                        progress.update(task)
                     except Exception as e:
                         logger.error(f"Error adding event to streamer: '{e}'")
             logger.info(f"Successfully ingested events into sketch '{self.my_sketch.name}'")
