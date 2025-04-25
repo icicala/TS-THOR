@@ -22,11 +22,10 @@ classifiers = [
 ]
 keywords = ["thor", "timesketch", "mapper", "converter", "nextron"]
 dependencies = [
-  "colorlog~=6.9.0",
-  "python-dateutil~=2.9.0.post0",
-  "setuptools~=68.2.0",
-  "alive-progress~=3.2.0",
-  "timesketch_import_client"
+  "timesketch_import_client",
+  "python-dateutil",
+  "typer",
+  "rich"
 ]
 packages = ["thor2timesketch"]
 

@@ -1,5 +1,4 @@
 timesketch_import_client
 python-dateutil
-alive-progress
 typer
 rich
