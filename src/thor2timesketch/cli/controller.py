@@ -19,7 +19,7 @@ def version_callback(value: bool):
         typer.echo(f"thor2timesketch version: {__version__}")
         raise typer.Exit()
 
-@app.callback(invoke_without_command=True)
+@app.command()
 def main(
         input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
         output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
