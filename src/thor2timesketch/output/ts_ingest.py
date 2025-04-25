@@ -52,21 +52,20 @@ class TSIngest:
         logger.info(f"New sketch has been created with name: '{my_sketch.name}' and ID: {my_sketch.id}")
         return my_sketch
 
-
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
         processed_count = 0
         error_count = 0
+
         with Progress(
                 SpinnerColumn(),
                 TextColumn("[bold blue]Ingesting to sketch '{task.fields[sketch_name]}'"),
-                TextColumn("[cyan]{task.completed} processed") if not has_total else TextColumn(
-                    "[cyan]{task.completed}/{task.total}"),
-                TextColumn("• [red]{task.fields[errors]} errors") if not has_total else TextColumn(
-                    "• [red]{task.fields[errors]}/{task.total} errors")
+                TextColumn("[cyan]{task.completed} processed"),
+                TextColumn("• [red]{task.fields[errors]} errors")
         ) as progress:
             task = progress.add_task(
                 "Ingesting",
-                total=total_count,
+                total=None,
+                completed=0,
                 errors=0,
                 sketch_name=self.my_sketch.name
             )
@@ -76,16 +75,16 @@ class TSIngest:
                 streamer.set_timeline_name(self.timeline_name)
                 streamer.set_upload_context(self.timeline_name)
 
-                for event in events_list:
+                for event in events:
                     try:
                         streamer.add_dict(event)
                         processed_count += 1
                     except Exception as e:
                         error_count += 1
-                        progress.update(task, errors=error_count)
                         logger.debug(f"Error adding event to streamer: '{e}'")
                     finally:
-                        progress.update(task, advance=1)
+                        progress.update(task, completed=processed_count, errors=error_count)
+
         logger.info(f"Processed {processed_count} events for sketch '{self.my_sketch.name}'")
         if error_count > 0:
             logger.warning(f"Encountered {error_count} errors during ingestion")
