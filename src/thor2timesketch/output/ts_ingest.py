@@ -54,28 +54,39 @@ class TSIngest:
 
 
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
+        processed_count = 0
+        error_count = 0
         with Progress(
-                SpinnerColumn("dots"),
-                TextColumn("[bold blue]{task.description}")
+                SpinnerColumn(),
+                TextColumn("[bold blue]Ingesting to sketch '{task.fields[sketch_name]}'"),
+                TextColumn("[cyan]{task.completed} processed") if not has_total else TextColumn(
+                    "[cyan]{task.completed}/{task.total}"),
+                TextColumn("• [red]{task.fields[errors]} errors") if not has_total else TextColumn(
+                    "• [red]{task.fields[errors]}/{task.total} errors")
         ) as progress:
-            task = progress.add_task(f"Ingesting to sketch '{self.my_sketch.name}'", total=None)
-            processed_count = 0
-            error_count = 0
+            task = progress.add_task(
+                "Ingesting",
+                total=total_count,
+                errors=0,
+                sketch_name=self.my_sketch.name
+            )
 
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
                 streamer.set_timeline_name(self.timeline_name)
                 streamer.set_upload_context(self.timeline_name)
-                for event in events:
+
+                for event in events_list:
                     try:
                         streamer.add_dict(event)
                         processed_count += 1
-                        progress.update(task)
                     except Exception as e:
-                        logger.error(f"Error adding event to streamer: '{e}'")
                         error_count += 1
-
-            logger.info(f"Processed {processed_count} events for sketch '{self.my_sketch.name}'")
-            if error_count > 0:
-                logger.warning(f"Encountered {error_count} errors during ingestion")
-            logger.info("The timeline will continue to be indexed in the background")
+                        progress.update(task, errors=error_count)
+                        logger.debug(f"Error adding event to streamer: '{e}'")
+                    finally:
+                        progress.update(task, advance=1)
+        logger.info(f"Processed {processed_count} events for sketch '{self.my_sketch.name}'")
+        if error_count > 0:
+            logger.warning(f"Encountered {error_count} errors during ingestion")
+        logger.info("The timeline will continue to be indexed in the background")
