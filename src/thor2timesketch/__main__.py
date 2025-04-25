@@ -1,7 +1,7 @@
-from thor2timesketch.cli.controller import MainControllerCLI
+from thor2timesketch.cli.controller import app
 
 def main() -> None:
-    MainControllerCLI.run()
+    app()
 
 if __name__ == "__main__":
     main()
