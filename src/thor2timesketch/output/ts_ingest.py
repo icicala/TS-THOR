@@ -56,11 +56,9 @@ class TSIngest:
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
         with Progress(
                 TextColumn("[bold blue]{task.description}"),
-                BarColumn(),
-                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-                TimeRemainingColumn()
+                BarColumn(pulse_style="green")
         ) as progress:
-            task = progress.add_task(f"Ingesting to sketch '{self.my_sketch.name}'", total=None)
+            task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
                 streamer.set_timeline_name(self.timeline_name)

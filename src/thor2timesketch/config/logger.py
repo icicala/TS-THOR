@@ -13,7 +13,7 @@ class LoggerConfig:
             level=level,
             format="%(message)s",
             datefmt="[%X]",
-            handlers=[RichHandler(console=cls.console, rich_tracebacks=True)]
+            handlers=[RichHandler(console=cls.console, rich_tracebacks=True, show_path=False)]
         )
 
     @classmethod

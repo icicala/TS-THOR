@@ -41,11 +41,10 @@ class FileWriter:
             self._prepare_output_dir()
             with Progress(
                     TextColumn("[bold blue]{task.description}"),
-                    BarColumn(),
-                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-                    TimeRemainingColumn()
+                    BarColumn(pulse_style="green")
             ) as progress:
-                task = progress.add_task(f"Writing to {self.output_file}", total=None)
+                task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
+                # Rest of the code
                 with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
                         file.write(json.dumps(event) + "\n")
