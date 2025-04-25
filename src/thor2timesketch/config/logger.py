@@ -13,7 +13,17 @@ class LoggerConfig:
             level=level,
             format="%(message)s",
             datefmt="[%X]",
-            handlers=[RichHandler(console=cls.console, rich_tracebacks=True, show_path=False)]
+            handlers=[
+                RichHandler(
+                    console=cls.console,
+                    rich_tracebacks=True,
+                    show_path=False,
+                    markup=True,
+                    log_time_format="[%Y-%m-%d %H:%M:%S]",
+                    show_level=True,
+                    enable_link_path=False
+                )
+            ]
         )
 
     @classmethod
