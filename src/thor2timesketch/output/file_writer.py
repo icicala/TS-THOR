@@ -5,7 +5,7 @@ from thor2timesketch.config.logger import LoggerConfig
 from alive_progress import alive_bar
 from thor2timesketch import constants
 from thor2timesketch.exceptions import OutputError
-from rich.progress import Progress, TextColumn
+from rich.progress import Progress, TextColumn, SpinnerColumn
 
 
 logger = LoggerConfig.get_logger(__name__)

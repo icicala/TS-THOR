@@ -1,6 +1,6 @@
 import os.path
 from typing import Dict, Union, Any, Iterable
-from rich.progress import Progress, BarColumn, TextColumn
+from rich.progress import Progress, TextColumn, SpinnerColumn
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
 from thor2timesketch.config.logger import LoggerConfig
