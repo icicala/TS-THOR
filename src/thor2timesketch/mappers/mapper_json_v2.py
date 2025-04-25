@@ -21,7 +21,8 @@ class MapperJsonV2(MapperJsonBase):
     def _get_timestamp_desc(self, json_log: Dict[str, Any], ts_data: Optional[DatetimeField] = None) -> str:
         if ts_data is None or ts_data.path == MapperJsonV2.THOR_TIMESTAMP_FIELD:
             return "THOR scan timestamp"
-        return f"{MapperJsonV2.THOR_MODULE_FIELD} - {ts_data.path}"
+        module = json_log.get(MapperJsonV2.THOR_MODULE_FIELD)
+        return f"{module} - {ts_data.path}"
 
     def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
         exclude_thor_timestamp = MapperJsonV2.THOR_TIMESTAMP_FIELD
@@ -37,4 +38,7 @@ class MapperJsonV2(MapperJsonBase):
         thor_timestamp = json_log.get(MapperJsonV2.THOR_TIMESTAMP_FIELD)
         if thor_timestamp is None:
             raise MappingError("Missing THOR timestamp field in JSON log")
-        return thor_timestamp
+        return DatetimeField(MapperJsonV2.THOR_TIMESTAMP_FIELD, thor_timestamp)
+
+    def check_thor_log(self, json_log: Dict[str, Any]) -> bool:
+        return any(key.startswith("reason") for key in json_log.keys())

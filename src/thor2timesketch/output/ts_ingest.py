@@ -61,7 +61,11 @@ class TSIngest:
                 streamer.set_upload_context(self.timeline_name)
                 for event in events:
                     try:
-                        streamer.add_dict(event)
+                        ok = streamer.add_dict(event)
+                        if not ok:
+                            logger.error("SKIPPED event: %s", {
+                                key: event.get(key) for key in ("message", "datetime", "timestamp_desc")
+                            })
                         bar()
                     except Exception as e:
                         logger.error(f"Error adding event to streamer: '{e}'")

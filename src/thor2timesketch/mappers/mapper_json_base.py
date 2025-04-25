@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dateutil import parser
 from typing import Dict, Any, List, Optional
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.mappers.mapped_event import MappedEvent
@@ -28,7 +29,7 @@ class MapperJsonBase(ABC):
 
         timestamps_from_log: List[DatetimeField] = self._get_timestamp_extract(json_log)
 
-        ts_additional = list(filter(lambda ts: ts.datetime != thor_timestamp, timestamps_from_log))
+        ts_additional = [ts for ts in timestamps_from_log if not self.timestamp_extractor.is_same_timestamp(ts.datetime, thor_timestamp.datetime) and ts.path != thor_timestamp.path]
 
         if ts_additional:
             logger.debug(f"Found {len(ts_additional)} additional timestamps")
@@ -42,7 +43,7 @@ class MapperJsonBase(ABC):
     def _create_thor_scan_event(self, json_log: Dict[str, Any]) -> MappedEvent:
         event = MappedEvent(
             message = self._get_message(json_log),
-            datetime = self._get_thor_timestamp(json_log),
+            datetime = self._get_thor_timestamp(json_log).datetime,
             timestamp_desc = self._get_timestamp_desc(json_log))
         event.add_additional(self._get_additional_fields(json_log))
         return event
@@ -54,7 +55,7 @@ class MapperJsonBase(ABC):
             message = self._get_message(json_log),
             datetime = ts_data.datetime,
             timestamp_desc = self._get_timestamp_desc(json_log, ts_data),
-            time_thor_scan = self._get_thor_timestamp(json_log)
+            time_thor_scan = self._get_thor_timestamp(json_log).datetime
         )
         event.add_additional(self._get_additional_fields(json_log))
         return event
@@ -75,5 +76,9 @@ class MapperJsonBase(ABC):
     def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
         pass
     @abstractmethod
-    def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> str:
+    def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> DatetimeField:
+        pass
+
+    @abstractmethod
+    def check_thor_log(self, json_log: Dict[str, Any]) -> bool:
         pass

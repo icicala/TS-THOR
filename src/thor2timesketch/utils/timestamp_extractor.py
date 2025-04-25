@@ -56,3 +56,12 @@ class TimestampExtractor:
             raise TimestampError(error_msg)
 
         return timestamps
+
+    def is_same_timestamp(self, time1: str, time2: str) -> bool:
+        try:
+            datetime1 = parser.isoparse(time1)
+            datetime2 = parser.isoparse(time2)
+            return datetime1 == datetime2
+        except ValueError as e:
+            logger.error(f"Error parsing timestamps: {e}")
+            raise MapperError(f"Invalid timestamp format: {e}")

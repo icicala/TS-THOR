@@ -32,11 +32,10 @@ class JsonTransformer:
         for json_line in valid_thor_logs:
             try:
                 version_mapper = self.log_version_mapper.get_mapper_for_version(json_line)
-                mapped_events = version_mapper.map_thor_events(json_line)
-
-                for event in mapped_events:
-                    yield event
-
+                if version_mapper.check_thor_log(json_line):
+                    mapped_events = version_mapper.map_thor_events(json_line)
+                    for event in mapped_events:
+                        yield event
             except VersionError as e:
                 message_err = f"Error mapping THOR log version: {e}"
                 logger.error(message_err)
