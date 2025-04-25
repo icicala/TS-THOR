@@ -55,10 +55,10 @@ class TSIngest:
 
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
         with Progress(
-                SpinnerColumn("dots"),  # Try dots, arrow3, line, dots12
+                SpinnerColumn("dots"),
                 TextColumn("[bold blue]{task.description}")
         ) as progress:
-            task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
+            task = progress.add_task(f"Ingesting to sketch '{self.my_sketch.name}'", total=None)
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
                 streamer.set_timeline_name(self.timeline_name)

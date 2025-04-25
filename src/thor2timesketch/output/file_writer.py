@@ -40,7 +40,7 @@ class FileWriter:
             self._validate_file_extension()
             self._prepare_output_dir()
             with Progress(
-                    SpinnerColumn("dots"),  # Try dots, arrow3, line, dots12
+                    SpinnerColumn("dots"),
                     TextColumn("[bold blue]{task.description}")
             ) as progress:
                 task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
