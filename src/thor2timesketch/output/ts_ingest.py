@@ -54,7 +54,13 @@ class TSIngest:
 
 
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
-        with alive_bar(spinner='dots', title=f"Ingesting to sketch '{self.my_sketch.name}'") as bar:
+        with Progress(
+                TextColumn("[bold blue]{task.description}"),
+                BarColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                TimeRemainingColumn()
+        ) as progress:
+            task = progress.add_task(f"Ingesting to sketch '{self.my_sketch.name}'", total=None)
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
                 streamer.set_timeline_name(self.timeline_name)
@@ -66,7 +72,7 @@ class TSIngest:
                             logger.error("SKIPPED event: %s", {
                                 key: event.get(key) for key in ("message", "datetime", "timestamp_desc")
                             })
-                        bar()
+                        progress.update(task, advance=1)
                     except Exception as e:
                         logger.error(f"Error adding event to streamer: '{e}'")
             logger.info(f"Successfully ingested events into sketch '{self.my_sketch.name}'")

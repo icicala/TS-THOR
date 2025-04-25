@@ -1,118 +1,89 @@
-import argparse
-import os
 import logging
+import os
 import sys
-from typing import Dict, Optional, Any, Union
-from thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
+from typing import Optional
+import typer
+from rich.console import Console
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.output.file_writer import FileWriter
 from thor2timesketch.output.ts_ingest import TSIngest
+from thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
 
-logger = LoggerConfig.get_logger(__name__)
+app = typer.Typer(help="THOR-TS-Mapper: Convert THOR security scanner logs to Timesketch format")
+console = Console()
 
+@app.command()
+def convert(
+    input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
+    output_file: Optional[str] = typer.Option(None, "--output-file", "-o", help="Write output to specified JSONL file"),
+    sketch: Optional[str] = typer.Option(None, "--sketch", help="Sketch ID or name for ingesting events into Timesketch"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output")
+):
 
-class MainControllerCLI:
-    @staticmethod
-    def parse_arguments() -> Dict[str, Optional[str]]:
-        parser = argparse.ArgumentParser(
-            description="THOR-TS-Mapper: Convert THOR security scanner logs to Timesketch format",
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-        )
+    log_level = logging.DEBUG if verbose else logging.INFO
+    LoggerConfig.setup_root_logger(level=log_level)
+    logger = LoggerConfig.get_logger(__name__)
 
-        parser.add_argument(
-            "input_file",
-            help="Path to THOR JSON log file"
-        )
-        parser.add_argument(
-            "-o", "--output-file",
-            dest="output_file",
-            help="Write output to specified JSONL file (default: <input_file>_mapped.jsonl)",
-            default=None
-        )
-        parser.add_argument(
-            "--ts_sketch",
-            help="Sketch ID or name for ingesting events into Timesketch",
-            default=None
-        )
-        parser.add_argument(
-            "-v", "--verbose",
-            action="store_true",
-            help="Enable verbose debugging output"
-        )
-        parser.add_argument(
-            "--version",
-            action="version",
-            version=f"%(prog)s {__import__('thor2timesketch').__version__}",
-            help="Show version number and exit"
-        )
+    if not os.path.isfile(input_file):
+        console.print(f"[bold red]Error:[/] Input file not found: {input_file}")
+        raise typer.Exit(code=1)
 
-        args = parser.parse_args()
+    if sketch and sketch.isdigit():
+        sketch = int(sketch)
 
-        log_level = logging.DEBUG if args.verbose else logging.INFO
-        LoggerConfig.setup_root_logger(level=log_level)
+    output_to_file = output_file is not None
+    output_to_ts = sketch is not None
 
-        if not os.path.isfile(args.input_file):
-            logger.error(f"Input file not found: {args.input_file}")
-            sys.exit(1)
+    if not (output_to_file or output_to_ts):
+        console.print("[bold red]Error:[/] No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
+        raise typer.Exit(code=1)
 
-        return {
-            "input_file": args.input_file,
-            "output_file": args.output_file,
-            "ts_sketch": args.ts_sketch,
-            "verbose": args.verbose
-        }
+    try:
+        mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
 
-    @staticmethod
-    def run() -> None:
-        args: Dict[str, Any] = MainControllerCLI.parse_arguments()
-        input_file: str = args["input_file"]
-        output_file: str = args["output_file"]
-        ts_sketch: Union[int, str] = args["ts_sketch"]
+        if output_to_file:
+            write_to_file = FileWriter(output_file)
+            write_to_file.write_to_file(mapped_events)
 
-        if ts_sketch and isinstance(ts_sketch, str) and ts_sketch.isdigit():
-            ts_sketch = int(ts_sketch)
+        if output_to_ts:
+            upload_to_ts = TSIngest(thor_file=input_file, sketch=sketch)
+            upload_to_ts.ingest_events(mapped_events)
 
-        output_to_file = output_file is not None
-        output_to_ts = ts_sketch is not None
+        logger.info("THOR log processing completed successfully")
 
-        if not (output_to_file or output_to_ts):
-            logger.error("No output destination specified. Use -o/--output-file for file output or --ts_sketch for Timesketch ingestion.")
-            sys.exit(1)
+    except KeyboardInterrupt:
+        logger.warning("Processing interrupted by user")
+        raise typer.Exit(code=130)
+    except InputError as e:
+        logger.error(f"Input validation error: {e}", exc_info=verbose)
+        raise typer.Exit(code=2)
+    except ProcessingError as e:
+        logger.error(f"Processing error: {e}", exc_info=verbose)
+        raise typer.Exit(code=3)
+    except OutputError as e:
+        logger.error(f"Output error: {e}", exc_info=verbose)
+        raise typer.Exit(code=4)
+    except Thor2tsError as e:
+        logger.error(f"Thor2ts error: {e}", exc_info=verbose)
+        raise typer.Exit(code=1)
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=verbose)
+        raise typer.Exit(code=1)
 
+def version_callback(value: bool):
+    if value:
+        from thor2timesketch import __version__
+        typer.echo(f"thor2timesketch version: {__version__}")
+        raise typer.Exit()
 
-        try:
-            mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
-            if output_to_file:
-                write_to_file = FileWriter(output_file)
-                write_to_file.write_to_file(mapped_events)
-            if output_to_ts:
-                upload_to_ts = TSIngest(thor_file=input_file, sketch=ts_sketch)
-                upload_to_ts.ingest_events(mapped_events)
-
-            logger.info("THOR log processing completed successfully")
-
-        except KeyboardInterrupt:
-            logger.warning("Processing interrupted by user")
-            sys.exit(130)
-        except InputError as e:
-            logger.error(f"Input validation error: {e}", exc_info=args["verbose"])
-            sys.exit(2)
-        except ProcessingError as e:
-            logger.error(f"Processing error: {e}", exc_info=args["verbose"])
-            sys.exit(3)
-        except OutputError as e:
-            logger.error(f"Output error: {e}", exc_info=args["verbose"])
-            sys.exit(4)
-        except Thor2tsError as e:
-            # Catch any other custom exceptions
-            logger.error(f"Thor2ts error: {e}", exc_info=args["verbose"])
-            sys.exit(1)
-        except Exception as e:
-            # Fallback for unexpected errors
-            logger.error(f"Unexpected error: {e}", exc_info=args["verbose"])
-            sys.exit(1)
-
+@app.callback()
+def main(
+    version: Optional[bool] = typer.Option(
+        None, "--version", callback=version_callback, is_eager=True, help="Show version and exit"
+    )
+):
+    pass
 
 if __name__ == "__main__":
-    MainControllerCLI.run()
+    app()

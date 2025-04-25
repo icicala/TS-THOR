@@ -5,6 +5,7 @@ from thor2timesketch.config.logger import LoggerConfig
 from alive_progress import alive_bar
 from thor2timesketch import constants
 from thor2timesketch.exceptions import OutputError
+from rich.progress import Progress, TextColumn, BarColumn, TimeRemainingColumn
 
 
 logger = LoggerConfig.get_logger(__name__)
@@ -34,16 +35,21 @@ class FileWriter:
                 logger.error(f"Failed to create output directory `{output_dir}`: {e}")
                 raise OutputError(f"Cannot create output directory: {e}")
 
-
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
         try:
             self._validate_file_extension()
             self._prepare_output_dir()
-            with alive_bar(spinner='dots', title=f"Writing to {self.output_file}") as bar:
+            with Progress(
+                    TextColumn("[bold blue]{task.description}"),
+                    BarColumn(),
+                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                    TimeRemainingColumn()
+            ) as progress:
+                task = progress.add_task(f"Writing to {self.output_file}", total=None)
                 with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
                         file.write(json.dumps(event) + "\n")
-                        bar()
+                        progress.update(task, advance=1)
                 logger.debug(f"Successfully written events to {self.output_file}")
         except Exception as exp:
             if self.output_file and os.path.exists(self.output_file):
