@@ -1,6 +1,6 @@
 import os.path
 from typing import Dict, Union, Any, Iterable
-from alive_progress import alive_bar
+from rich.progress import Progress, BarColumn, TextColumn
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
 from thor2timesketch.config.logger import LoggerConfig
@@ -55,8 +55,8 @@ class TSIngest:
 
     def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
         with Progress(
-                TextColumn("[bold blue]{task.description}"),
-                BarColumn(pulse_style="green")
+                SpinnerColumn("dots"),  # Try dots, arrow3, line, dots12
+                TextColumn("[bold blue]{task.description}")
         ) as progress:
             task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
             with importer.ImportStreamer() as streamer:

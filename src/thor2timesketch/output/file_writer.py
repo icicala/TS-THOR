@@ -5,7 +5,7 @@ from thor2timesketch.config.logger import LoggerConfig
 from alive_progress import alive_bar
 from thor2timesketch import constants
 from thor2timesketch.exceptions import OutputError
-from rich.progress import Progress, TextColumn, BarColumn, TimeRemainingColumn
+from rich.progress import Progress, TextColumn
 
 
 logger = LoggerConfig.get_logger(__name__)
@@ -40,11 +40,10 @@ class FileWriter:
             self._validate_file_extension()
             self._prepare_output_dir()
             with Progress(
-                    TextColumn("[bold blue]{task.description}"),
-                    BarColumn(pulse_style="green")
+                    SpinnerColumn("dots"),  # Try dots, arrow3, line, dots12
+                    TextColumn("[bold blue]{task.description}")
             ) as progress:
                 task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
-                # Rest of the code
                 with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
                         file.write(json.dumps(event) + "\n")
