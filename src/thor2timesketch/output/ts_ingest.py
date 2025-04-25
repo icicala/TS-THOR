@@ -59,20 +59,23 @@ class TSIngest:
                 TextColumn("[bold blue]{task.description}")
         ) as progress:
             task = progress.add_task(f"Ingesting to sketch '{self.my_sketch.name}'", total=None)
+            processed_count = 0
+            error_count = 0
+
             with importer.ImportStreamer() as streamer:
                 streamer.set_sketch(self.my_sketch)
                 streamer.set_timeline_name(self.timeline_name)
                 streamer.set_upload_context(self.timeline_name)
                 for event in events:
                     try:
-                        ok = streamer.add_dict(event)
-                        logger.info(f'Data ingested answer from TS{ok}')
-                        # if not ok:
-                        #     logger.error("SKIPPED event: %s", {
-                        #         key: event.get(key) for key in ("message", "datetime", "timestamp_desc")
-                        #     })
+                        streamer.add_dict(event)
+                        processed_count += 1
                         progress.update(task)
                     except Exception as e:
                         logger.error(f"Error adding event to streamer: '{e}'")
-            logger.info(f"Successfully ingested events into sketch '{self.my_sketch.name}'")
+                        error_count += 1
+
+            logger.info(f"Processed {processed_count} events for sketch '{self.my_sketch.name}'")
+            if error_count > 0:
+                logger.warning(f"Encountered {error_count} errors during ingestion")
             logger.info("The timeline will continue to be indexed in the background")
