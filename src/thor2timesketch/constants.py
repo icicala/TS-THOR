@@ -6,3 +6,4 @@ ISO8601_PATTERN = r'^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[+-]\d{2}:
 LOG_VERSION = "log_version"
 OUTPUT_FILE_EXTENSION = ".jsonl"
 TS_SCOPE = ['user', 'shared']
+MAX_WRITE_ERRORS = 5
