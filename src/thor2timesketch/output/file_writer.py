@@ -2,10 +2,9 @@ import os
 import json
 from typing import Dict, Any, Iterator
 from thor2timesketch.config.logger import LoggerConfig
-from alive_progress import alive_bar
+from rich.progress import Progress, TextColumn, SpinnerColumn
 from thor2timesketch import constants
 from thor2timesketch.exceptions import OutputError
-from rich.progress import Progress, TextColumn, SpinnerColumn
 
 
 logger = LoggerConfig.get_logger(__name__)
@@ -39,16 +38,41 @@ class FileWriter:
         try:
             self._validate_file_extension()
             self._prepare_output_dir()
+
+            processed_count = 0
+            error_count = 0
+            output_filename = os.path.basename(self.output_file)
+
             with Progress(
-                    SpinnerColumn("dots"),
-                    TextColumn("[bold blue]{task.description}")
+                    SpinnerColumn(),
+                    TextColumn("[bold blue]Writing to '{task.fields[filename]}'"),
+                    TextColumn("[cyan]{task.completed} processed"),
+                    TextColumn("• [red]{task.fields[errors]} errors"),
+                    transient=True
             ) as progress:
-                task = progress.add_task(f"Writing to {os.path.basename(self.output_file)}", total=None)
+                task = progress.add_task(
+                    "Writing",
+                    total=None,
+                    completed=0,
+                    errors=0,
+                    filename=output_filename
+                )
+
                 with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
-                        file.write(json.dumps(event) + "\n")
-                        progress.update(task)
-                logger.debug(f"Successfully written events to {self.output_file}")
+                        try:
+                            file.write(json.dumps(event) + "\n")
+                            processed_count += 1
+                        except Exception as e:
+                            error_count += 1
+                            logger.debug(f"Error writing event to file: '{e}'")
+                        finally:
+                            progress.update(task, completed=processed_count, errors=error_count)
+
+            logger.info(f"Successfully written {processed_count} events to {self.output_file}")
+            if error_count > 0:
+                logger.warning(f"Encountered {error_count} errors while writing to file")
+
         except Exception as exp:
             if self.output_file and os.path.exists(self.output_file):
                 try:
