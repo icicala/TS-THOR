@@ -38,10 +38,9 @@ class JsonReader:
                         json_data = self.json_validator.validate_json_log(line)
                         if json_data is not None:
                             yield json_data
-                    except JsonParseError as e:
+                    except (JsonParseError, JsonValidationError) as e:
                         logger.error(f"Error parsing JSON at line {line_num}: {e}")
-                    except JsonValidationError as e:
-                        logger.error(f"Invalid JSON at line {line_num}: {e}")
+                        raise
         except IOError as e:
             message_err = f"Error opening or reading file: {e}"
             logger.error(message_err)
