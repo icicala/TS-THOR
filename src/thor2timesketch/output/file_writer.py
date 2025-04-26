@@ -67,7 +67,7 @@ class FileWriter:
                             processed_count += 1
                         except Exception as e:
                             error_count += 1
-                            logger.error(f"Error writing event: {e}")
+                            logger.debug(f"Error writing event: {e}")
                         finally:
                             progress.update(task, completed=processed_count, errors=error_count)
 
