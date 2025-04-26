@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "thor2timesketch"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
   { name = "Ion Cicala (Nextron Systems GmbH)", email = "ion.cicala@nextron-systems.com" }
 ]
