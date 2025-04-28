@@ -1,5 +1,5 @@
 import os.path
-from typing import Dict, Union, Any, Iterable
+from typing import Dict, Union, Any, Iterator
 from rich.progress import Progress, TextColumn, SpinnerColumn
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
@@ -13,16 +13,14 @@ class TSIngest:
 
 
     def __init__(self, thor_file: str, sketch: str) -> None:
-        try:
-            self.ts_client = timesketch_config.get_client()
-            if self.ts_client is None:
-                raise TimesketchError("Failed to connect to Timesketch client. Check your configuration.")
-            self.timeline_name: str = self._get_timeline_name(thor_file)
-            sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
-            self.my_sketch: Any = self._load_sketch(sketch_type)
-        except TimesketchError as error:
-            logger.error(f"Connection error {error}")
-            raise
+
+        self.ts_client = timesketch_config.get_client()
+        if self.ts_client is None:
+            raise TimesketchError("Failed to connect to Timesketch client. Check your configuration.")
+        self.timeline_name: str = self._get_timeline_name(thor_file)
+        sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
+        self.my_sketch: Any = self._load_sketch(sketch_type)
+
 
     def _get_timeline_name(self, thor_file: str) -> str:
         file_basename: str = os.path.basename(thor_file)
@@ -39,8 +37,8 @@ class TSIngest:
                 for sketch in self.ts_client.list_sketches(scope=scope, include_archived=False):
                     sketches[sketch.name] = int(sketch.id)
             return sketches
-        except TimesketchError as err:
-            error_msg = "fFailed to retrieve sketches from Timesketch: {err}"
+        except TimesketchError as error:
+            error_msg = f"fFailed to retrieve sketches from Timesketch: {error}"
             logger.error(error_msg)
             raise TimesketchError(error_msg)
 
@@ -72,7 +70,7 @@ class TSIngest:
             logger.error(error_msg)
             raise TimesketchError(error_msg)
 
-    def ingest_events(self, events: Iterable[Dict[str, Any]]) -> None:
+    def ingest_events(self, events: Iterator[Dict[str, Any]]) -> None:
         processed_count = 0
         error_count = 0
 

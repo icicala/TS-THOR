@@ -1,6 +1,6 @@
 from typing import Iterator, Dict, Any
 from thor2timesketch import constants
-from thor2timesketch.exceptions import FileValidationError, JsonValidationError, InputError, JsonParseError
+from thor2timesketch.exceptions import JsonValidationError, InputError, JsonParseError
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.input.json_validator import JsonValidator
 from thor2timesketch.config.logger import LoggerConfig
@@ -18,7 +18,8 @@ class JsonReader:
 
 
     def _validate_file(self,input_file: str) -> str:
-        return self.file_validator.validate_file(input_file)
+        valid_file: str = self.file_validator.validate_file(input_file)
+        return valid_file
 
 
     def get_valid_data(self, input_file: str) -> Iterator[Dict[str, Any]]:
