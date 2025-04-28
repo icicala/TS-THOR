@@ -14,7 +14,8 @@ class LoggerConfig:
             markup=True,
             show_time=True,
             show_level=True,
-            enable_link_path=False
+            enable_link_path=False,
+            log_time_format="%y-%m-%d %H:%M:%S"
         )
 
         logging.basicConfig(

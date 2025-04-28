@@ -13,7 +13,7 @@ class TSIngest:
 
 
     def __init__(self, thor_file: str, sketch: str) -> None:
-
+        self.thor_file = thor_file
         self.ts_client = timesketch_config.get_client()
         if self.ts_client is None:
             raise TimesketchError("Failed to connect to Timesketch client. Check your configuration.")
@@ -92,7 +92,9 @@ class TSIngest:
                 with importer.ImportStreamer() as streamer:
                     streamer.set_sketch(self.my_sketch)
                     streamer.set_timeline_name(self.timeline_name)
+                    streamer.set_provider("thor2ts")
                     streamer.set_upload_context(self.timeline_name)
+                    streaner.add_file(self.thor_file)
 
                     for event in events:
                         try:
