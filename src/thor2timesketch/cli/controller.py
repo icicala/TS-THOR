@@ -32,7 +32,7 @@ def main(
     logger = LoggerConfig.get_logger(__name__)
 
     if not os.path.isfile(input_file):
-        console.print(f"[bold red]Error:[/] Input file not found: {input_file}")
+        console.print(f"[bold red]Error:[/] Input file not found: '{input_file}'")
         raise typer.Exit(code=1)
 
     output_to_file = output_file is not None

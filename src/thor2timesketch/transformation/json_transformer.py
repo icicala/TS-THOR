@@ -26,7 +26,7 @@ class JsonTransformer:
                 raise ProcessingError(message_err)
 
             file_size = os.path.getsize(input_json_file)
-            logger.info(f"Processing input file: {input_json_file} ({file_size / self.mb_converter:.2f} MB)")
+            logger.info(f"Processing input file: '{input_json_file}' ('{file_size / self.mb_converter:.2f}' MB)")
             return self._generate_mapped_logs(valid_thor_logs)
         except InputError:
             raise
