@@ -116,11 +116,14 @@ class TSIngest:
 
                 progress.update(task, description="[bold yellow]Indexing timeline…")
                 deadline = time.time() + 60
-                while streamer.state.lower() not in ("ready", "success"):
+                timeout_reached = False
+                while streamer.state.lower() not in ("ready", "success") and not timeout_reached:
                     if time.time() > deadline:
-                        raise TimesketchError("Indexing did not complete, the timeline will continue to be indexed in the background")
+                        logger.warning("Indexing did not complete within 60 seconds - the timeline will continue to be indexed in the background")
+                        timeout_reached = True
                     time.sleep(1)
-                progress.update(task, description="[bold green]Indexing complete")
+                if not timeout_reached:
+                    progress.update(task, description="[bold green]Indexing complete")
 
             except Exception as error:
                 error_msg = f"Failed to ingest events: {error}"
