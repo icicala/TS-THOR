@@ -125,6 +125,9 @@ class TSIngest:
                 if not timeout_reached:
                     progress.update(task, description="[bold green]Indexing complete")
 
+            except KeyboardInterrupt:
+                logger.warning("Timesketch ingestion interrupted by user")
+                raise
             except Exception as error:
                 error_msg = f"Failed to ingest events: {error}"
                 logger.error(error_msg)

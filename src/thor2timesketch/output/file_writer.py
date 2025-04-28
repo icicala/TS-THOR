@@ -85,7 +85,7 @@ class FileWriter:
         except KeyboardInterrupt:
             logger.warning("Process interrupted by user")
             self._cleanup_file(self.output_file)
-            raise OutputError("Process interrupted by user")
+            raise
 
         except Exception as e:
             logger.error(f"Error writing to file: {e}")

@@ -20,18 +20,27 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent"
 ]
-keywords = ["thor", "timesketch", "mapper", "converter", "nextron"]
+keywords = ["thor", "timesketch", "mapper", "converter", "nextron", "thor2timesketch", "thor2ts"]
 dependencies = [
   "timesketch_import_client",
   "python-dateutil",
   "typer",
   "rich"
 ]
-packages = ["thor2timesketch"]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "mypy",
+  "ruff",
+]
+
+[tool.hatch.build.sources]
+directory = "src"
 
 [project.urls]
-Homepage = "tbd"
-Issues = "tbd"
+Homepage = "https://github.com/icicala/thor-ts-mapper.git"
+Issues = "https://github.com/icicala/thor-ts-mapper.git"
 
 [project.scripts]
 thor2ts = "thor2timesketch.__main__:main"
