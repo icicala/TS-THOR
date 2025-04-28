@@ -18,7 +18,7 @@ class FileWriter:
         file_name, extension = os.path.splitext(path)
         if extension.lower() != constants.OUTPUT_FILE_EXTENSION:
             path = file_name + constants.OUTPUT_FILE_EXTENSION
-            logger.info(f"Changed output file to `{path}` to ensure JSONL format")
+            logger.info(f"Changed output file to '{path}' to ensure JSONL format")
         return path
 
     def _prepare_output_dir(self) -> None:
@@ -26,9 +26,9 @@ class FileWriter:
         if output_dir and not os.path.isdir(output_dir):
             try:
                 os.makedirs(output_dir, exist_ok=True)
-                logger.info(f"Created output directory: {output_dir}")
+                logger.info(f"Created output directory: '{output_dir}'")
             except Exception as e:
-                logger.error(f"Failed to create output directory `{output_dir}`: {e}")
+                logger.error(f"Failed to create output directory {output_dir}`: {e}")
                 raise OutputError(f"Cannot create output directory: {e}")
 
     def _cleanup_file(self, output_file:str)-> None:
@@ -45,7 +45,7 @@ class FileWriter:
         self._prepare_output_dir()
         mode = 'a' if os.path.exists(self.output_file) else 'w'
         action = "Appending to" if mode == 'a' else "Writing to"
-        logger.info(f"{action} file: `{self.output_file}`")
+        logger.info(f"{action} file: '{self.output_file}'")
         try:
             processed_count = 0
             error_count = 0
