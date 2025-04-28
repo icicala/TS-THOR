@@ -13,8 +13,6 @@ class ColorFormatter(logging.Formatter):
             level_color = "[yellow]"
         elif record.levelno == logging.ERROR:
             level_color = "[red]"
-        else:
-            level_color = ""
         formatted_msg = super().format(record)
         return f"{level_color}{record.levelname}[/] {formatted_msg}"
 
@@ -29,7 +27,7 @@ class LoggerConfig:
             show_path=False,
             markup=True,
             log_time_format="[%Y-%m-%d %H:%M:%S]",
-            show_level=False,
+            show_level=True,
             enable_link_path=False
         )
         formatter = ColorFormatter("%(message)s")

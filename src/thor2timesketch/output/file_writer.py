@@ -43,8 +43,8 @@ class FileWriter:
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
         self.output_file = self._normalize_extension(self.output_file)
         self._prepare_output_dir()
-        self.mode = 'a' if os.path.exists(self.output_file) else 'w'
-        action = "Appending to" if self.mode == 'a' else "Writing to"
+        mode = 'a' if os.path.exists(self.output_file) else 'w'
+        action = "Appending to" if mode == 'a' else "Writing to"
         logger.info(f"{action} file: {self.output_file}")
         try:
             processed_count = 0
@@ -62,7 +62,7 @@ class FileWriter:
                     filename=output_filename
                 )
 
-                with open(self.output_file, self.mode, encoding=constants.DEFAULT_ENCODING) as file:
+                with open(self.output_file, mode, encoding=constants.DEFAULT_ENCODING) as file:
                     for event in events:
                         try:
                             file.write(json.dumps(event) + "\n")
