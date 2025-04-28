@@ -1,3 +1,4 @@
+# language: python
 import logging
 from rich.console import Console
 from rich.logging import RichHandler
@@ -15,8 +16,15 @@ class ColorFormatter(logging.Formatter):
 
 class LoggerConfig:
     console = Console()
+
     @classmethod
     def setup_root_logger(cls, level: int = logging.INFO) -> None:
+        level_styles = {
+            "debug": "dim cyan",
+            "info": "bold green",
+            "warning": "yellow",
+            "error": "bold red",
+        }
         handler = RichHandler(
             console=cls.console,
             rich_tracebacks=True,
@@ -24,7 +32,8 @@ class LoggerConfig:
             markup=True,
             log_time_format="[%Y-%m-%d %H:%M:%S]",
             show_level=True,
-            enable_link_path=False
+            enable_link_path=False,
+            level_styles=level_styles
         )
         formatter = ColorFormatter("%(message)s")
         handler.setFormatter(formatter)
