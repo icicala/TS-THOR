@@ -1,10 +1,10 @@
 import logging
 import os
-import sys
 from typing import Optional
 import typer
 from rich.console import Console
 from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.output.file_writer import FileWriter
 from thor2timesketch.output.ts_ingest import TSIngest
