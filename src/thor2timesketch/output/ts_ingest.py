@@ -5,7 +5,7 @@ from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch import constants
-
+from thor2timesketch.exceptions import TimesketchError
 
 logger = LoggerConfig.get_logger(__name__)
 
@@ -13,10 +13,14 @@ class TSIngest:
 
 
     def __init__(self, thor_file: str, sketch: str) -> None:
-        self.ts_client = timesketch_config.get_client()
-        self.timeline_name: str = self._get_timeline_name(thor_file)
-        sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
-        self.my_sketch: Any = self._load_sketch(sketch_type)
+        try:
+            self.ts_client = timesketch_config.get_client()
+            self.timeline_name: str = self._get_timeline_name(thor_file)
+            sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
+            self.my_sketch: Any = self._load_sketch(sketch_type)
+        except TimesketchError as error:
+            logger.error(f"Error connecting to Timesketch: {error}")
+            raise
 
     def _get_timeline_name(self, thor_file: str) -> str:
         file_basename: str = os.path.basename(thor_file)

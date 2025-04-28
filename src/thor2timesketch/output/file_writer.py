@@ -18,7 +18,7 @@ class FileWriter:
         file_name, extension = os.path.splitext(path)
         if extension.lower() != constants.OUTPUT_FILE_EXTENSION:
             path = file_name + constants.OUTPUT_FILE_EXTENSION
-            logger.info(f"Changed output file to '{path}' to ensure JSONL format")
+            logger.info(f"Changed output file to '{path}' to ensure 'JSONL' format")
         return path
 
     def _prepare_output_dir(self) -> None:
@@ -45,7 +45,7 @@ class FileWriter:
         self._prepare_output_dir()
         mode = 'a' if os.path.exists(self.output_file) else 'w'
         action = "Appending to" if mode == 'a' else "Writing to"
-        logger.info(f"{action} file: '{self.output_file}'")
+        logger.info(f"'{action}' file: '{self.output_file}'")
         try:
             processed_count = 0
             error_count = 0
@@ -79,7 +79,7 @@ class FileWriter:
                 self._cleanup_file(self.output_file)
                 raise OutputError(f"File processing failed with {error_count} errors")
             else:
-                logger.info(f"Successfully wrote {processed_count} events to '{self.output_file}'")
+                logger.info(f"Successfully wrote '{processed_count}' events to '{self.output_file}'")
 
 
         except KeyboardInterrupt:

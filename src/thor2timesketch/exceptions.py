@@ -67,7 +67,6 @@ class OutputError(Thor2tsError):
     def __init__(self, error_msg: str = "Error writing or sending output") -> None:
         super().__init__(error_msg)
 
-
 class TimesketchError(OutputError):
     def __init__(self, error_msg: str = "Error connecting to Timesketch") -> None:
         super().__init__(error_msg)
