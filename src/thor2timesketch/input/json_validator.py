@@ -15,8 +15,7 @@ class JsonValidator:
 
     def _parse_json_log(self, json_log: str) -> Any:
         try:
-            parsed_json = json.loads(json_log)
-            return parsed_json
+            return json.loads(json_log)
         except json.JSONDecodeError as e:
             error_msg = f"JSON decode error: {str(e)}"
             logger.error(error_msg)

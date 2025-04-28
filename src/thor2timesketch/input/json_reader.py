@@ -18,13 +18,8 @@ class JsonReader:
 
 
     def _validate_file(self,input_file: str) -> str:
-        try:
-            valid_file: str = self.file_validator.validate_file(input_file)
-        except FileValidationError as e:
-            message_err = f"File validation error: {e}"
-            logger.error(message_err)
-            raise FileValidationError(message_err)
-        return valid_file
+        return self.file_validator.validate_file(input_file)
+
 
     def get_valid_data(self, input_file: str) -> Iterator[Dict[str, Any]]:
         valid_file = self._validate_file(input_file)
@@ -38,10 +33,10 @@ class JsonReader:
                         json_data = self.json_validator.validate_json_log(line)
                         if json_data is not None:
                             yield json_data
-                    except (JsonParseError, JsonValidationError) as e:
-                        logger.error(f"Error parsing JSON at line {line_num}: {e}")
+                    except (JsonParseError, JsonValidationError) as error:
+                        logger.error(f"Error parsing JSON at line {line_num}: {error}")
                         raise
-        except IOError as e:
-            message_err = f"Error opening or reading file: {e}"
+        except IOError as error:
+            message_err = f"Error opening or reading file '{valid_file}': {error}"
             logger.error(message_err)
-            raise InputError(message_err)
+            raise InputError(message_err) from error

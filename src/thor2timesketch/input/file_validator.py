@@ -16,25 +16,25 @@ class FileValidator:
         self._check_file_readable(file_path)
         self._check_file_not_empty(file_path)
         self._check_file_extension(file_path)
-        logger.info(f"File {file_path} is valid and ready for processing.")
+        logger.info(f"File '{file_path}' is valid and ready for processing.")
         return file_path
 
 
     def _check_file_exists(self, file_path: str) -> None:
         if not os.path.isfile(file_path):
-            error_msg = f"File {file_path} does not exist."
+            error_msg = f"File '{file_path}' does not exist."
             logger.error(error_msg)
             raise JsonFileNotFoundError(error_msg)
 
     def _check_file_readable(self, file_path: str) -> None:
         if not os.access(file_path, os.R_OK):
-            error_msg = f"File {file_path} is not readable."
+            error_msg = f"File '{file_path}' is not readable."
             logger.error(error_msg)
             raise JsonFileNotReadableError(error_msg)
 
     def _check_file_not_empty(self, file_path: str) -> None:
         if os.path.getsize(file_path) == self.empty_file:
-            error_msg = f"File {file_path} is empty."
+            error_msg = f"File '{file_path}' is empty."
             logger.error(error_msg)
             raise JsonEmptyFileError(error_msg)
 
@@ -45,7 +45,7 @@ class FileValidator:
             expected = ", ".join(self.valid_extensions)
             error_msg = (
                 f"Invalid file extension for '{file_path}'. "
-                f"Expected one of: [{expected}], but got: '{file_extension}'"
+                f"Expected one of: ['{expected}'], but got: '{file_extension}'"
             )
             logger.error(error_msg)
             raise JsonInvalidFileExtensionError(error_msg)

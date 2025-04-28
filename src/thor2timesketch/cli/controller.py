@@ -8,7 +8,7 @@ from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.output.file_writer import FileWriter
 from thor2timesketch.output.ts_ingest import TSIngest
-from thor2timesketch.exceptions import InputError, ProcessingError, OutputError, Thor2tsError
+from thor2timesketch.exceptions import Thor2tsError
 
 app = typer.Typer(help="thor2ts: Convert THOR security scanner logs to Timesketch format", add_completion=True)
 console = Console()
@@ -50,28 +50,14 @@ def main(
     try:
         mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
 
-        if output_to_file:
-            write_to_file = FileWriter(output_file)
-            write_to_file.write_to_file(mapped_events)
+        writer = OutputWriter(input_file, output_file, sketch)
+        writer.write(mapped_events)
 
-        if output_to_ts:
-            upload_to_ts = TSIngest(thor_file=input_file, sketch=sketch)
-            upload_to_ts.ingest_events(mapped_events)
-
-        logger.info("THOR log processing completed successfully")
+        logger.info("thor2ts successfully converted logs to Timesketch format")
 
     except KeyboardInterrupt:
         logger.warning("Processing interrupted by user")
         raise typer.Exit(code=130)
-    except InputError as e:
-        logger.error(f"Input validation error: {e}", exc_info=verbose)
-        raise typer.Exit(code=2)
-    except ProcessingError as e:
-        logger.error(f"Processing error: {e}", exc_info=verbose)
-        raise typer.Exit(code=3)
-    except OutputError as e:
-        logger.error(f"Output error: {e}", exc_info=verbose)
-        raise typer.Exit(code=4)
     except Thor2tsError as e:
         logger.error(f"Thor2ts error: {e}", exc_info=verbose)
         raise typer.Exit(code=1)
