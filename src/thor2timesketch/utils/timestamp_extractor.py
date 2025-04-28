@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Tuple
 from dateutil import parser
 from thor2timesketch import constants
 from thor2timesketch.config.logger import LoggerConfig
-from thor2timesketch.exceptions import TimestampError
+from thor2timesketch.exceptions import TimestampError, MappingError
 from thor2timesketch.utils.datetime_field import DatetimeField
 
 logger = LoggerConfig.get_logger(__name__)
@@ -64,4 +64,4 @@ class TimestampExtractor:
             return datetime1 == datetime2
         except ValueError as e:
             logger.error(f"Error parsing timestamps: {e}")
-            raise MapperError(f"Invalid timestamp format: {e}")
+            raise MappingError(f"Invalid timestamp format: {e}")

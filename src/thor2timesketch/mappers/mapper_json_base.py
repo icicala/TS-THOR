@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from dateutil import parser
 from typing import Dict, Any, List, Optional
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.mappers.mapped_event import MappedEvent

@@ -12,15 +12,19 @@ logger = LoggerConfig.get_logger(__name__)
 class TSIngest:
 
 
-    def __init__(self, thor_file: str, sketch: Union[int, str]) -> None:
+    def __init__(self, thor_file: str, sketch: str) -> None:
         self.ts_client = timesketch_config.get_client()
         self.timeline_name: str = self._get_timeline_name(thor_file)
-        self.my_sketch: Any = self._load_sketch(sketch)
+        sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
+        self.my_sketch: Any = self._load_sketch(sketch_type)
 
     def _get_timeline_name(self, thor_file: str) -> str:
         file_basename: str = os.path.basename(thor_file)
         file_name, _ = os.path.splitext(file_basename)
         return file_name
+
+    def _identify_sketch_type(self, sketch: str) -> Union[int, str]:
+        return int(sketch) if sketch.isdigit() else sketch
 
     def _get_available_sketches(self) -> Dict[str, int]:
         sketches = {}
@@ -38,8 +42,7 @@ class TSIngest:
                 my_sketch = self.ts_client.get_sketch(sketch)
                 logger.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
                 return my_sketch
-            else:
-                sketch = f"Sketch_{sketch}"
+            sketch = f"Sketch_{sketch}"
 
         elif isinstance(sketch, str):
             if sketch in sketches.keys():

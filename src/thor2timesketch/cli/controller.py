@@ -13,7 +13,7 @@ from thor2timesketch.exceptions import InputError, ProcessingError, OutputError,
 app = typer.Typer(help="thor2ts: Convert THOR security scanner logs to Timesketch format", add_completion=True)
 console = Console()
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
     if value:
         from thor2timesketch import __version__
         typer.echo(f"thor2timesketch version: {__version__}")
@@ -30,7 +30,7 @@ def main(
         version: Optional[bool] = typer.Option(
             None, "--version", callback=version_callback, is_eager=True, help="Show version and exit"
         )
-):
+) -> None:
 
     log_level = logging.DEBUG if verbose else logging.INFO
     LoggerConfig.setup_root_logger(level=log_level)
@@ -39,9 +39,6 @@ def main(
     if not os.path.isfile(input_file):
         console.print(f"[bold red]Error:[/] Input file not found: {input_file}")
         raise typer.Exit(code=1)
-
-    if sketch and sketch.isdigit():
-        sketch = int(sketch)
 
     output_to_file = output_file is not None
     output_to_ts = sketch is not None

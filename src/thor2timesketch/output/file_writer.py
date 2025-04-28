@@ -53,7 +53,7 @@ class FileWriter:
             with Progress(
                     SpinnerColumn(),
                     TextColumn("[bold green]Writing to '{task.fields[filename]}'"),
-                    TextColumn("[cyan]{task.completed} processed"),
+                    TextColumn("[green]{task.completed} processed"),
                     TextColumn("• [red]{task.fields[errors]} errors"),
                     transient=True
             ) as progress:
