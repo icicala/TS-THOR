@@ -1,4 +1,5 @@
 import os.path
+import time
 from typing import Dict, Union, Any, Iterator
 from rich.progress import Progress, TextColumn, SpinnerColumn
 from timesketch_import_client import importer
@@ -71,6 +72,12 @@ class TSIngest:
             raise TimesketchError(error_msg)
 
     def ingest_events(self, events: Iterator[Dict[str, Any]]) -> None:
+
+        try:
+            self.ts_client.get_sketch(self.my_sketch.id)
+        except Exception:
+            TimesketchError(f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest")
+
         processed_count = 0
         error_count = 0
 
@@ -106,6 +113,15 @@ class TSIngest:
                             progress.update(task, completed=processed_count, errors=error_count)
                 if not streamer.timeline:
                     raise TimesketchError("Error creating timeline, ingestion may have failed")
+
+                progress.update(task, description="[bold yellow]Indexing timeline…")
+                deadline = time.time() + 60
+                while streamer.state.lower() not in ("ready", "success"):
+                    if time.time() > deadline:
+                        raise TimesketchError("Indexing did not complete, the timeline will continue to be indexed in the background")
+                    time.sleep(1)
+                progress.update(task, description="[bold green]Indexing complete")
+
             except Exception as error:
                 error_msg = f"Failed to ingest events: {error}"
                 logger.error(error_msg)
@@ -114,4 +130,3 @@ class TSIngest:
         logger.info(f"Processed {processed_count} events for sketch '{self.my_sketch.name}'")
         if error_count > 0:
             logger.warning(f"Encountered {error_count} errors during ingestion")
-        logger.info("The timeline will continue to be indexed in the background")
