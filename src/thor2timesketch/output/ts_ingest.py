@@ -58,7 +58,7 @@ class TSIngest:
 
         with Progress(
                 SpinnerColumn(),
-                TextColumn("[bold blue]Ingesting to sketch '{task.fields[sketch_name]}'"),
+                TextColumn("[bold green]Ingesting to sketch '{task.fields[sketch_name]}'"),
                 TextColumn("[cyan]{task.completed} processed"),
                 TextColumn("• [red]{task.fields[errors]} errors"),
                 transient=True

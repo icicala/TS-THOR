@@ -12,14 +12,14 @@ logger = LoggerConfig.get_logger(__name__)
 class FileWriter:
     def __init__(self, output_file: str):
         self.output_file = output_file
-        self.mode = 'a' if os.path.exists(self.output_file) else 'w'
-        logger.debug(f"File mode: {'append' if self.mode == 'a' else 'write'}")
 
-    def _validate_file_extension(self) -> None:
-        file_name, extension = os.path.splitext(self.output_file)
+
+    def _normalize_extension(self, path: str) -> str:
+        file_name, extension = os.path.splitext(path)
         if extension.lower() != constants.OUTPUT_FILE_EXTENSION:
-            self.output_file = file_name + constants.OUTPUT_FILE_EXTENSION
-            logger.info(f"Changed output file to `{self.output_file}` to ensure JSONL format")
+            path = file_name + constants.OUTPUT_FILE_EXTENSION
+            logger.info(f"Changed output file to `{path}` to ensure JSONL format")
+        return path
 
     def _prepare_output_dir(self) -> None:
         output_dir = os.path.dirname(self.output_file)
@@ -41,16 +41,18 @@ class FileWriter:
                 raise OutputError(f"Cannot remove output file: {e}")
 
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
+        self.output_file = self._normalize_extension(self.output_file)
+        self._prepare_output_dir()
+        self.mode = 'a' if os.path.exists(self.output_file) else 'w'
+        action = "Appending to" if self.mode == 'a' else "Writing to"
+        logger.info(f"{action} file: {self.output_file}")
         try:
-            self._validate_file_extension()
-            self._prepare_output_dir()
             processed_count = 0
             error_count = 0
             output_filename = os.path.basename(self.output_file)
-
             with Progress(
                     SpinnerColumn(),
-                    TextColumn("[bold blue]Writing to '{task.fields[filename]}'"),
+                    TextColumn("[bold green]Writing to '{task.fields[filename]}'"),
                     TextColumn("[cyan]{task.completed} processed"),
                     TextColumn("• [red]{task.fields[errors]} errors"),
                     transient=True
