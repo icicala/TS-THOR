@@ -5,8 +5,10 @@ from rich.logging import RichHandler
 
 class ColorFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
+        # format timestamp wrapped in white
         time_str = self.formatTime(record, self.datefmt)
         time_str = f"[white]{time_str}[/white]"
+        # assign level color based on level
         if record.levelno == logging.DEBUG:
             level_color = "[blue]"
         elif record.levelno == logging.INFO:
@@ -23,6 +25,7 @@ class ColorFormatter(logging.Formatter):
 
 class LoggerConfig:
     console = Console()
+
     @classmethod
     def setup_root_logger(cls, level: int = logging.INFO) -> None:
         handler = RichHandler(
@@ -30,7 +33,7 @@ class LoggerConfig:
             rich_tracebacks=True,
             show_path=False,
             markup=True,
-            log_time_format="[%Y-%m-%d %H:%M:%S]",
+            log_time_format="",
             show_level=False,
             enable_link_path=False
         )
