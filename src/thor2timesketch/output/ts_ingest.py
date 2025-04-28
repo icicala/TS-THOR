@@ -94,7 +94,6 @@ class TSIngest:
                     streamer.set_timeline_name(self.timeline_name)
                     streamer.set_provider("thor2ts")
                     streamer.set_upload_context(self.timeline_name)
-                    streamer.add_file(self.thor_file)
 
                     for event in events:
                         try:
