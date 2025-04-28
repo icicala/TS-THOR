@@ -83,13 +83,13 @@ class TSIngest:
 
         with Progress(
                 SpinnerColumn(),
-                TextColumn("[bold green]Ingesting to sketch '{task.fields[sketch_name]}'"),
+                TextColumn("{task.description}"),
                 TextColumn("[cyan]{task.completed} processed"),
                 TextColumn("• [red]{task.fields[errors]} errors"),
                 transient=True
         ) as progress:
             task = progress.add_task(
-                "Ingesting",
+                f"[bold green]Ingesting to sketch '{self.my_sketch.name}'",
                 total=None,
                 completed=0,
                 errors=0,

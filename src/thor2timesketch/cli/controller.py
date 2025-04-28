@@ -48,7 +48,7 @@ def main(
         writer = OutputWriter(input_file, output_file, sketch)
         writer.write(mapped_events)
 
-        logger.info("thor2ts successfully converted logs to Timesketch format")
+        logger.info("thor2ts successfully completed.")
 
     except KeyboardInterrupt:
         logger.warning("Processing interrupted by user")
