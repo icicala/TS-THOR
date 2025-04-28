@@ -35,7 +35,7 @@ class FileWriter:
         if os.path.exists(output_file):
             try:
                 os.remove(output_file)
-                logger.debug(f"Removed output file: {output_file}")
+                logger.debug(f"Removed output file: '{output_file}'")
             except OSError as e:
                 logger.error(f"Failed to remove output file: {e}")
                 raise OutputError(f"Cannot remove output file: {e}")
@@ -45,7 +45,7 @@ class FileWriter:
         self._prepare_output_dir()
         mode = 'a' if os.path.exists(self.output_file) else 'w'
         action = "Appending to" if mode == 'a' else "Writing to"
-        logger.info(f"{action} file: {self.output_file}")
+        logger.info(f"{action} file: `{self.output_file}`")
         try:
             processed_count = 0
             error_count = 0
@@ -75,7 +75,7 @@ class FileWriter:
                             progress.update(task, completed=processed_count, errors=error_count)
 
             if error_count > 0:
-                logger.error(f"Encountered {error_count} errors while writing {processed_count} events")
+                logger.error(f"Encountered '{error_count}' errors while writing '{processed_count}' events")
                 self._cleanup_file(self.output_file)
                 raise OutputError(f"File processing failed with {error_count} errors")
             else:
