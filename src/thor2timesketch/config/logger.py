@@ -27,7 +27,7 @@ class LoggerConfig:
             show_path=False,
             markup=True,
             log_time_format="[%Y-%m-%d %H:%M:%S]",
-            show_level=True,
+            show_level=False,
             enable_link_path=False
         )
         formatter = ColorFormatter("%(message)s")
