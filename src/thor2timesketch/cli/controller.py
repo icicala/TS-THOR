@@ -1,4 +1,3 @@
-import logging
 import os
 from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
@@ -18,9 +17,8 @@ app = typer.Typer(
 console = Console()
 error_console = Console(stderr=True)
 
+
 def version_callback(value: bool) -> None:
-    if not value:
-        return
     try:
         pkg_version = version("thor2timesketch")
     except PackageNotFoundError:
@@ -28,29 +26,28 @@ def version_callback(value: bool) -> None:
     console.print(f"[bold green]thor2timesketch[/] version: [cyan]{pkg_version}[/]")
     raise typer.Exit()
 
-@app.callback()
-def setup(
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
-    version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
-                              help="Show version and exit")
-) -> None:
-    log_level = logging.DEBUG if verbose else logging.INFO
-    LoggerConfig.setup_root_logger(level=log_level)
-
 @app.command()
 def main(
-    input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
-    output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
-                                           help="Write output to specified JSONL file"),
-    sketch: Optional[str] = typer.Option(None, "--sketch",
-                                       help="Sketch ID or name for ingesting events into Timesketch"),
+        input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
+        output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
+                                                  help="Write output to specified JSONL file"),
+        sketch: Optional[str] = typer.Option(None, "--sketch",
+                                             help="Sketch ID or name for ingesting events into Timesketch"),
+        verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
+        version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
+                                     help="Show version and exit")
 ) -> None:
+
+    log_level = "DEBUG" if verbose else "INFO"
+    LoggerConfig.setup_root_logger(level=log_level)
+
     if not os.path.isfile(input_file):
         error_console.print(f"[bold red]Error:[/] Input file not found: '{input_file}'")
         raise typer.Exit(code=1)
 
     if not (output_file or sketch):
-        error_console.print("[bold red]Error:[/] No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
+        error_console.print(
+            "[bold red]Error:[/] No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
         raise typer.Exit(code=1)
 
     try:
