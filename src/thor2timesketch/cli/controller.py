@@ -30,7 +30,7 @@ def version_callback(value: bool) -> None:
 
 @app.command()
 def main(
-        input_file: str = typer.Argument(..., help="Path to THOR JSON log file"),
+        input_file: str = typer.Argument(..., help="Path to THOR JSON log file (required)", metavar="INPUT_FILE"),
         output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
                                                   help="Write output to specified JSONL file"),
         sketch: Optional[str] = typer.Option(None, "--sketch",
