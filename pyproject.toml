@@ -40,16 +40,8 @@ version_scheme = "no-guess-dev"
 local_scheme   = "no-local-version"
 
 [project.optional-dependencies]
-dev = [
-  "pytest",
-  "mypy",
-  "ruff",
-]
-publish = [
-  "build",
-  "twine",
-  "hatch-vcs",
-]
+dev = ["pytest", "mypy", "ruff"]
+publish = ["build", "twine", "hatch-vcs"]
 
 [tool.hatch.build.sources]
 directory = "src"
