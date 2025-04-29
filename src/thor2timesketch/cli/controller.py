@@ -19,12 +19,13 @@ error_console = Console(stderr=True)
 
 
 def version_callback(value: bool) -> None:
-    try:
-        pkg_version = version("thor2timesketch")
-    except PackageNotFoundError:
-        pkg_version = "0.0.0"
-    console.print(f"[bold green]thor2timesketch[/] version: [cyan]{pkg_version}[/]")
-    raise typer.Exit()
+    if value:
+        try:
+            pkg_version = version("thor2timesketch")
+        except PackageNotFoundError:
+            pkg_version = "0.0.0"
+        console.print(f"[bold green]thor2timesketch[/] version: [cyan]{pkg_version}[/]")
+        raise typer.Exit()
 
 @app.command()
 def main(
@@ -34,7 +35,7 @@ def main(
         sketch: Optional[str] = typer.Option(None, "--sketch",
                                              help="Sketch ID or name for ingesting events into Timesketch"),
         verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
-        version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
+        _version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
                                      help="Show version and exit")
 ) -> None:
 
