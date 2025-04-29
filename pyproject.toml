@@ -33,10 +33,7 @@ dependencies = [
 ]
 [tool.hatch.version]
 source = "vcs"
-raw-options = {
-  version_scheme = "post-release",
-  local_scheme   = "no-local-version"
-}
+raw-options = { "version_scheme" = "post-release", "local_scheme" = "no-local-version" }
 
 [project.optional-dependencies]
 dev = [
