@@ -61,7 +61,8 @@ class TimestampExtractor:
         try:
             datetime1 = parser.isoparse(time1)
             datetime2 = parser.isoparse(time2)
-            return datetime1 == datetime2
+            ts_check = datetime1 == datetime2
+            return ts_check
         except ValueError as e:
             logger.error(f"Error parsing timestamps: {e}")
             raise MappingError(f"Invalid timestamp format: {e}")

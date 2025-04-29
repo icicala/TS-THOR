@@ -24,7 +24,7 @@ classifiers = [
 keywords = ["thor", "timesketch", "nextron", "thor2timesketch", "thor2ts"]
 dependencies = [
   "timesketch_import_client",
-  "python-dateutil",
+  "types-python-dateutil",
   "typer",
   "rich"
 ]

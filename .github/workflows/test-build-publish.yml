@@ -1,4 +1,4 @@
-name: Build & Publish thor2timesketch
+name: Build thor2timesketch
 
 on:
   push:

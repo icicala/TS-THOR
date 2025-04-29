@@ -1,4 +1,4 @@
 timesketch_import_client
-python-dateutil~=2.9.0.post0
+types-python-dateutil
 typer~=0.15.2
 rich~=14.0.0
