@@ -42,7 +42,7 @@ jobs:
           pip freeze --exclude-editable > audit-requirements.txt
           pip-audit --requirement audit-requirements.txt
   build:
-    name: Build distribution 📦
+    name: Build distribution
     needs: quality-and-security
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
           path: dist/
 
   publish-testpypi:
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
+    name: Publish Python distribution to TestPyPI
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -117,7 +117,6 @@ jobs:
           pip install --index-url https://test.pypi.org/simple/ \
                       --extra-index-url https://pypi.org/simple \
                       thor2timesketch
-
       - name: Verify version
         run: |
           source thor2ts-venv/bin/activate
