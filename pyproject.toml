@@ -33,7 +33,7 @@ dependencies = [
 ]
 [tool.hatch.version]
 source = "vcs"
-raw-options = { local_scheme = "no-local-version" }
+raw-options = { distance_to_default_version = "drop" }
 
 [project.optional-dependencies]
 dev = [
