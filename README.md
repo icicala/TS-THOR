@@ -185,5 +185,5 @@ Contributions to `thor2ts` are welcome! To contribute:
 ---
 ## Support
 If you encounter any issues or have questions, please open an issue in the [GitHub repository](https://github.com/NextronSytems/thor-ts-mapper.git).
-![Published](https://github.com/icicala/thor-ts-mapper/actions/workflows/test-build-publish.yml/badge.svg)
 ---
+![Published](https://github.com/icicala/thor-ts-mapper/actions/workflows/build-thor2ts.yml/badge.svg)

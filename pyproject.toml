@@ -33,7 +33,10 @@ dependencies = [
 ]
 [tool.hatch.version]
 source = "vcs"
-raw-options = { local_scheme = "no-local-version", version_scheme = "release-branch-semver" }
+raw-options = {
+  version_scheme = "post-release",
+  local_scheme   = "no-local-version"
+}
 
 [project.optional-dependencies]
 dev = [
@@ -52,7 +55,7 @@ directory = "src"
 
 [project.urls]
 Homepage = "https://github.com/icicala/thor-ts-mapper.git"
-Issues = "https://github.com/icicala/thor-ts-mapper.git"
+Issues = "https://github.com/icicala/thor-ts-mapper/issues"
 
 [project.scripts]
 thor2ts = "thor2timesketch.__main__:main"
