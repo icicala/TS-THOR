@@ -6,70 +6,47 @@ on:
   pull_request:
     branches: [master]
   workflow_dispatch:
+
 env:
   PYTHON_VERSION: 3.9
+
 jobs:
-  dependency-check:
-    name: Check Dependencies for Vulnerabilities
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install and run pip-audit
-        run: |
-          python -m pip install --upgrade pip
-          pip install pip-audit
-          pip-audit
-  security:
-    name: Check Code for Vulnerabilities
-    runs-on: ubuntu-latest
-    needs: dependency-check
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Security scans
-        run: |
-          pip install bandit safety
-          bandit -r src/thor2timesketch
-          safety check
   quality:
     name: Check Linting and Type
     runs-on: ubuntu-latest
-    needs: security
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install build dependencies
-        run: |
+      - run: |
           python -m pip install --upgrade pip
           pip install hatch-vcs
-
-      - name: Install package dependencies
-        run: |
           pip install -e ".[dev]"
+          ruff check .
+          mypy -p thor2timesketch
 
-      - name: Run ruff
-        run: ruff check .
-
-      - name: Run mypy
-        run: mypy -p thor2timesketch
+  security:
+    name: Security and Dependency Checks
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -e .
+          # Dependency security check
+          pip install pip-audit
+          pip-audit --require-hashes=false
+          # Code security check
+          pip install bandit safety
+          bandit -r src/thor2timesketch
+          safety check
