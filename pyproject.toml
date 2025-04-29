@@ -31,9 +31,8 @@ dependencies = [
   "typer",
   "rich"
 ]
-[tool.hatch.version]
-source = "vcs"
-raw-options = { "version_scheme" = "post-release", "local_scheme" = "no-local-version" }
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
 
 [project.optional-dependencies]
 dev = [
