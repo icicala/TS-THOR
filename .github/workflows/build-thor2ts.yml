@@ -117,6 +117,7 @@ jobs:
           pip install --index-url https://test.pypi.org/simple/ \
                       --extra-index-url https://pypi.org/simple \
                       thor2timesketch
+
       - name: Verify version
         run: |
           source thor2ts-venv/bin/activate
