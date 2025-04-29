@@ -6,45 +6,38 @@ on:
   pull_request:
     branches: [master]
   workflow_dispatch:
-
 env:
   PYTHON_VERSION: 3.9
-
 jobs:
   quality-and-security:
     name: Code Quality and Security
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
-      - name: Create virtual environment
+      - name: Install dev dependencies
         run: |
-          python -m venv .venv
-          echo "PATH=$GITHUB_WORKSPACE/.venv/bin:$PATH" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: |
-          source .venv/bin/activate
           python -m pip install --upgrade pip
-          pip install hatch-vcs
           pip install -e ".[dev]"
 
-      - name: Lint and type check
-        run: |
-          source .venv/bin/activate
-          ruff check .
-          mypy -p thor2timesketch
+      - name: Ruff (auto-fix)
+        run: ruff check --fix .
 
-      - name: Security checks
+      - name: MyPy
+        run: mypy -p thor2timesketch
+
+      - name: Bandit security scan
         run: |
-          source .venv/bin/activate
-          pip install pip-audit bandit
+          pip install bandit
           bandit -r src/thor2timesketch
+
+      - name: Dependency audit
+        run: |
+          pip install pip-audit
           pip freeze --exclude-editable > audit-requirements.txt
           pip-audit --requirement audit-requirements.txt
