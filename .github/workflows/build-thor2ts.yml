@@ -44,10 +44,9 @@ jobs:
       - name: Security checks
         run: |
           source .venv/bin/activate
-          # Dependency security check
           pip install pip-audit
-          pip-audit
-          # Code security check
+          pip freeze --exclude-editable > audit-requirements.txt
+          pip-audit --requirement audit-requirements.txt
           pip install bandit safety
           bandit -r src/thor2timesketch
           safety check
