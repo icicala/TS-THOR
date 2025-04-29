@@ -35,7 +35,7 @@ dependencies = [
 source = "vcs"
 
 [tool.hatch.version.raw-options]
-version_scheme = "no-guess-dev"
+local_scheme = "no-local-version"
 
 [project.optional-dependencies]
 dev = [
