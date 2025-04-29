@@ -36,8 +36,8 @@ dependencies = [
 source = "vcs"
 
 [tool.hatch.version.raw-options]
-version_scheme = "no-guess-dev"
-local_scheme   = "no-local-version"
+local_scheme = "no-local-version"
+version_scheme = "release-branch-semver"
 
 [project.optional-dependencies]
 dev = ["pytest", "mypy", "ruff"]
