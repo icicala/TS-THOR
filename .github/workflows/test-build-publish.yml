@@ -28,7 +28,7 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install hatch-vcs-version
+          pip install hatch-vcs
 
       - name: Install package dependencies
         run: |
