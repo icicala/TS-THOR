@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "thor2timesketch"
-version = "0.1.2"
+dynamic = ["version"]
 authors = [
   { name = "Ion Cicala (Nextron Systems GmbH)", email = "ion.cicala@nextron-systems.com" }
 ]
@@ -21,13 +21,15 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent"
 ]
-keywords = ["thor", "timesketch", "mapper", "converter", "nextron", "thor2timesketch", "thor2ts"]
+keywords = ["thor", "timesketch", "nextron", "thor2timesketch", "thor2ts"]
 dependencies = [
   "timesketch_import_client",
   "python-dateutil",
   "typer",
   "rich"
 ]
+[tool.hatch.version]
+source = "vcs"
 
 [project.optional-dependencies]
 dev = [
@@ -39,7 +41,6 @@ publish = [
   "build",
   "twine",
   "hatch-vcs-version",
-
 ]
 
 [tool.hatch.build.sources]
@@ -55,6 +56,8 @@ thor2ts = "thor2timesketch.__main__:main"
 [tool.ruff]
 line-length = 79
 exclude = ["build", "dist", ".venv"]
+fix = true
 
 [tool.ruff.lint]
 ignore = []
+fixable = ["ALL"]

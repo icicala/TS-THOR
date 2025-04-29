@@ -38,13 +38,13 @@ class MapperJsonV2(MapperJsonBase):
         }
         return additional_fields
 
-    def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> Optional[Any]:
+    def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> DatetimeField:
         thor_timestamp = json_log.get(MapperJsonV2.THOR_TIMESTAMP_FIELD)
         if thor_timestamp is None:
             raise TimestampError(f"Missing required '{MapperJsonV2.THOR_TIMESTAMP_FIELD}' field in JSON log")
         if not isinstance(thor_timestamp, str):
             raise TimestampError(f"Invalid type for '{MapperJsonV2.THOR_TIMESTAMP_FIELD}': expected str, got {type(thor_timestamp).__name__}")
-        return DatetimeField(MapperJsonV2.THOR_TIMESTAMP_FIELD, thor_timestamp)
+        return DatetimeField(path=MapperJsonV2.THOR_TIMESTAMP_FIELD, datetime=thor_timestamp)
 
     def check_thor_log(self, json_log: Dict[str, Any]) -> bool:
         return any(key.startswith("reason") for key in json_log.keys())
