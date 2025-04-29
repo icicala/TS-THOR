@@ -26,5 +26,4 @@ class JsonLogVersion:
         thor_mapper = next((mapper for version, mapper in self._mapper_log_version.items() if thor_version == version), None)
         if thor_mapper is None:
             raise VersionError(f'The mapper for version "{thor_version}" is not implemented')
-        logger.debug(f"Using {thor_mapper.__name__} for version '{thor_version}'")
         return thor_mapper()

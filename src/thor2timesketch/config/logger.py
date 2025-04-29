@@ -1,9 +1,17 @@
 import logging
 from rich.console import Console
 from rich.logging import RichHandler
+from rich.theme import Theme
 
 class LoggerConfig:
-    console = Console()
+    custom_theme = Theme({
+        "logging.level.debug": "blue",
+        "logging.level.info": "green",
+        "logging.level.warning": "yellow",
+        "logging.level.error": "red"
+    })
+
+    console = Console(theme=custom_theme)
 
     @classmethod
     def setup_root_logger(cls, level: int = logging.INFO) -> None:
