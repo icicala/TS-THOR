@@ -49,4 +49,4 @@ jobs:
           pip-audit --requirement audit-requirements.txt
           pip install bandit safety
           bandit -r src/thor2timesketch
-          safety check
+          safety scan --file=audit-requirements.txt --full-report
