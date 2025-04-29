@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dev dependencies
         run: |
-          python -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip
           pip install -e ".[dev]"
 
       - name: Ruff (auto-fix)
@@ -52,6 +52,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -60,11 +61,11 @@ jobs:
 
       - name: Install build dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install build hatch-vcs
+          python3 -m pip install --upgrade pip
+          pip install build hatch-vcs --user
 
       - name: Build package
-        run: python -m build
+        run: python3 -m build
 
       - name: Store distribution packages
         uses: actions/upload-artifact@v4
@@ -78,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/project/thor2timesketch
+      url: https://test.pypi.org/p/thor2timesketch
     permissions:
         id-token: write
 
@@ -93,8 +94,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          verbose: true
 
   verify-testpypi-installation:
     name: Verify TestPyPI Installation
