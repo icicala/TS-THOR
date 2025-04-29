@@ -26,6 +26,4 @@ class JsonValidator:
             error_msg = "Not a valid JSON object: Expected a dictionary."
             logger.error(error_msg)
             raise JsonValidationError(error_msg)
-
-        logger.debug("JSON validation successful")
         return json_log

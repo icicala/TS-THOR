@@ -16,8 +16,7 @@ app = typer.Typer(
 )
 
 console = Console()
-error_console = Console(stderr=True)
-
+logger = LoggerConfig.get_logger(__name__)
 
 def version_callback(value: bool) -> None:
     if value:
@@ -43,29 +42,28 @@ def main(
     LoggerConfig.setup_root_logger(level=log_level)
 
     if not os.path.isfile(input_file):
-        error_console.print(f"[bold red]Error:[/] Input file not found: '{input_file}'")
+        logger.error(f"Input file not found: '{input_file}'")
         raise typer.Exit(code=1)
 
     if not (output_file or sketch):
-        error_console.print(
-            "[bold red]Error:[/] No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
+        logger.error("No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
         raise typer.Exit(code=1)
 
     try:
-        console.print("[blue]Transforming THOR logs...[/]")
+        logger.info("Transforming THOR logs...")
         mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
 
         writer = OutputWriter(input_file, output_file, sketch)
         writer.write(mapped_events)
 
-        console.print("[green]✓ thor2ts successfully completed[/]")
+        logger.info("✓ thor2ts successfully completed")
 
     except KeyboardInterrupt:
-        error_console.print("[yellow]⚠ Processing interrupted by user[/]")
+        logger.warning("⚠ Processing interrupted by user")
         raise typer.Exit(code=130)
     except Thor2tsError as e:
-        error_console.print(f"[bold red]Error:[/] {e}")
+        logger.error(f"{e}")
         raise typer.Exit(code=1)
     except Exception as e:
-        error_console.print(f"[bold red]Unexpected error:[/] {e}")
+        logger.error(f"Unexpected error: {e}")
         raise typer.Exit(code=1)

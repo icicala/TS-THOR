@@ -25,18 +25,21 @@ class FileValidator:
             error_msg = f"File '{file_path}' does not exist."
             logger.error(error_msg)
             raise JsonFileNotFoundError(error_msg)
+        logger.debug(f"File '{file_path}' is valid.")
 
     def _check_file_readable(self, file_path: str) -> None:
         if not os.access(file_path, os.R_OK):
             error_msg = f"File '{file_path}' is not readable."
             logger.error(error_msg)
             raise JsonFileNotReadableError(error_msg)
+        logger.debug(f"File '{file_path}' is readable.")
 
     def _check_file_not_empty(self, file_path: str) -> None:
         if os.path.getsize(file_path) == self.empty_file:
             error_msg = f"File '{file_path}' is empty."
             logger.error(error_msg)
             raise JsonEmptyFileError(error_msg)
+        logger.debug(f"File '{file_path}' is not empty.")
 
     def _check_file_extension(self, file_path: str) -> None:
         _, file_extension = os.path.splitext(file_path)
@@ -49,3 +52,4 @@ class FileValidator:
             )
             logger.error(error_msg)
             raise JsonInvalidFileExtensionError(error_msg)
+        logger.debug(f"File '{file_path}' has a valid extension: '{file_extension}'")

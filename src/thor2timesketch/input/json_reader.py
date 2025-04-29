@@ -24,6 +24,7 @@ class JsonReader:
 
     def get_valid_data(self, input_file: str) -> Iterator[Dict[str, Any]]:
         valid_file = self._validate_file(input_file)
+        logger.debug("JSON file validated successfully")
         return self._generate_valid_json(valid_file)
 
     def _generate_valid_json(self, valid_file: str) -> Iterator[Dict[str, Any]]:
