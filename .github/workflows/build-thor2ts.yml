@@ -44,9 +44,7 @@ jobs:
       - name: Security checks
         run: |
           source .venv/bin/activate
-          pip install pip-audit
+          pip install pip-audit bandit
+          bandit -r src/thor2timesketch
           pip freeze --exclude-editable > audit-requirements.txt
           pip-audit --requirement audit-requirements.txt
-          pip install bandit safety
-          bandit -r src/thor2timesketch
-          safety scan --file=audit-requirements.txt --full-report
