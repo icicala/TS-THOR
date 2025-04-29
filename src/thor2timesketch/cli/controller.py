@@ -13,6 +13,8 @@ app = typer.Typer(
     help="Convert THOR security scanner logs to Timesketch format",
     no_args_is_help=True,
     add_completion=True,
+    rich_markup_mode="rich",
+    context_settings={"help_option_names": ["-h", "--help"]},
 )
 
 console = Console()
@@ -42,11 +44,11 @@ def main(
     LoggerConfig.setup_root_logger(level=log_level)
 
     if not os.path.isfile(input_file):
-        logger.error(f"Input file not found: '{input_file}'")
+        logger.error(f"Input file not found: '{input_file}'. Use -h for help.")
         raise typer.Exit(code=1)
 
     if not (output_file or sketch):
-        logger.error("No output destination specified. Use -o/--output-file for file output or --sketch for Timesketch ingestion.")
+        logger.error("Use -o/--output-file for file output or --sketch for Timesketch ingestion. Use -h for help.")
         raise typer.Exit(code=1)
 
     try:
