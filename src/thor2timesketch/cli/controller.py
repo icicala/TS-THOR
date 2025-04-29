@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
@@ -38,8 +39,7 @@ def main(
         _version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
                                      help="Show version and exit")
 ) -> None:
-
-    log_level = "DEBUG" if verbose else "INFO"
+    log_level = logging.DEBUG if verbose else logging.INFO
     LoggerConfig.setup_root_logger(level=log_level)
 
     if not os.path.isfile(input_file):
