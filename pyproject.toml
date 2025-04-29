@@ -31,6 +31,7 @@ dependencies = [
   "typer",
   "rich"
 ]
+
 [tool.hatch.version.raw-options]
 version_scheme = "no-guess-dev"
 
