@@ -9,6 +9,23 @@ on:
 env:
   PYTHON_VERSION: 3.9
 jobs:
+  dependency-check:
+    name: Check Dependencies for Vulnerabilities
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install and run pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+          pip-audit
   security:
     name: Check Code for Vulnerabilities
     runs-on: ubuntu-latest
@@ -27,23 +44,6 @@ jobs:
           pip install bandit safety
           bandit -r src/thor2timesketch
           safety check
-  dependency-check:
-    name: Check Dependencies for Vulnerabilities
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install and run pip-audit
-        run: |
-          python -m pip install --upgrade pip
-          pip install pip-audit
-          pip-audit
   quality:
     name: Check Linting and Type
     runs-on: ubuntu-latest
