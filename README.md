@@ -167,8 +167,6 @@ cred_key = <generated_key>
 > Timesketch accepts only JSON files with a `.jsonl` extension.
 
 ---
-
-
 ## Ingesting into Timesketch
 ### File `jsonl`
 The resulting (`.jsonl`) file can be ingested into Timesketch using either the Web UI or the [Importer CLI tool](https://timesketch.org/guides/user/cli-client/).
@@ -185,5 +183,7 @@ Contributions to `thor2ts` are welcome! To contribute:
 ---
 ## Support
 If you encounter any issues or have questions, please open an issue in the [GitHub repository](https://github.com/NextronSytems/thor-ts-mapper.git).
+
 ---
-![Published](https://github.com/icicala/thor-ts-mapper/actions/workflows/build-thor2ts.yml/badge.svg)
+
+![Release](https://github.com/icicala/thor-ts-mapper/actions/workflows/release-thor2ts.yml/badge.svg)
