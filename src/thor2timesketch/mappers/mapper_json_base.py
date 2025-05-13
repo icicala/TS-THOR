@@ -79,5 +79,5 @@ class MapperJsonBase(ABC):
         pass
 
     @abstractmethod
-    def check_thor_log(self, json_log: Dict[str, Any]) -> bool:
+    def get_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
         pass

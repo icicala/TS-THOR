@@ -46,5 +46,7 @@ class MapperJsonV2(MapperJsonBase):
             raise TimestampError(f"Invalid type for '{MapperJsonV2.THOR_TIMESTAMP_FIELD}': expected str, got {type(thor_timestamp).__name__}")
         return DatetimeField(path=MapperJsonV2.THOR_TIMESTAMP_FIELD, datetime=thor_timestamp)
 
-    def check_thor_log(self, json_log: Dict[str, Any]) -> bool:
-        return any(key.startswith("reason") for key in json_log.keys())
+    def get_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
+        level = json_log.get("level")
+        module = json_log.get("module")
+        return level, module

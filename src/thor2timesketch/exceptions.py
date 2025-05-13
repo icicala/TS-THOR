@@ -33,6 +33,10 @@ class JsonInvalidFileExtensionError(FileValidationError):
     def __init__(self, error_msg: str = "Invalid file extension") -> None:
         super().__init__(error_msg)
 
+class FilterConfigError(FileValidationError):
+    def __init__(self, error_msg: str = "Filter configuration error") -> None:
+        super().__init__(error_msg)
+
 
 class JsonValidationError(InputError):
     def __init__(self, error_msg: str = "JSON validation error") -> None:

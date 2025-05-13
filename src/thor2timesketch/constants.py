@@ -7,3 +7,4 @@ LOG_VERSION = "log_version"
 OUTPUT_FILE_EXTENSION = ".jsonl"
 TS_SCOPE = ['user', 'shared']
 MAX_WRITE_ERRORS = 5
+DEFAULT_FILTER = "default_filter.yaml"

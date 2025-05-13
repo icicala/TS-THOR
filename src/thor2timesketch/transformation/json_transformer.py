@@ -1,11 +1,12 @@
 import os
-from typing import Dict, Any, Iterator
+from typing import Dict, Any, Iterator, Optional
 from thor2timesketch import constants
 from thor2timesketch.exceptions import ProcessingError, MappingError, VersionError, InputError
 from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapper_loader import load_all_mappers
+from thor2timesketch.config.filter_findings import FilterFindings
 
 logger = LoggerConfig.get_logger(__name__)
 
@@ -17,17 +18,13 @@ class JsonTransformer:
         self.log_version_mapper = JsonLogVersion()
         self.mb_converter = constants.MB_CONVERTER
 
-    def transform_thor_logs(self, input_json_file: str) -> Iterator[Dict[str, Any]]:
+    def transform_thor_logs(self, input_json_file: str, filter_path: Optional[str]) -> Iterator[Dict[str, Any]]:
         try:
             valid_thor_logs = self.input_reader.get_valid_data(input_json_file)
-            if valid_thor_logs is None:
-                message_err = "No valid THOR logs found"
-                logger.error(message_err)
-                raise ProcessingError(message_err)
-
+            filters = FilterFindings.read_from_yaml(filter_path)
             file_size = os.path.getsize(input_json_file)
             logger.info(f"Processing input file: '{input_json_file}' ('{file_size / self.mb_converter:.2f}' MB)")
-            return self._generate_mapped_logs(valid_thor_logs)
+            return self._generate_mapped_logs(valid_thor_logs, filters)
         except InputError:
             raise
         except Exception as error:
@@ -35,11 +32,13 @@ class JsonTransformer:
             logger.error(message_err)
             raise ProcessingError(message_err) from error
 
-    def _generate_mapped_logs(self, valid_thor_logs: Iterator[Dict[str, Any]]) -> Iterator[Dict[str, Any]]:
+    def _generate_mapped_logs(self, valid_thor_logs: Iterator[Dict[str, Any]], filters: FilterFindings) -> Iterator[Dict[str, Any]]:
+
         for json_line in valid_thor_logs:
             try:
                 version_mapper = self.log_version_mapper.get_mapper_for_version(json_line)
-                if version_mapper.check_thor_log(json_line):
+                level, module = version_mapper.get_filterable_fields(json_line)
+                if filters.matches_filter_criteria(level, module):
                     mapped_events = version_mapper.map_thor_events(json_line)
                     for event in mapped_events:
                         yield event
@@ -54,3 +53,10 @@ class JsonTransformer:
                 raise MappingError(message_err) from error
 
         logger.debug("Finished transforming THOR logs")
+
+file_json = "../../../thor7maijsonv1.json"
+filter_path = "../../../testyaml.yaml"
+transformer = JsonTransformer()
+mapped_logs = transformer.transform_thor_logs(file_json, filter_path)
+for log in mapped_logs:
+    print(log)

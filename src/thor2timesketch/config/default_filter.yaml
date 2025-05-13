@@ -1,0 +1,43 @@
+levels:
+  - Alert
+  - Warning
+  - Notice
+  - Info
+
+modules:
+  - Artifact-Collector
+  - AtJobs
+  - Autoruns
+  - DNSCache
+  - DeepDive
+  - Dropzone
+  - EnvCheck
+  - Eventlog
+  - Events
+  - Filescan
+  - Firewall
+  - Hosts
+  - HotfixCheck
+  - LSASessions
+  - LoggedIn
+  - MFT
+  - Mutex
+  - NetworkSessions
+  - NetworkShares
+  - ProcessCheck
+  - RegistryChecks
+  - Rootkit
+  - SHIMCache
+  - ScheduledTasks
+  - ServiceCheck
+  - Timestomp
+  - UserDir
+  - Users
+  - WMIStartup
+  - RegistryHive
+  - WER
+  - Amcache
+  - ETL
+  - LogScan
+  - ProcessConnections
+  - WMIPersistence
