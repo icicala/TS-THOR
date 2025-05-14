@@ -8,3 +8,6 @@ OUTPUT_FILE_EXTENSION = ".jsonl"
 TS_SCOPE = ['user', 'shared']
 MAX_WRITE_ERRORS = 5
 DEFAULT_FILTER = "default_filter.yaml"
+PREFIX = "TF"
+THOR_TAG = "thor"
+EXTRA_TAG = "ts_extra"

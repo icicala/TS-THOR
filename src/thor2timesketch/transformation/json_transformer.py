@@ -55,8 +55,8 @@ class JsonTransformer:
         logger.debug("Finished transforming THOR logs")
 
 file_json = "../../../thor7maijsonv1.json"
-filter_path = "../../../testyaml.yaml"
+filter_pathes = "../../../testyaml.yaml"
 transformer = JsonTransformer()
-mapped_logs = transformer.transform_thor_logs(file_json, filter_path)
+mapped_logs = transformer.transform_thor_logs(file_json, filter_pathes)
 for log in mapped_logs:
     print(log)

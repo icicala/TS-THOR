@@ -36,6 +36,8 @@ def main(
                                                   help="Write output to specified JSONL file"),
         sketch: Optional[str] = typer.Option(None, "--sketch",
                                              help="Sketch ID or name for ingesting events into Timesketch"),
+        filter_path: Optional[str] = typer.Option(None, "--filter", "-f",
+                                                help="Path to YAML filter configuration"),
         verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
         _version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
                                      help="Show version and exit")
@@ -53,7 +55,7 @@ def main(
 
     try:
         logger.info("Transforming THOR logs...")
-        mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file)
+        mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file, filter_path=filter_path)
 
         writer = OutputWriter(input_file, output_file, sketch)
         writer.write(mapped_events)
