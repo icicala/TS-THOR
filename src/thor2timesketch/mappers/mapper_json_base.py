@@ -3,6 +3,8 @@ from typing import Dict, Any, List, Optional
 from thor2timesketch.config.logger import LoggerConfig
 from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.utils.datetime_field import DatetimeField
+from thor2timesketch.utils.normalizer import JsonNormalizer, IdentityNormalizer
+from thor2timesketch.utils.regex_timestamp_extractor import RegexTimestampExtractor
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 from thor2timesketch.utils.thor_finding_id import ThorFindingId
 
@@ -15,27 +17,29 @@ class MapperJsonBase(ABC):
     THOR_MODULE_FIELD: str = ""
     THOR_LEVEL_FIELD: str = ""
 
-    def __init__(self) -> None:
-        self.timestamp_extractor: TimestampExtractor = TimestampExtractor()
+    def __init__(self, normalizer: Optional[JsonNormalizer], time_extractor: Optional[TimestampExtractor] = None) -> None:
+        self.timestamp_extractor: TimestampExtractor = time_extractor if time_extractor is not None else RegexTimestampExtractor()
+        self.normalizer : JsonNormalizer = normalizer if normalizer is not None else IdentityNormalizer()
 
     def map_thor_events(self, json_log: Dict[str, Any]) -> List[Dict[str, Any]]:
 
         logger.debug("Starting to map THOR events")
+        normalized_json = self.normalizer.normalize(json_log)
         events: List[Dict[str, Any]] = []
 
         ref_id = ThorFindingId.get_finding_id()
 
-        thor_timestamp = self._get_thor_timestamp(json_log)
-        thor_event = self._create_thor_event(json_log, ref_id)
+        thor_timestamp = self._get_thor_timestamp(normalized_json)
+        thor_event = self._create_thor_event(normalized_json, ref_id)
         events.append(thor_event.to_dict())
 
-        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(json_log)
+        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(normalized_json)
         additional_timestamp = [ts for ts in all_timestamps if not self.timestamp_extractor.is_same_timestamp(ts.datetime, thor_timestamp.datetime) and ts.path != thor_timestamp.path]
 
         if additional_timestamp:
             logger.debug(f"Found {len(additional_timestamp)} additional timestamps")
             for timestamp in additional_timestamp:
-                event = self._create_additional_timestamp_event(json_log, timestamp, ref_id)
+                event = self._create_additional_timestamp_event(normalized_json, timestamp, ref_id)
                 events.append(event.to_dict())
 
         logger.debug(f"Mapped {len(events)} events")
@@ -65,7 +69,7 @@ class MapperJsonBase(ABC):
         return event
 
     def _get_timestamp_extract(self, json_log: Dict[str, Any]) -> List[DatetimeField]:
-        ts_extractor: List[DatetimeField] = self.timestamp_extractor.extract_datetime(json_log)
+        ts_extractor: List[DatetimeField] = self.timestamp_extractor.extract(json_log)
         return ts_extractor
 
     @abstractmethod

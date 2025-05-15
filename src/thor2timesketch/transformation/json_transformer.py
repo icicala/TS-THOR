@@ -53,10 +53,7 @@ class JsonTransformer:
                 raise MappingError(message_err) from error
 
         logger.debug("Finished transforming THOR logs")
-
-file_json = "../../../thor7maijsonv1.json"
-filter_pathes = "../../../testyaml.yaml"
+jsonv1_data = "../../../thor13mayjsonv2.json"
 transformer = JsonTransformer()
-mapped_logs = transformer.transform_thor_logs(file_json, filter_pathes)
-for log in mapped_logs:
-    print(log)
+for event in transformer.transform_thor_logs(jsonv1_data, None):
+    print(event)

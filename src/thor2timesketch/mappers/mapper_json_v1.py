@@ -4,6 +4,7 @@ from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch import constants
+from thor2timesketch.utils.normalizer import FlatteningNormalizer
 
 @JsonLogVersion.log_version("v1.0.0")
 class MapperJsonV1(MapperJsonBase):
@@ -12,6 +13,11 @@ class MapperJsonV1(MapperJsonBase):
     THOR_MESSAGE_FIELD: str = "message"
     THOR_MODULE_FIELD: str = "module"
     THOR_LEVEL_FIELD: str = "level"
+
+    def __init__(self) -> None:
+        self.normalizer = FlatteningNormalizer()
+        self.timestamp_extractor = RegexTimestampExtractor()
+        super().__init__(self.normalizer, self.timestamp_extractor)
 
     def _get_message(self, json_log: Dict[str, Any]) -> str:
         message = json_log.get(MapperJsonV1.THOR_MESSAGE_FIELD)
