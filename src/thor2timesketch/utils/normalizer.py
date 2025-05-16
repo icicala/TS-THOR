@@ -28,7 +28,6 @@ class AuditTrailNormalizer(JsonNormalizer):
         for key, value in details.items():
             field = key if key not in data else f"Details_{key}"
             data[field] = value
-        timestamps = data.pop("Timestamps", {})
         flatten_json = JSONFlattener.flatten_json(data)
-        flatten_json["Timestamps"] = timestamps
+
         return flatten_json

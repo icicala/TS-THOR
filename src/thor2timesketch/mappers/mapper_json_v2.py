@@ -4,7 +4,7 @@ from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.mappers.mapper_json_v1 import MapperJsonV1
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.normalizer import FlatteningNormalizer
-
+from thor2timesketch.utils.regex_timestamp_extractor import RegexTimestampExtractor
 
 @JsonLogVersion.log_version("v2.0.0")
 class MapperJsonV2(MapperJsonBase):
@@ -26,8 +26,8 @@ class MapperJsonV2(MapperJsonBase):
     def _get_message(self, json_log: Dict[str, Any]) -> str:
         return self.mapper._get_message(json_log)
 
-    def _get_timestamp_desc(self, json_log: Dict[str, Any], ts_data: Optional[DatetimeField] = None) -> str:
-        return self.mapper._get_timestamp_desc(json_log, ts_data)
+    def _get_timestamp_desc(self, json_log: Dict[str, Any], time_data: DatetimeField) -> str:
+        return self.mapper._get_timestamp_desc(json_log, time_data)
 
     def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
         return self.mapper._get_additional_fields(json_log)

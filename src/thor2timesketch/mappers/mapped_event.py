@@ -6,7 +6,7 @@ class MappedEvent:
         message: str,
         datetime: str,
         timestamp_desc: str,
-        ref_id: str,
+        event_group_id: str,
         tags: Optional[List[str]] = None,
         time_thor_scan: Optional[str] = None
     ):
@@ -14,7 +14,7 @@ class MappedEvent:
         self.datetime = datetime
         self.timestamp_desc = timestamp_desc
         self.time_thor_scan = time_thor_scan
-        self.ref_id = ref_id
+        self.event_group_id = event_group_id
         self.tags = tags or []
         self.additional_fields: Dict[str, Any] = {}
 
@@ -26,7 +26,7 @@ class MappedEvent:
             "message": self.message,
             "datetime": self.datetime,
             "timestamp_desc": self.timestamp_desc,
-            "ref_id": self.ref_id,
+            "event_group_id": self.event_group_id,
             "tags": self.tags,
         }
         if self.time_thor_scan is not None:

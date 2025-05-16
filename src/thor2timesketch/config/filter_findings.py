@@ -31,7 +31,6 @@ class FilterFindings:
             levels = {level.lower() for level in filters.get("levels") or []}
             modules = {module.lower() for module in filters.get("modules") or []}
             if not levels and not modules:
-                print("empty module and level")
                 error_msg = f"Empty filter config in {filter_path}: at least one filter (levels or modules) must be provided"
                 logger.error(error_msg)
                 raise FilterConfigError(error_msg)

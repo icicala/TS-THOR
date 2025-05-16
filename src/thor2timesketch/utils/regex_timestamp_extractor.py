@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Tuple
 from dateutil import parser
 from thor2timesketch import constants
 from thor2timesketch.config.logger import LoggerConfig
-from thor2timesketch.exceptions import TimestampError, MappingError
+from thor2timesketch.exceptions import TimestampError
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 
@@ -16,7 +16,7 @@ class RegexTimestampExtractor(TimestampExtractor):
     def __init__(self) -> None:
         self.ISO8601 = re.compile(constants.ISO8601_PATTERN, re.IGNORECASE)
 
-    def extract_datetime(self, data_json: Dict[str, Any]) -> List[DatetimeField]:
+    def extract(self, data_json: Dict[str, Any]) -> List[DatetimeField]:
 
         if data_json is None:
             error_msg = "Received an empty THOR log as input for timestamp extractor."
@@ -57,13 +57,3 @@ class RegexTimestampExtractor(TimestampExtractor):
             raise TimestampError(error_msg)
 
         return timestamps
-
-    def is_same_timestamp(self, time1: str, time2: str) -> bool:
-        try:
-            datetime1 = parser.isoparse(time1)
-            datetime2 = parser.isoparse(time2)
-            ts_check = datetime1 == datetime2
-            return ts_check
-        except ValueError as e:
-            logger.error(f"Error parsing timestamps: {e}")
-            raise MappingError(f"Invalid timestamp format: {e}")
