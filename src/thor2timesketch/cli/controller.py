@@ -4,7 +4,10 @@ from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
 import typer
 from rich.console import Console
+
+from thor2timesketch.config.filter_creator import FilterCreator
 from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.constants import OUTPUT_YAML_FILE
 from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.exceptions import Thor2tsError
@@ -38,6 +41,8 @@ def main(
                                              help="Sketch ID or name for ingesting events into Timesketch"),
         filter_path: Optional[str] = typer.Option(None, "--filter", "-f",
                                                 help="Path to YAML filter configuration"),
+        generate_filter: bool = typer.Option(False, "--generate-filter",
+                                              help="Generate a filter YAML and exit"),
         verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
         _version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
                                      help="Show version and exit")
@@ -48,6 +53,15 @@ def main(
     if not os.path.isfile(input_file):
         logger.error(f"Input file not found: '{input_file}'. Use -h for help.")
         raise typer.Exit(code=1)
+
+    if generate_filter:
+        try:
+            FilterCreator(input_file).generate_yaml_file()
+            console.print(f"Filter config written to `{os.path.join(os.getcwd(), OUTPUT_YAML_FILE)}`")
+            raise typer.Exit()
+        except Thor2tsError as e:
+            logger.error(f"{e}")
+            raise typer.Exit(code=1)
 
     if not (output_file or sketch):
         logger.error("Use -o/--output-file for file output or --sketch for Timesketch ingestion. Use -h for help.")

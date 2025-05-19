@@ -1,5 +1,5 @@
 from typing import Dict, Any, Type, Callable
-from thor2timesketch.constants import AUDIT_TRAIL, LOG_VERSION, AUDIT_TIMESTAMP
+from thor2timesketch.constants import AUDIT_TRAIL, LOG_VERSION, AUDIT_FINDING
 from thor2timesketch.exceptions import VersionError
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.config.logger import LoggerConfig
@@ -21,7 +21,8 @@ class JsonLogVersion:
     def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "MapperJsonBase":
         thor_version = json_line.get(LOG_VERSION)
         if thor_version is None:
-            if AUDIT_TIMESTAMP in json_line:
+            # if AUDIT_TIMESTAMP in json_line:
+            if AUDIT_FINDING in json_line:
                 thor_version = AUDIT_TRAIL
             else:
                 raise VersionError(f"Missing '{LOG_VERSION}' and no audit timestamps found")

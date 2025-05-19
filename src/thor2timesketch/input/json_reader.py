@@ -1,9 +1,9 @@
 from typing import Iterator, Dict, Any
-from thor2timesketch import constants
 from thor2timesketch.exceptions import JsonValidationError, InputError, JsonParseError
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.input.json_validator import JsonValidator
 from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.constants import VALID_JSON_EXTENSIONS, DEFAULT_ENCODING
 
 
 logger = LoggerConfig.get_logger(__name__)
@@ -11,9 +11,8 @@ logger = LoggerConfig.get_logger(__name__)
 class JsonReader:
 
     def __init__(self) -> None:
-        self.file_validator = FileValidator()
+        self.file_validator = FileValidator(VALID_JSON_EXTENSIONS)
         self.json_validator = JsonValidator()
-        self.file_encoder = constants.DEFAULT_ENCODING
 
 
 
@@ -29,7 +28,7 @@ class JsonReader:
 
     def _generate_valid_json(self, valid_file: str) -> Iterator[Dict[str, Any]]:
         try:
-            with open(valid_file, 'r', encoding=self.file_encoder) as file:
+            with open(valid_file, 'r', encoding=DEFAULT_ENCODING) as file:
                 for line_num, line in enumerate(file, 1):
                     try:
                         json_data = self.json_validator.validate_json_log(line)

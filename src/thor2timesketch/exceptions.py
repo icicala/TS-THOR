@@ -14,22 +14,22 @@ class FileValidationError(InputError):
         super().__init__(error_msg)
 
 
-class JsonFileNotFoundError(FileValidationError):
+class FileNotFoundError(FileValidationError):
     def __init__(self, error_msg: str = "JSON file not found") -> None:
         super().__init__(error_msg)
 
 
-class JsonFileNotReadableError(FileValidationError):
+class FileNotReadableError(FileValidationError):
     def __init__(self, error_msg: str = "JSON file is not readable") -> None:
         super().__init__(error_msg)
 
 
-class JsonEmptyFileError(FileValidationError):
+class EmptyFileError(FileValidationError):
     def __init__(self, error_msg: str = "JSON file is empty") -> None:
         super().__init__(error_msg)
 
 
-class JsonInvalidFileExtensionError(FileValidationError):
+class InvalidFileExtensionError(FileValidationError):
     def __init__(self, error_msg: str = "Invalid file extension") -> None:
         super().__init__(error_msg)
 
