@@ -34,7 +34,7 @@ class MapperJsonBase(ABC):
         events.append(thor_event.to_dict())
 
         all_timestamps: List[DatetimeField] = self._get_timestamp_extract(normalized_json)
-        additional_timestamp = [ts for ts in all_timestamps if not self.timestamp_extractor.is_same_timestamp(ts.datetime, thor_timestamp.datetime) and ts.path != thor_timestamp.path]
+        additional_timestamp = [time for time in all_timestamps if not self.timestamp_extractor.is_same_timestamp(time.datetime, thor_timestamp.datetime) and time.path != thor_timestamp.path]
 
         if additional_timestamp:
             logger.debug(f"Found {len(additional_timestamp)} additional timestamps")

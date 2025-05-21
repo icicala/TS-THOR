@@ -9,9 +9,6 @@ logger = LoggerConfig.get_logger(__name__)
 
 
 class TimestampExtractor(ABC):
-
-
-
     def is_same_timestamp(self, time1: str, time2: str) -> bool:
         try:
             datetime1 = parser.isoparse(time1)

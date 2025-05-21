@@ -1,5 +1,5 @@
 from typing import Dict, Any, Type, Callable
-from thor2timesketch.constants import AUDIT_TRAIL, LOG_VERSION, AUDIT_FINDING
+from thor2timesketch.constants import LOG_VERSION, AUDIT_FINDING, AUDIT_INFO
 from thor2timesketch.exceptions import VersionError
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.config.logger import LoggerConfig
@@ -18,18 +18,43 @@ class JsonLogVersion:
             return mapper_cls
         return map_log_version
 
-    def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "MapperJsonBase":
-        thor_version = json_line.get(LOG_VERSION)
-        if thor_version is None:
-            # if AUDIT_TIMESTAMP in json_line:
-            if AUDIT_FINDING in json_line:
-                thor_version = AUDIT_TRAIL
-            else:
-                raise VersionError(f"Missing '{LOG_VERSION}' and no audit timestamps found")
-        if not isinstance(thor_version, str):
-            raise VersionError(f"Invalid '{LOG_VERSION}' type: {thor_version!r}")
-        thor_mapper = self._mapper_log_version.get(thor_version.lower())
-        if thor_mapper is None:
-            raise VersionError(f"Unsupported log version: {thor_version}")
-        return thor_mapper()
+    def detect_log_version(self, json_line: Dict[str, Any]) -> str:
+        if LOG_VERSION in json_line:
+            log_version = json_line[LOG_VERSION]
+            if not isinstance(log_version, str):
+                raise VersionError(f"Invalid '{LOG_VERSION}' type: {log_version!r}")
+            return log_version.lower()
+        if AUDIT_INFO in json_line and isinstance(json_line[AUDIT_INFO], dict):
+            return AUDIT_INFO
+        if AUDIT_FINDING in json_line and isinstance(json_line[AUDIT_FINDING], list):
+            return AUDIT_FINDING
+        raise VersionError(f"Cannot detect log version: missing '{LOG_VERSION}', '{AUDIT_INFO}' or '{AUDIT_FINDING}'")
 
+    def get_mapper_for_version(self, json_line: Dict[str, Any]) -> MapperJsonBase:
+        version_key = self.detect_log_version(json_line)
+        return self.resolve_mapper(version_key)
+
+    def resolve_mapper(self, log_version: str) -> MapperJsonBase:
+        mapper_type = self._mapper_log_version.get(log_version)
+        if not mapper_type:
+            raise VersionError(f"No mapper registered for version: {log_version!r}")
+        return mapper_type()
+
+
+
+    # def get_mapper_for_version(self, json_line: Dict[str, Any]) -> "MapperJsonBase":
+    #     log_version = None
+    #     if LOG_VERSION in json_line:
+    #         log_version = json_line.get(LOG_VERSION)
+    #         if not isinstance(log_version, str):
+    #             raise VersionError(f"Invalid '{LOG_VERSION}' type: {log_version!r}")
+    #     elif AUDIT_INFO in json_line and isinstance(json_line[AUDIT_INFO], dict):
+    #         log_version = AUDIT_INFO
+    #     elif AUDIT_FINDING in json_line and isinstance(json_line[AUDIT_FINDING], list):
+    #         log_version = AUDIT_FINDING
+    #     if log_version is None:
+    #         raise VersionError(f"Could not determine log version: missing '{LOG_VERSION}', 'info' or 'findings'")
+    #     thor_mapper = self._mapper_log_version.get(log_version.lower())
+    #     if thor_mapper is None:
+    #         raise VersionError(f"Unsupported mapper for: {log_version}")
+    #     return thor_mapper()

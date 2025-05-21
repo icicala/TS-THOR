@@ -1,5 +1,5 @@
-from typing import Any, Dict, Iterator
-from thor2timesketch.constants import AUDIT_TIMESTAMP, AUDIT_FINDING
+from typing import Any, Dict, Iterator, Optional
+from thor2timesketch.constants import AUDIT_TIMESTAMP, AUDIT_FINDING, AUDIT_INFO
 
 
 class AuditEventsExtractor:
@@ -11,3 +11,13 @@ class AuditEventsExtractor:
             timestamps = finding.get(AUDIT_TIMESTAMP)
             if isinstance(timestamps, dict) and bool(timestamps):
                 yield finding
+
+    @staticmethod
+    def extract_info(audit_json: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        info = audit_json.get(AUDIT_INFO)
+        if not isinstance(info, dict) or not info:
+            return None
+        timestamps = info.get(AUDIT_TIMESTAMP)
+        if not isinstance(timestamps, dict) or not timestamps:
+            return None
+        return info
