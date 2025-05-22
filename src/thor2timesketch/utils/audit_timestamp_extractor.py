@@ -9,5 +9,6 @@ class AuditTimestampExtractor(TimestampExtractor):
 
     def extract(self, data: Dict[str, Any]) -> List[DatetimeField]:
         timestamps = data.get(AUDIT_TIMESTAMP, {})
-        return [DatetimeField(path=key, datetime=value)
-            for key, value in timestamps.items()]
+        return [
+            DatetimeField(path=key, datetime=value) for key, value in timestamps.items()
+        ]

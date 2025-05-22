@@ -16,13 +16,19 @@ class MapperJsonAuditFindings(MapperJsonAudit):
     THOR_MODULE_FIELD = "Module"
     THOR_LEVEL_FIELD = "Level"
 
-    def _create_audit_event(self, json_log: Dict[str, Any], time_data: DatetimeField, event_group_id: str, primary: bool) -> MappedEvent:
+    def _create_audit_event(
+        self,
+        json_log: Dict[str, Any],
+        time_data: DatetimeField,
+        event_group_id: str,
+        primary: bool,
+    ) -> MappedEvent:
         event = MappedEvent(
-            message = self._get_message(json_log),
-            datetime = time_data.datetime,
-            timestamp_desc = self._get_timestamp_desc(json_log, time_data),
-            event_group_id = event_group_id,
-            tags = self._get_additional_tags(json_log)
+            message=self._get_message(json_log),
+            datetime=time_data.datetime,
+            timestamp_desc=self._get_timestamp_desc(json_log, time_data),
+            event_group_id=event_group_id,
+            tags=self._get_additional_tags(json_log),
         )
         if primary:
             event.add_additional(self._get_additional_fields(json_log))
@@ -34,10 +40,14 @@ class MapperJsonAuditFindings(MapperJsonAudit):
             raise MappingError(f"Invalid or missing 'message' field: {message}")
         return message
 
-    def _get_timestamp_desc(self, json_log: Dict[str, Any], time_data: DatetimeField) -> str:
+    def _get_timestamp_desc(
+        self, json_log: Dict[str, Any], time_data: DatetimeField
+    ) -> str:
         module = json_log.get(MapperJsonAuditFindings.THOR_MODULE_FIELD)
         if not isinstance(module, str):
-            raise MappingError("Missing required 'module' field for timestamp description")
+            raise MappingError(
+                "Missing required 'module' field for timestamp description"
+            )
         return f"{module} - {time_data.path}"
 
     def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
@@ -47,7 +57,9 @@ class MapperJsonAuditFindings(MapperJsonAudit):
     def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> DatetimeField:
         raise MappingError("Audit logs do not have a scan timestamp field")
 
-    def get_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
+    def get_filterable_fields(
+        self, json_log: Dict[str, Any]
+    ) -> tuple[Optional[str], Optional[str]]:
         level = json_log.get(MapperJsonAuditFindings.THOR_LEVEL_FIELD)
         module = json_log.get(MapperJsonAuditFindings.THOR_MODULE_FIELD)
         return level, module
@@ -60,4 +72,3 @@ class MapperJsonAuditFindings(MapperJsonAudit):
         if not isinstance(type_event, str):
             raise MappingError("Missing required 'level' field for additional tags")
         return [AUDIT_FINDING, type_event]
-

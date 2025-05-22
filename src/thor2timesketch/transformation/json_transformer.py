@@ -1,41 +1,74 @@
 import os
 from typing import Dict, Any, Iterator, Optional
+from thor2timesketch.config.filter_findings import FilterFindings
 from thor2timesketch.constants import MB_CONVERTER
 from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapper_loader import load_all_mappers
-from thor2timesketch.transformation.filter_processor import FilterProcessor
-from thor2timesketch.transformation.mapper_processor import MapperProcessor
-from thor2timesketch.transformation.pretransformation_processor import PreTransformationProcessor
-from thor2timesketch.transformation.reader_processor import ReaderProcessor
+from thor2timesketch.transformation.pretransformation_processor import (
+    PreTransformationProcessor,
+)
 
 logger = LoggerConfig.get_logger(__name__)
 
 
 class JsonTransformer:
+
     def __init__(self) -> None:
         load_all_mappers()
-        self.input_reader = ReaderProcessor()
-        self.pre_transformer = PreTransformationProcessor()
-        self.log_version_mapper = JsonLogVersion()
-        self.mb_converter = MB_CONVERTER
+        self.reader = JsonReader()
+        self.version_mapper = JsonLogVersion()
+        self.mb = MB_CONVERTER
 
-    def transform_thor_logs(self, input_json_file: str, filter_path: Optional[str]) -> Iterator[Dict[str, Any]]:
+    def transform_thor_logs(
+        self, input_file: str, filter_path: Optional[str]
+    ) -> Iterator[Dict[str, Any]]:
 
-        raw_events = self.input_reader.read(input_json_file)
-        file_size = os.path.getsize(input_json_file)
-        logger.info(f"Processing input file: '{input_json_file}' ('{file_size / self.mb_converter:.2f}' MB)")
-        for event in raw_events:
-            pre_transformed_events = self.pre_transformer.pre_transformer(event)
-            mappers_events = MapperProcessor(self.log_version_mapper).map(pre_transformed_events)
-            filtered_events = FilterProcessor(self.log_version_mapper, filter_path).filter(mappers_events)
-            for mapper, filtered_event in filtered_events:
-                yield from mapper.map_thor_events(filtered_event)
+        selectors = FilterFindings.read_filters_yaml(filter_path)
+        pre_transform = PreTransformationProcessor(filter_path)
+        raw_lines = self.reader.get_valid_data(input_file)
 
-        logger.debug(f"Finished processing input file: '{input_json_file}'")
+        self._log_start(input_file)
+        yield from self._generate_events(raw_lines, selectors, pre_transform)
+        self._log_end(input_file)
+
+    def _generate_events(
+        self,
+        events: Iterator[Dict[str, Any]],
+        selectors: FilterFindings,
+        pre_transform: PreTransformationProcessor,
+    ) -> Iterator[Dict[str, Any]]:
+        for entry in events:
+            for record in pre_transform.transformation(entry):
+                mapper = self.version_mapper.get_mapper_for_version(record)
+                if self._is_eligible(record, mapper, selectors):
+                    yield from mapper.map_thor_events(record)
+
+    def _is_eligible(
+        self, record: Dict[str, Any], mapper, selectors: FilterFindings
+    ) -> bool:
+        if not mapper.requires_filter():
+            return True
+        level, module = mapper.get_filterable_fields(record)
+        return selectors.matches_filter_criteria(level, module)
+
+    def _log_start(self, path: str) -> None:
+        size = os.path.getsize(path) / self.mb
+        logger.info(f"Processing input file: `{path}` ({size:.2f} MB)")
+
+    def _log_end(self, path: str) -> None:
+        logger.debug(f"Finished processing input file: `{path}`")
 
 
-json_v1 = "../../../thoraudittrail7mail.json"
-transformer = JsonTransformer()
-for eveng in transformer.transform_thor_logs(json_v1, None):
-    print(eveng)
+if __name__ == "__main__":
+    import time
+
+    json_v1 = "../../../thoraudittrail7mail.json"
+    ymalfile = "../config/thor2ts_filter.yaml"
+    transformer = JsonTransformer()
+
+    # single-core
+    start = time.monotonic()
+    single_count = sum(1 for _ in transformer.transform_thor_logs(json_v1, ymalfile))
+    print(f"Single-core: {single_count} events in {time.monotonic() - start:.2f}s")

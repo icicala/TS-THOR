@@ -17,9 +17,17 @@ class MapperJsonBase(ABC):
     THOR_MODULE_FIELD: str = ""
     THOR_LEVEL_FIELD: str = ""
 
-    def __init__(self, normalizer: Optional[JsonNormalizer] = None, time_extractor: Optional[TimestampExtractor] = None) -> None:
-        self.timestamp_extractor: TimestampExtractor = time_extractor if time_extractor is not None else RegexTimestampExtractor()
-        self.normalizer : JsonNormalizer = normalizer if normalizer is not None else IdentityNormalizer()
+    def __init__(
+        self,
+        normalizer: Optional[JsonNormalizer] = None,
+        time_extractor: Optional[TimestampExtractor] = None,
+    ) -> None:
+        self.timestamp_extractor: TimestampExtractor = (
+            time_extractor if time_extractor is not None else RegexTimestampExtractor()
+        )
+        self.normalizer: JsonNormalizer = (
+            normalizer if normalizer is not None else IdentityNormalizer()
+        )
 
     def map_thor_events(self, json_log: Dict[str, Any]) -> List[Dict[str, Any]]:
 
@@ -33,62 +41,86 @@ class MapperJsonBase(ABC):
         thor_event = self._create_thor_event(normalized_json, event_group_id)
         events.append(thor_event.to_dict())
 
-        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(normalized_json)
-        additional_timestamp = [time for time in all_timestamps if not self.timestamp_extractor.is_same_timestamp(time.datetime, thor_timestamp.datetime) and time.path != thor_timestamp.path]
+        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(
+            normalized_json
+        )
+        additional_timestamp = [
+            time
+            for time in all_timestamps
+            if not self.timestamp_extractor.is_same_timestamp(
+                time.datetime, thor_timestamp.datetime
+            )
+            and time.path != thor_timestamp.path
+        ]
 
         if additional_timestamp:
             logger.debug(f"Found {len(additional_timestamp)} additional timestamps")
             for timestamp in additional_timestamp:
-                event = self._create_additional_timestamp_event(normalized_json, timestamp, event_group_id)
+                event = self._create_additional_timestamp_event(
+                    normalized_json, timestamp, event_group_id
+                )
                 events.append(event.to_dict())
 
         logger.debug(f"Mapped {len(events)} events")
         return events
 
-    def _create_thor_event(self, json_log: Dict[str, Any], event_group_id: str) -> MappedEvent:
+    def _create_thor_event(
+        self, json_log: Dict[str, Any], event_group_id: str
+    ) -> MappedEvent:
         event = MappedEvent(
-            message = self._get_message(json_log),
-            datetime = self._get_thor_timestamp(json_log).datetime,
-            timestamp_desc = self._get_timestamp_desc(json_log, self._get_thor_timestamp(json_log)),
-            event_group_id = event_group_id,
-            tags = self._get_thor_tags(json_log)
+            message=self._get_message(json_log),
+            datetime=self._get_thor_timestamp(json_log).datetime,
+            timestamp_desc=self._get_timestamp_desc(
+                json_log, self._get_thor_timestamp(json_log)
+            ),
+            event_group_id=event_group_id,
+            tags=self._get_thor_tags(json_log),
         )
 
         event.add_additional(self._get_additional_fields(json_log))
         return event
 
-
-    def _create_additional_timestamp_event(self, json_log: Dict[str, Any],
-                                           time_data: DatetimeField, event_group_id: str) -> MappedEvent:
+    def _create_additional_timestamp_event(
+        self, json_log: Dict[str, Any], time_data: DatetimeField, event_group_id: str
+    ) -> MappedEvent:
         event = MappedEvent(
-            message = self._get_message(json_log),
-            datetime = time_data.datetime,
-            timestamp_desc = self._get_timestamp_desc(json_log, time_data),
-            event_group_id = event_group_id,
-            tags = self._get_additional_tags(json_log))
+            message=self._get_message(json_log),
+            datetime=time_data.datetime,
+            timestamp_desc=self._get_timestamp_desc(json_log, time_data),
+            event_group_id=event_group_id,
+            tags=self._get_additional_tags(json_log),
+        )
         return event
 
     def _get_timestamp_extract(self, json_log: Dict[str, Any]) -> List[DatetimeField]:
         time_extractor: List[DatetimeField] = self.timestamp_extractor.extract(json_log)
         return time_extractor
 
+    def requires_filter(self) -> bool:
+        return True
+
     @abstractmethod
     def _get_message(self, json_log: Dict[str, Any]) -> str:
         pass
 
     @abstractmethod
-    def _get_timestamp_desc(self, json_log: Dict[str, Any], time_data: DatetimeField) -> str:
+    def _get_timestamp_desc(
+        self, json_log: Dict[str, Any], time_data: DatetimeField
+    ) -> str:
         pass
 
     @abstractmethod
     def _get_additional_fields(self, json_log: Dict[str, Any]) -> Dict[str, Any]:
         pass
+
     @abstractmethod
     def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> DatetimeField:
         pass
 
     @abstractmethod
-    def get_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
+    def get_filterable_fields(
+        self, json_log: Dict[str, Any]
+    ) -> tuple[Optional[str], Optional[str]]:
         pass
 
     @abstractmethod

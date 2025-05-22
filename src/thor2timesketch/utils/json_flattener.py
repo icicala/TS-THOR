@@ -6,6 +6,7 @@ from thor2timesketch.exceptions import FlattenJsonError
 
 logger = LoggerConfig.get_logger(__name__)
 
+
 class JSONFlattener:
 
     @staticmethod
@@ -15,7 +16,7 @@ class JSONFlattener:
     @staticmethod
     def flatten_json(json_line: Dict[str, Any]) -> Dict[str, Any]:
         flattened: Dict[str, Any] = {}
-        queue = deque([(json_line, '')])
+        queue = deque([(json_line, "")])
         try:
             while queue:
                 current, path = queue.popleft()
@@ -23,7 +24,7 @@ class JSONFlattener:
                     for key, value in current.items():
                         new_key = f"{path}{DELIMITER}{key}" if path else key
                         queue.append((value, new_key))
-                elif  JSONFlattener._is_list_of_dicts(current):
+                elif JSONFlattener._is_list_of_dicts(current):
                     for index, item in enumerate(current, start=1):
                         key = f"{path}{DELIMITER}{index}"
                         flattened[key] = item

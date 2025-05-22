@@ -2,6 +2,7 @@ import uuid
 import base64
 from thor2timesketch.constants import PREFIX
 
+
 class ThorFindingId:
     @staticmethod
     def get_finding_id() -> str:

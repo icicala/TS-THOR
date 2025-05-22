@@ -4,7 +4,12 @@ from thor2timesketch.output.ts_ingest import TSIngest
 
 
 class OutputWriter:
-    def __init__(self, input_file: str, output_file: Optional[str] = None, sketch: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        input_file: str,
+        output_file: Optional[str] = None,
+        sketch: Optional[str] = None,
+    ) -> None:
         self.input_file = input_file
         self.output_file = output_file
         self.sketch = sketch

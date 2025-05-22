@@ -4,6 +4,7 @@ from thor2timesketch.input.file_validator import FileValidator
 from typing import Dict, Any, Optional
 import yaml
 
+
 class YamlConfigReader:
 
     @staticmethod

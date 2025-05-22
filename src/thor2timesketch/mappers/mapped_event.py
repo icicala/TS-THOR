@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional, List
 
+
 class MappedEvent:
     def __init__(
         self,
@@ -8,7 +9,7 @@ class MappedEvent:
         timestamp_desc: str,
         event_group_id: str,
         tags: Optional[List[str]] = None,
-        time_thor_scan: Optional[str] = None
+        time_thor_scan: Optional[str] = None,
     ):
         self.message = message
         self.datetime = datetime

@@ -8,18 +8,16 @@ from thor2timesketch.constants import VALID_JSON_EXTENSIONS, DEFAULT_ENCODING
 
 logger = LoggerConfig.get_logger(__name__)
 
+
 class JsonReader:
 
     def __init__(self) -> None:
         self.file_validator = FileValidator(VALID_JSON_EXTENSIONS)
         self.json_validator = JsonValidator()
 
-
-
-    def _validate_file(self,input_file: str) -> str:
+    def _validate_file(self, input_file: str) -> str:
         valid_file: str = self.file_validator.validate_file(input_file)
         return valid_file
-
 
     def get_valid_data(self, input_file: str) -> Iterator[Dict[str, Any]]:
         valid_file = self._validate_file(input_file)
@@ -28,7 +26,7 @@ class JsonReader:
 
     def _generate_valid_json(self, valid_file: str) -> Iterator[Dict[str, Any]]:
         try:
-            with open(valid_file, 'r', encoding=DEFAULT_ENCODING) as file:
+            with open(valid_file, "r", encoding=DEFAULT_ENCODING) as file:
                 for line_num, line in enumerate(file, 1):
                     try:
                         json_data = self.json_validator.validate_json_log(line)

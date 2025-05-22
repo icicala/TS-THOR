@@ -6,6 +6,7 @@ from thor2timesketch.exceptions import FilterConfigError
 
 logger = LoggerConfig.get_logger(__name__)
 
+
 class FilterFindings:
     def __init__(self, levels: set[str], modules: set[str]) -> None:
         self._levels = {level.lower() for level in levels}
@@ -25,12 +26,32 @@ class FilterFindings:
             error_msg = f"Missing 'filters' section in filter config {filter_file}"
             logger.error(error_msg)
             raise FilterConfigError(error_msg)
-        levels = {level.lower() for level in filter_section.get("levels") or {} if isinstance(level, str)}
-        modules_include = {module.lower() for module in filter_section.get("modules").get("include") or {} if isinstance(module, str)}
-        modules_exclude = {module.lower() for module in filter_section.get("modules").get("exclude") or {} if isinstance(module, str)}
+        levels = {
+            level.lower()
+            for level in filter_section.get("levels") or {}
+            if isinstance(level, str)
+        }
+        modules_include = {
+            module.lower()
+            for module in filter_section.get("modules").get("include") or {}
+            if isinstance(module, str)
+        }
+        modules_exclude = {
+            module.lower()
+            for module in filter_section.get("modules").get("exclude") or {}
+            if isinstance(module, str)
+        }
 
-        features_include = {feature.lower() for feature in filter_section.get("features").get("include") or {} if isinstance(feature, str)}
-        features_exclude = {feature.lower() for feature in filter_section.get("features").get("exclude") or {} if isinstance(feature, str)}
+        features_include = {
+            feature.lower()
+            for feature in filter_section.get("features").get("include") or {}
+            if isinstance(feature, str)
+        }
+        features_exclude = {
+            feature.lower()
+            for feature in filter_section.get("features").get("exclude") or {}
+            if isinstance(feature, str)
+        }
 
         modules_filtered = modules_include - modules_exclude
         features_filtered = features_include - features_exclude
@@ -40,7 +61,9 @@ class FilterFindings:
             error_msg = f"Empty filter config in {filter_file}: at least one filter include (levels or modules) must be provided"
             logger.error(error_msg)
             raise FilterConfigError(error_msg)
-        logger.info(f"Filter config loaded from {filter_file}: levels={levels}, modules={modules_final}")
+        logger.info(
+            f"Filter config loaded from {filter_file}: levels={levels}, modules={modules_final}"
+        )
         return cls(levels, modules_final)
 
     @classmethod
@@ -49,7 +72,9 @@ class FilterFindings:
         no_filter.matches_filter_criteria = lambda level, module: True
         return no_filter
 
-    def matches_filter_criteria(self, level: Optional[str], module: Optional[str]) -> bool:
+    def matches_filter_criteria(
+        self, level: Optional[str], module: Optional[str]
+    ) -> bool:
         norm_level = level.lower() if level is not None else None
         norm_module = module.lower() if module is not None else None
         if self._levels and not self._modules:

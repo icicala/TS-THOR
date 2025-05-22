@@ -24,8 +24,8 @@
 #     def _get_thor_timestamp(self, json_log: Dict[str, Any]) -> str:
 #         pass
 
-    # def extract_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[str, str]:
-    #     meta = json_log.get("meta", {})
-    #     level = meta.get("level")
-    #     module = meta.get("module")
-    #     return level, module
+# def extract_filterable_fields(self, json_log: Dict[str, Any]) -> tuple[str, str]:
+#     meta = json_log.get("meta", {})
+#     level = meta.get("level")
+#     module = meta.get("module")
+#     return level, module

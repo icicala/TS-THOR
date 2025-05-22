@@ -95,3 +95,6 @@ filters:
     - Bifrost
     - DumpScan
     - ProcessIntegrity
+  audit:
+    - findings
+    - info

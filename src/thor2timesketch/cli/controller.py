@@ -23,6 +23,7 @@ app = typer.Typer(
 console = Console()
 logger = LoggerConfig.get_logger(__name__)
 
+
 def version_callback(value: bool) -> None:
     if value:
         try:
@@ -32,20 +33,34 @@ def version_callback(value: bool) -> None:
         console.print(f"[bold green]thor2timesketch[/] version: [cyan]{pkg_version}[/]")
         raise typer.Exit()
 
+
 @app.command()
 def main(
-        input_file: str = typer.Argument(..., help="Path to THOR JSON log file", metavar="INPUT_FILE"),
-        output_file: Optional[str] = typer.Option(None, "--output-file", "-o",
-                                                  help="Write output to specified JSONL file"),
-        sketch: Optional[str] = typer.Option(None, "--sketch",
-                                             help="Sketch ID or name for ingesting events into Timesketch"),
-        filter_path: Optional[str] = typer.Option(None, "--filter", "-f",
-                                                help="Path to YAML filter configuration"),
-        generate_filter: bool = typer.Option(False, "--generate-filter",
-                                              help="Generate a filter YAML and exit"),
-        verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose debugging output"),
-        _version: bool = typer.Option(False, "--version", callback=version_callback, is_eager=True,
-                                     help="Show version and exit")
+    input_file: str = typer.Argument(
+        ..., help="Path to THOR JSON log file", metavar="INPUT_FILE"
+    ),
+    output_file: Optional[str] = typer.Option(
+        None, "--output-file", "-o", help="Write output to specified JSONL file"
+    ),
+    sketch: Optional[str] = typer.Option(
+        None, "--sketch", help="Sketch ID or name for ingesting events into Timesketch"
+    ),
+    filter_path: Optional[str] = typer.Option(
+        None, "--filter", "-f", help="Path to YAML filter configuration"
+    ),
+    generate_filter: bool = typer.Option(
+        False, "--generate-filter", help="Generate a filter YAML and exit"
+    ),
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose debugging output"
+    ),
+    _version: bool = typer.Option(
+        False,
+        "--version",
+        callback=version_callback,
+        is_eager=True,
+        help="Show version and exit",
+    ),
 ) -> None:
     log_level = logging.DEBUG if verbose else logging.INFO
     LoggerConfig.setup_root_logger(level=log_level)
@@ -57,19 +72,25 @@ def main(
     if generate_filter:
         try:
             FilterCreator(input_file).generate_yaml_file()
-            console.print(f"Filter config written to `{os.path.join(os.getcwd(), OUTPUT_YAML_FILE)}`")
+            console.print(
+                f"Filter config written to `{os.path.join(os.getcwd(), OUTPUT_YAML_FILE)}`"
+            )
             raise typer.Exit()
         except Thor2tsError as e:
             logger.error(f"{e}")
             raise typer.Exit(code=1)
 
     if not (output_file or sketch):
-        logger.error("Use -o/--output-file for file output or --sketch for Timesketch ingestion. Use -h for help.")
+        logger.error(
+            "Use -o/--output-file for file output or --sketch for Timesketch ingestion. Use -h for help."
+        )
         raise typer.Exit(code=1)
 
     try:
         logger.info("Transforming THOR logs...")
-        mapped_events = JsonTransformer().transform_thor_logs(input_json_file=input_file, filter_path=filter_path)
+        mapped_events = JsonTransformer().transform_thor_logs(
+            input_json_file=input_file, filter_path=filter_path
+        )
 
         writer = OutputWriter(input_file, output_file, sketch)
         writer.write(mapped_events)

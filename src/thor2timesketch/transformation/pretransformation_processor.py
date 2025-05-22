@@ -8,7 +8,7 @@ class PreTransformationProcessor:
     def __init__(self, filter_path: Optional[str] = None) -> None:
         self._audit_filter = FilterAudit.read_from_yaml(filter_path)
 
-    def pre_transformer(self, valid_json: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
+    def transformation(self, valid_json: Dict[str, Any]) -> Iterator[Dict[str, Any]]:
         if LOG_VERSION in valid_json:
             yield valid_json
             return

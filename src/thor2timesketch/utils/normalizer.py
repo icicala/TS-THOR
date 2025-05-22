@@ -5,20 +5,24 @@ from thor2timesketch.config.logger import LoggerConfig
 
 logger = LoggerConfig.get_logger(__name__)
 
+
 class JsonNormalizer(ABC):
     @abstractmethod
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:
         pass
+
 
 class IdentityNormalizer(JsonNormalizer):
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:
         logger.debug("Using identity normalizer (no flattening)")
         return data
 
+
 class FlatteningNormalizer(JsonNormalizer):
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:
         logger.debug("Using flattening normalizer")
         return JSONFlattener.flatten_json(data)
+
 
 class AuditTrailNormalizer(JsonNormalizer):
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:

@@ -24,6 +24,9 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Black
+        run: black --check --diff .
+
       - name: Ruff (auto-fix)
         run: ruff check --fix .
 

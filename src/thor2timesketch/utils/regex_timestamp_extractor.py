@@ -11,6 +11,7 @@ from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 
 logger = LoggerConfig.get_logger(__name__)
 
+
 class RegexTimestampExtractor(TimestampExtractor):
 
     def __init__(self) -> None:
@@ -44,9 +45,13 @@ class RegexTimestampExtractor(TimestampExtractor):
                             if parsed_date.tzinfo is None:
                                 parsed_date = parsed_date.replace(tzinfo=timezone.utc)
                             iso_data = parsed_date.isoformat()
-                            logger.debug(f"Found ISO8601 date {iso_data} at path {path}")
-                            timestamps.append(DatetimeField(path=path, datetime=iso_data))
-                        except (ValueError, TypeError)  as e:
+                            logger.debug(
+                                f"Found ISO8601 date {iso_data} at path {path}"
+                            )
+                            timestamps.append(
+                                DatetimeField(path=path, datetime=iso_data)
+                            )
+                        except (ValueError, TypeError) as e:
                             error_msg = f"Error parsing date '{log_json}' at path '{path}': {str(e)}"
                             logger.error(error_msg)
                             raise TimestampError(error_msg)
