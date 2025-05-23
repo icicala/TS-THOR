@@ -4,13 +4,10 @@ from datetime import timezone
 from typing import Dict, Any, List, Tuple
 from dateutil import parser
 from thor2timesketch import constants
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.exceptions import TimestampError
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class RegexTimestampExtractor(TimestampExtractor):
 
@@ -21,7 +18,7 @@ class RegexTimestampExtractor(TimestampExtractor):
 
         if data_json is None:
             error_msg = "Received an empty THOR log as input for timestamp extractor."
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise TimestampError(error_msg)
 
         timestamps: List[DatetimeField] = []
@@ -45,7 +42,7 @@ class RegexTimestampExtractor(TimestampExtractor):
                             if parsed_date.tzinfo is None:
                                 parsed_date = parsed_date.replace(tzinfo=timezone.utc)
                             iso_data = parsed_date.isoformat()
-                            logger.debug(
+                            ConsoleConfig.debug(
                                 f"Found ISO8601 date {iso_data} at path {path}"
                             )
                             timestamps.append(
@@ -53,12 +50,12 @@ class RegexTimestampExtractor(TimestampExtractor):
                             )
                         except (ValueError, TypeError) as e:
                             error_msg = f"Error parsing date '{log_json}' at path '{path}': {str(e)}"
-                            logger.error(error_msg)
+                            ConsoleConfig.error(error_msg)
                             raise TimestampError(error_msg)
 
         except Exception as e:
             error_msg = f"Unexpected error during timestamp extraction: {str(e)}"
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise TimestampError(error_msg)
 
         return timestamps

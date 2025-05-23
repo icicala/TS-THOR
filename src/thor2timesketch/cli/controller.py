@@ -1,12 +1,11 @@
-import logging
+
 import os
 from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
 import typer
-from rich.console import Console
-
+from pathlib import Path
 from thor2timesketch.config.filter_creator import FilterCreator
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import OUTPUT_YAML_FILE
 from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.transformation.json_transformer import JsonTransformer
@@ -20,9 +19,6 @@ app = typer.Typer(
     context_settings={"help_option_names": ["-h", "--help"]},
 )
 
-console = Console()
-logger = LoggerConfig.get_logger(__name__)
-
 
 def version_callback(value: bool) -> None:
     if value:
@@ -30,22 +26,22 @@ def version_callback(value: bool) -> None:
             pkg_version = version("thor2timesketch")
         except PackageNotFoundError:
             pkg_version = "0.0.0"
-        console.print(f"[bold green]thor2timesketch[/] version: [cyan]{pkg_version}[/]")
+        ConsoleConfig.info(f"thor2timesketch version: `{pkg_version}`")
         raise typer.Exit()
 
 
 @app.command()
 def main(
-    input_file: str = typer.Argument(
+    input_file: Path = typer.Argument(
         ..., help="Path to THOR JSON log file", metavar="INPUT_FILE"
     ),
-    output_file: Optional[str] = typer.Option(
-        None, "--output-file", "-o", help="Write output to specified JSONL file"
+    output_file: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Write output to specified JSONL file"
     ),
     sketch: Optional[str] = typer.Option(
         None, "--sketch", help="Sketch ID or name for ingesting events into Timesketch"
     ),
-    filter_path: Optional[str] = typer.Option(
+    filter_path: Optional[Path] = typer.Option(
         None, "--filter", "-f", help="Path to YAML filter configuration"
     ),
     generate_filter: bool = typer.Option(
@@ -62,47 +58,46 @@ def main(
         help="Show version and exit",
     ),
 ) -> None:
-    log_level = logging.DEBUG if verbose else logging.INFO
-    LoggerConfig.setup_root_logger(level=log_level)
 
-    if not os.path.isfile(input_file):
-        logger.error(f"Input file not found: '{input_file}'. Use -h for help.")
+
+    ConsoleConfig.panel("")
+
+    ConsoleConfig.set_verbose(verbose)
+
+    if not input_file.is_file():
+        ConsoleConfig.error(f"Input file not found: '{input_file}'. Use -h for help.")
         raise typer.Exit(code=1)
 
     if generate_filter:
         try:
             FilterCreator(input_file).generate_yaml_file()
-            console.print(
-                f"Filter config written to `{os.path.join(os.getcwd(), OUTPUT_YAML_FILE)}`"
-            )
             raise typer.Exit()
         except Thor2tsError as e:
-            logger.error(f"{e}")
+            ConsoleConfig.error(f"{e}")
             raise typer.Exit(code=1)
 
     if not (output_file or sketch):
-        logger.error(
-            "Use -o/--output-file for file output or --sketch for Timesketch ingestion. Use -h for help."
+        ConsoleConfig.error(
+            "Use -o/--output for file output or --sketch for Timesketch ingestion. Use -h for help."
         )
         raise typer.Exit(code=1)
 
     try:
-        logger.info("Transforming THOR logs...")
         mapped_events = JsonTransformer().transform_thor_logs(
-            input_json_file=input_file, filter_path=filter_path
+            input_file=input_file, filter_path=filter_path
         )
 
         writer = OutputWriter(input_file, output_file, sketch)
         writer.write(mapped_events)
 
-        logger.info("✓ thor2ts successfully completed")
+        ConsoleConfig.success("✓ thor2ts successfully completed")
 
     except KeyboardInterrupt:
-        logger.warning("⚠ Processing interrupted by user")
+        ConsoleConfig.warning("⚠ Processing interrupted by user")
         raise typer.Exit(code=130)
     except Thor2tsError as e:
-        logger.error(f"{e}")
+        ConsoleConfig.error(f"{e}")
         raise typer.Exit(code=1)
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        ConsoleConfig.error(f"Unexpected error: {e}")
         raise typer.Exit(code=1)

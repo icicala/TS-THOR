@@ -1,10 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 from thor2timesketch.utils.json_flattener import JSONFlattener
-from thor2timesketch.config.logger import LoggerConfig
-
-logger = LoggerConfig.get_logger(__name__)
-
+from thor2timesketch.config.console_config import ConsoleConfig
 
 class JsonNormalizer(ABC):
     @abstractmethod
@@ -14,13 +11,13 @@ class JsonNormalizer(ABC):
 
 class IdentityNormalizer(JsonNormalizer):
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        logger.debug("Using identity normalizer (no flattening)")
+        ConsoleConfig.debug("Using identity normalizer (no flattening)")
         return data
 
 
 class FlatteningNormalizer(JsonNormalizer):
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        logger.debug("Using flattening normalizer")
+        ConsoleConfig.debug("Using flattening normalizer")
         return JSONFlattener.flatten_json(data)
 
 
@@ -33,5 +30,4 @@ class AuditTrailNormalizer(JsonNormalizer):
             field = key if key not in data else f"Details_{key}"
             data[field] = value
         flatten_json = JSONFlattener.flatten_json(data)
-
         return flatten_json

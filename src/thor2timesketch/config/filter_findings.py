@@ -1,30 +1,27 @@
 from typing import Optional
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
 from thor2timesketch.exceptions import FilterConfigError
-
-
-logger = LoggerConfig.get_logger(__name__)
-
+from pathlib import Path
 
 class FilterFindings:
     def __init__(self, levels: set[str], modules: set[str]) -> None:
         self._levels = {level.lower() for level in levels}
         self._modules = {module.lower() for module in modules}
-        logger.debug(f"Filter initialized with levels={levels}, modules={modules}")
+        ConsoleConfig.debug(f"Filter initialized with levels={levels}, modules={modules}")
 
     @classmethod
-    def read_filters_yaml(cls, config_filter: Optional[str] = None) -> "FilterFindings":
+    def read_filters_yaml(cls, config_filter: Optional[Path] = None) -> "FilterFindings":
 
         if config_filter is None:
             return cls.null_filter()
 
-        filter_file = YamlConfigReader.load_yaml(config_filter)
+        filter_section = YamlConfigReader.load_yaml(config_filter)
 
-        filter_section = filter_file.get("filters")
+
         if not filter_section:
-            error_msg = f"Missing 'filters' section in filter config {filter_file}"
-            logger.error(error_msg)
+            error_msg = f"Missing 'filters' section in filter config {config_filter}"
+            ConsoleConfig.error(error_msg)
             raise FilterConfigError(error_msg)
         levels = {
             level.lower()
@@ -58,11 +55,11 @@ class FilterFindings:
         modules_final = modules_filtered | features_filtered
 
         if not levels and not modules_final:
-            error_msg = f"Empty filter config in {filter_file}: at least one filter include (levels or modules) must be provided"
-            logger.error(error_msg)
+            error_msg = f"Empty filter config in {config_filter}: at least one filter include (levels or modules) must be provided"
+            ConsoleConfig.error(error_msg)
             raise FilterConfigError(error_msg)
-        logger.info(
-            f"Filter config loaded from {filter_file}: levels={levels}, modules={modules_final}"
+        ConsoleConfig.info(
+            f"Filter config loaded from {config_filter}: levels={levels}, modules={modules_final}"
         )
         return cls(levels, modules_final)
 

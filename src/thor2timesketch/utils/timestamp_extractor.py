@@ -1,12 +1,9 @@
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 from dateutil import parser
 from thor2timesketch.exceptions import MappingError
 from thor2timesketch.utils.datetime_field import DatetimeField
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class TimestampExtractor(ABC):
     def is_same_timestamp(self, time1: str, time2: str) -> bool:
@@ -17,7 +14,7 @@ class TimestampExtractor(ABC):
             return ts_check
         except ValueError as e:
             error_msg = f"Error parsing timestamps: {e}"
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise MappingError(error_msg)
 
     @abstractmethod

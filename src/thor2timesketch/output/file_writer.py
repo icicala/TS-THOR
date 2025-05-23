@@ -1,54 +1,51 @@
 import os
 import json
-from typing import Dict, Any, Iterator
-from thor2timesketch.config.logger import LoggerConfig
+from typing import Dict, Any, Iterator, Union
+
+from pycparser.ply.yacc import error_count
+
+from thor2timesketch.config.console_config import ConsoleConfig
 from rich.progress import Progress, TextColumn, SpinnerColumn
-from thor2timesketch import constants
+from thor2timesketch.constants import OUTPUT_FILE_EXTENSION, DEFAULT_ENCODING, MAX_WRITE_ERRORS
 from thor2timesketch.exceptions import OutputError
-
-logger = LoggerConfig.get_logger(__name__)
-
+from pathlib import Path
 
 class FileWriter:
-    def __init__(self, output_file: str):
+    def __init__(self, output_file: Path):
         self.output_file = output_file
 
-    def _normalize_extension(self, path: str) -> str:
-        file_name, extension = os.path.splitext(path)
-        if extension.lower() != constants.OUTPUT_FILE_EXTENSION:
-            path = file_name + constants.OUTPUT_FILE_EXTENSION
-            logger.info(f"Changed output file to '{path}' to ensure 'JSONL' format")
-        return path
+    def _normalize_extension(self) -> None:
+        if self.output_file.suffix.lower() != OUTPUT_FILE_EXTENSION:
+            self.output_path = self.output_file.with_suffix(OUTPUT_FILE_EXTENSION)
+            ConsoleConfig.info(f"Changed output file to '{self.output_path}' to ensure JSONL format")
 
     def _prepare_output_dir(self) -> None:
-        output_dir = os.path.dirname(self.output_file)
-        if output_dir and not os.path.isdir(output_dir):
+        output_dir = self.output_path.parent
+        if output_dir and not output_dir.is_dir():
             try:
-                os.makedirs(output_dir, exist_ok=True)
-                logger.info(f"Created output directory: '{output_dir}'")
-            except Exception as e:
-                logger.error(f"Failed to create output directory {output_dir}`: {e}")
+                output_dir.mkdir(parents=True, exist_ok=True)
+                ConsoleConfig.info(f"Created output directory: '{output_dir}'")
+            except OSError as e:
+                ConsoleConfig.error(f"Failed to create output directory {output_dir}`: {e}")
                 raise OutputError(f"Cannot create output directory: {e}")
 
-    def _cleanup_file(self, output_file: str) -> None:
-        if os.path.exists(output_file):
+    def _cleanup_file(self) -> None:
+        if self.output_path.exists():
             try:
-                os.remove(output_file)
-                logger.debug(f"Removed output file: '{output_file}'")
+                self.output_path.unlink()
+                ConsoleConfig.debug(f"Removed output file: '{self.output_path}'")
             except OSError as e:
-                logger.error(f"Failed to remove output file: {e}")
+                ConsoleConfig.error(f"Failed to remove output file: {e}")
                 raise OutputError(f"Cannot remove output file: {e}")
 
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
-        self.output_file = self._normalize_extension(self.output_file)
+        self._normalize_extension()
         self._prepare_output_dir()
-        mode = "a" if os.path.exists(self.output_file) else "w"
+        mode = "a" if self.output_path.exists() else "w"
         action = "Appending to" if mode == "a" else "Writing to"
-        logger.info(f"'{action}' file: '{self.output_file}'")
+        ConsoleConfig.info(f"'{action}' file: '{self.output_file}'")
         try:
-            processed_count = 0
-            error_count = 0
-            output_filename = os.path.basename(self.output_file)
+            processed_count = error_count = 0
             with Progress(
                 SpinnerColumn(),
                 TextColumn("[bold green]Writing to '{task.fields[filename]}'"),
@@ -61,42 +58,37 @@ class FileWriter:
                     total=None,
                     completed=0,
                     errors=0,
-                    filename=output_filename,
+                    filename=self.output_path.name,
                 )
 
-                with open(
-                    self.output_file, mode, encoding=constants.DEFAULT_ENCODING
-                ) as file:
+                with self.output_path.open(mode, encoding=DEFAULT_ENCODING) as file:
                     for event in events:
                         try:
                             file.write(json.dumps(event) + "\n")
                             processed_count += 1
-                        except Exception as e:
+                        except (TypeError, ValueError, OSError) as e:
                             error_count += 1
-                            if error_count <= constants.MAX_WRITE_ERRORS:
+                            if error_count <= MAX_WRITE_ERRORS:
                                 logger.error(f"Error writing event to file: {e}")
                         finally:
                             progress.update(
                                 task, completed=processed_count, errors=error_count
                             )
 
-            if error_count > 0:
-                logger.error(
+            if error_count:
+                ConsoleConfig.error(
                     f"Encountered '{error_count}' errors while writing '{processed_count}' events"
                 )
-                self._cleanup_file(self.output_file)
+                self._cleanup_file()
                 raise OutputError(f"File processing failed with {error_count} errors")
-            else:
-                logger.info(
-                    f"Successfully wrote '{processed_count}' events to '{self.output_file}'"
-                )
+            ConsoleConfig.success(f"Successfully wrote '{processed_count}' events to '{self.output_file}'")
 
         except KeyboardInterrupt:
-            logger.warning("Process interrupted by user")
-            self._cleanup_file(self.output_file)
+            ConsoleConfig.warning("Process interrupted by user")
+            self._cleanup_file()
             raise
 
         except Exception as e:
-            logger.error(f"Error writing to file: {e}")
-            self._cleanup_file(self.output_file)
+            ConsoleConfig.error(f"Error writing to file: {e}")
+            self._cleanup_file()
             raise OutputError(str(e))

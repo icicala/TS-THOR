@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
+from thor2timesketch.exceptions import MappingError
 from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.normalizer import JsonNormalizer, IdentityNormalizer
 from thor2timesketch.utils.regex_timestamp_extractor import RegexTimestampExtractor
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 from thor2timesketch.utils.thor_finding_id import ThorFindingId
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class MapperJsonBase(ABC):
     THOR_TIMESTAMP_FIELD: str = ""
@@ -30,39 +28,45 @@ class MapperJsonBase(ABC):
         )
 
     def map_thor_events(self, json_log: Dict[str, Any]) -> List[Dict[str, Any]]:
+        try:
+            ConsoleConfig.debug("Starting to map THOR events")
+            normalized_json = self.normalizer.normalize(json_log)
+            events: List[Dict[str, Any]] = []
 
-        logger.debug("Starting to map THOR events")
-        normalized_json = self.normalizer.normalize(json_log)
-        events: List[Dict[str, Any]] = []
+            event_group_id = ThorFindingId.get_finding_id()
 
-        event_group_id = ThorFindingId.get_finding_id()
+            thor_timestamp = self._get_thor_timestamp(normalized_json)
+            thor_event = self._create_thor_event(normalized_json, event_group_id)
+            events.append(thor_event.to_dict())
 
-        thor_timestamp = self._get_thor_timestamp(normalized_json)
-        thor_event = self._create_thor_event(normalized_json, event_group_id)
-        events.append(thor_event.to_dict())
-
-        all_timestamps: List[DatetimeField] = self._get_timestamp_extract(
-            normalized_json
-        )
-        additional_timestamp = [
-            time
-            for time in all_timestamps
-            if not self.timestamp_extractor.is_same_timestamp(
-                time.datetime, thor_timestamp.datetime
+            all_timestamps: List[DatetimeField] = self._get_timestamp_extract(
+                normalized_json
             )
-            and time.path != thor_timestamp.path
-        ]
-
-        if additional_timestamp:
-            logger.debug(f"Found {len(additional_timestamp)} additional timestamps")
-            for timestamp in additional_timestamp:
-                event = self._create_additional_timestamp_event(
-                    normalized_json, timestamp, event_group_id
+            additional_timestamp = [
+                time
+                for time in all_timestamps
+                if not self.timestamp_extractor.is_same_timestamp(
+                    time.datetime, thor_timestamp.datetime
                 )
-                events.append(event.to_dict())
+                and time.path != thor_timestamp.path
+            ]
 
-        logger.debug(f"Mapped {len(events)} events")
-        return events
+            if additional_timestamp:
+                ConsoleConfig.debug(f"Found {len(additional_timestamp)} additional timestamps")
+                for timestamp in additional_timestamp:
+                    event = self._create_additional_timestamp_event(
+                        normalized_json, timestamp, event_group_id
+                    )
+                    events.append(event.to_dict())
+
+            ConsoleConfig.debug(f"Mapped {len(events)} events")
+            return events
+        except (MappingError, TimeoutError, ValueError):
+            raise
+        except Exception as e:
+            error_msg = f"Unexpected error while mapping events: {e}"
+            ConsoleConfig.error(error_msg)
+            raise MappingError(error_msg) from e
 
     def _create_thor_event(
         self, json_log: Dict[str, Any], event_group_id: str

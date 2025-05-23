@@ -2,16 +2,12 @@ import os
 from typing import Dict, Any, Iterator, Optional
 from thor2timesketch.config.filter_findings import FilterFindings
 from thor2timesketch.constants import MB_CONVERTER
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapper_loader import load_all_mappers
-from thor2timesketch.transformation.pretransformation_processor import (
-    PreTransformationProcessor,
-)
-
-logger = LoggerConfig.get_logger(__name__)
-
+from thor2timesketch.transformation.pretransformation_processor import PreTransformationProcessor
+from pathlib import Path
 
 class JsonTransformer:
 
@@ -22,7 +18,7 @@ class JsonTransformer:
         self.mb = MB_CONVERTER
 
     def transform_thor_logs(
-        self, input_file: str, filter_path: Optional[str]
+        self, input_file: Path, filter_path: Optional[Path]
     ) -> Iterator[Dict[str, Any]]:
 
         selectors = FilterFindings.read_filters_yaml(filter_path)
@@ -53,22 +49,9 @@ class JsonTransformer:
         level, module = mapper.get_filterable_fields(record)
         return selectors.matches_filter_criteria(level, module)
 
-    def _log_start(self, path: str) -> None:
-        size = os.path.getsize(path) / self.mb
-        logger.info(f"Processing input file: `{path}` ({size:.2f} MB)")
+    def _log_start(self, input_file: Path) -> None:
+        size = os.path.getsize(input_file) / self.mb
+        ConsoleConfig.info(f"Starting transforming events from input file: `{input_file}` ({size:.2f} MB)")
 
-    def _log_end(self, path: str) -> None:
-        logger.debug(f"Finished processing input file: `{path}`")
-
-
-if __name__ == "__main__":
-    import time
-
-    json_v1 = "../../../thoraudittrail7mail.json"
-    ymalfile = "../config/thor2ts_filter.yaml"
-    transformer = JsonTransformer()
-
-    # single-core
-    start = time.monotonic()
-    single_count = sum(1 for _ in transformer.transform_thor_logs(json_v1, ymalfile))
-    print(f"Single-core: {single_count} events in {time.monotonic() - start:.2f}s")
+    def _log_end(self, input_file: Path) -> None:
+        ConsoleConfig.success(f"Finished transforming events from input file: `{input_file}`")

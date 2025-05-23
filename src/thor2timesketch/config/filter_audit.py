@@ -1,27 +1,21 @@
 from typing import Optional, Set
-
-from thor2timesketch.config.logger import LoggerConfig
+from pathlib import Path
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
 from thor2timesketch.constants import AUDIT_INFO, AUDIT_FINDING, AUDIT_TRAIL
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class FilterAudit:
 
     def __init__(self, audit_trail: Set[str]) -> None:
         self._allowed_filters = {select.lower() for select in audit_trail}
-        logger.debug(
-            f"Audit trail filter initialized with types={self._allowed_filters}"
-        )
+        ConsoleConfig.debug(f"Audit trail filter initialized with types={self._allowed_filters}")
 
     @classmethod
-    def read_from_yaml(cls, config_path: Optional[str]) -> "FilterAudit":
+    def read_audit_yaml(cls, config_path: Optional[Path]) -> "FilterAudit":
         if not config_path:
             return cls.null_filter()
 
-        filter_file = YamlConfigReader.load_yaml(config_path)
-        filters_section = filter_file.get("filters", {})
+        filters_section = YamlConfigReader.load_yaml(config_path)
         allowed_filters = set(selector for selector in filters_section.get(AUDIT_TRAIL))
         if not allowed_filters:
             allowed_filters = {AUDIT_INFO, AUDIT_FINDING}
@@ -51,4 +45,5 @@ class FilterAudit:
             return AUDIT_INFO
         if AUDIT_FINDING in self._allowed_filters and has_findings:
             return AUDIT_FINDING
+
         return None

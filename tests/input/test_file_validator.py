@@ -1,9 +1,8 @@
 import pytest
 from pathlib import Path
-
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.exceptions import (
-    FileNotFoundError,
+    FileNotFound,
     FileNotReadableError,
     EmptyFileError,
     InvalidFileExtensionError,
@@ -32,7 +31,7 @@ def test_file_not_readable(tmp_path, validator, monkeypatch):
 @pytest.mark.parametrize(
     "filename, content, expected_exc",
     [
-        ("nonexistent.json",    None, FileNotFoundError),
+        ("nonexistent.json", None, FileNotFound),
         ("empty.json",          "",   EmptyFileError),
         ("invalid.txt",         "x",  InvalidFileExtensionError),
     ],

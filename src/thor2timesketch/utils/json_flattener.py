@@ -1,11 +1,8 @@
 from typing import Any, Dict
 from collections import deque
-from thor2timesketch.config.logger import LoggerConfig
+from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import DELIMITER
 from thor2timesketch.exceptions import FlattenJsonError
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class JSONFlattener:
 
@@ -32,7 +29,7 @@ class JSONFlattener:
                     flattened[path] = current
         except Exception as e:
             error_msg = f"Error flattening JSON: {e}"
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise FlattenJsonError(error_msg)
-        logger.debug("Successfully flattened JSON: %s", flattened)
+        ConsoleConfig.debug("Successfully flattened JSON: %s", flattened)
         return flattened

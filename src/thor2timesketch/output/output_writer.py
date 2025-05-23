@@ -1,13 +1,14 @@
 from typing import Iterator, Dict, Any, Optional
 from thor2timesketch.output.file_writer import FileWriter
 from thor2timesketch.output.ts_ingest import TSIngest
+from pathlib import Path
 
 
 class OutputWriter:
     def __init__(
         self,
-        input_file: str,
-        output_file: Optional[str] = None,
+        input_file: Path,
+        output_file: Optional[Path] = None,
         sketch: Optional[str] = None,
     ) -> None:
         self.input_file = input_file

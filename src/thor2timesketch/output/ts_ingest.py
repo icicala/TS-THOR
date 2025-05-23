@@ -1,81 +1,71 @@
-import os.path
 import time
+from pathlib import Path
 from typing import Dict, Union, Any, Iterator
 from rich.progress import Progress, TextColumn, SpinnerColumn
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
-from thor2timesketch.config.logger import LoggerConfig
-from thor2timesketch import constants
+from thor2timesketch.config.console_config import ConsoleConfig
+from thor2timesketch.constants import TS_SCOPE
 from thor2timesketch.exceptions import TimesketchError
-
-logger = LoggerConfig.get_logger(__name__)
-
 
 class TSIngest:
 
-    def __init__(self, thor_file: str, sketch: str) -> None:
+    def __init__(self, thor_file: Path, sketch: str) -> None:
         self.thor_file = thor_file
         self.ts_client = timesketch_config.get_client()
-        if self.ts_client is None:
+        if not self.ts_client:
             raise TimesketchError(
                 "Failed to connect to Timesketch client. Check your configuration."
             )
-        self.timeline_name: str = self._get_timeline_name(thor_file)
+        self.timeline_name: str = self.thor_file.stem
         sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
         self.my_sketch: Any = self._load_sketch(sketch_type)
 
-    def _get_timeline_name(self, thor_file: str) -> str:
-        file_basename: str = os.path.basename(thor_file)
-        file_name, _ = os.path.splitext(file_basename)
-        return file_name
 
     def _identify_sketch_type(self, sketch: str) -> Union[int, str]:
         return int(sketch) if sketch.isdigit() else sketch
 
     def _get_available_sketches(self) -> Dict[str, int]:
-        sketches = {}
+        sketches: dict[str, int] = {}
         try:
-            for scope in constants.TS_SCOPE:
+            for scope in TS_SCOPE:
                 for sketch in self.ts_client.list_sketches(
                     scope=scope, include_archived=False
                 ):
                     sketches[sketch.name] = int(sketch.id)
             return sketches
-        except TimesketchError as error:
+        except Exception as error:
             error_msg = f"fFailed to retrieve sketches from Timesketch: {error}"
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise TimesketchError(error_msg)
 
     def _load_sketch(self, sketch: Union[int, str]) -> Any:
         try:
-            sketches = self._get_available_sketches()
+            available_sketches = self._get_available_sketches()
 
-            if isinstance(sketch, int):
-                if sketch in sketches.values():
-                    my_sketch = self.ts_client.get_sketch(sketch)
-                    logger.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
-                    return my_sketch
-                sketch = f"Sketch_{sketch}"
+            if isinstance(sketch, int) and sketch in available_sketches.values():
+                my_sketch = self.ts_client.get_sketch(sketch)
+                ConsoleConfig.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
+                return my_sketch
 
-            elif isinstance(sketch, str):
-                if sketch in sketches.keys():
-                    my_sketch = self.ts_client.get_sketch(sketches[sketch])
-                    logger.info(f"Found sketch with name '{sketch}': ID {my_sketch.id}")
-                    return my_sketch
+            if isinstance(sketch, str) and sketch in available_sketches.keys():
+                my_sketch = self.ts_client.get_sketch(available_sketches[sketch])
+                ConsoleConfig.info(f"Found sketch with name '{sketch}': ID {my_sketch.id}")
+                return my_sketch
 
-            logger.info("Creating a new sketch with name '{}'".format(sketch))
-            my_sketch = self.ts_client.create_sketch(
-                sketch, "New sketch created by thor2ts"
+            ConsoleConfig.info("Creating a new sketch with name `{sketch}`")
+            new_sketch = self.ts_client.create_sketch(
+                sketch, "Created by thor2ts"
             )
-            if not my_sketch or not hasattr(my_sketch, "id"):
-                raise TimesketchError("Failed to create sketch with name '{sketch}'")
-            logger.info(
-                f"New sketch has been created with name: '{my_sketch.name}' and ID: {my_sketch.id}"
+            if not new_sketch or not hasattr(new_sketch, "id"):
+                raise TimesketchError("Failed to create sketch with name `{sketch}`")
+            ConsoleConfig.info(
+                f"New sketch has been created with name: '{new_sketch.name}' and ID: {new_sketch.id}"
             )
-            return my_sketch
+            return new_sketch
         except Exception as error:
             error_msg = f"Failed to load sketch: {error}"
-            logger.error(error_msg)
+            ConsoleConfig.error(error_msg)
             raise TimesketchError(error_msg)
 
     def ingest_events(self, events: Iterator[Dict[str, Any]]) -> None:
@@ -83,12 +73,11 @@ class TSIngest:
         try:
             self.ts_client.get_sketch(self.my_sketch.id)
         except Exception:
-            TimesketchError(
-                f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest"
-            )
+            error_msg = f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest"
+            ConsoleConfig.error(error_msg)
+            TimesketchError(error_msg)
 
-        processed_count = 0
-        error_count = 0
+        processed_count = error_count = 0
 
         with Progress(
             SpinnerColumn(),
@@ -117,14 +106,14 @@ class TSIngest:
                             processed_count += 1
                         except Exception as e:
                             error_count += 1
-                            logger.debug(f"Error adding event to streamer: '{e}'")
+                            ConsoleConfig.debug(f"Error adding event to streamer: '{e}'")
                         finally:
                             progress.update(
                                 task, completed=processed_count, errors=error_count
                             )
                 if not streamer.timeline:
                     raise TimesketchError(
-                        "Error creating timeline, ingestion may have failed"
+                        "Error creating timeline, ingestion aborted"
                     )
 
                 progress.update(task, description="[bold yellow]Indexing timeline…")
@@ -135,7 +124,7 @@ class TSIngest:
                     and not timeout_reached
                 ):
                     if time.time() > deadline:
-                        logger.warning(
+                        ConsoleConfig.warning(
                             "Indexing did not complete within 60 seconds - the timeline will continue to be indexed in the background"
                         )
                         timeout_reached = True
@@ -144,15 +133,15 @@ class TSIngest:
                     progress.update(task, description="[bold green]Indexing complete")
 
             except KeyboardInterrupt:
-                logger.warning("Timesketch ingestion interrupted by user")
+                ConsoleConfig.warning("Timesketch ingestion interrupted by user")
                 raise
             except Exception as error:
                 error_msg = f"Failed to ingest events: {error}"
-                logger.error(error_msg)
+                ConsoleConfig.error(error_msg)
                 raise TimesketchError(error_msg)
 
-        logger.info(
+        ConsoleConfig.success(
             f"Processed {processed_count} events for sketch '{self.my_sketch.name}'"
         )
         if error_count > 0:
-            logger.warning(f"Encountered {error_count} errors during ingestion")
+            ConsoleConfig.warning(f"Encountered {error_count} errors during ingestion")
