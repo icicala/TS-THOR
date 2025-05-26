@@ -1,5 +1,10 @@
 from typing import Iterator, Dict, Any, Union
-from thor2timesketch.exceptions import JsonValidationError, InputError, JsonParseError
+from thor2timesketch.exceptions import (
+    JsonValidationError,
+    InputError,
+    JsonParseError,
+    FileValidationError,
+)
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.input.json_validator import JsonValidator
 from thor2timesketch.config.console_config import ConsoleConfig
@@ -18,8 +23,11 @@ class JsonReader:
         return valid_file
 
     def get_valid_data(self, input_file: Union[str, Path]) -> Iterator[Dict[str, Any]]:
-        valid_file = self._validate_file(input_file)
-        ConsoleConfig.debug("JSON file validated successfully")
+        try:
+            valid_file = self._validate_file(input_file)
+            ConsoleConfig.info("File is valid and ready for processing.")
+        except FileValidationError as e:
+            raise InputError(f"File validation error: {e}") from e
         return self._generate_valid_json(valid_file)
 
     def _generate_valid_json(self, valid_file: Path) -> Iterator[Dict[str, Any]]:
@@ -31,11 +39,10 @@ class JsonReader:
                         if json_data is not None:
                             yield json_data
                     except (JsonParseError, JsonValidationError) as error:
-                        ConsoleConfig.error(
+                        raise InputError(
                             f"Error parsing JSON at line {line_num}: {error}"
                         )
-                        raise
         except IOError as error:
-            message_err = f"Error opening or reading file '{valid_file}': {error}"
-            ConsoleConfig.error(message_err)
-            raise InputError(message_err) from error
+            raise InputError(
+                f"Error opening or reading file '{valid_file}': {error}"
+            ) from error

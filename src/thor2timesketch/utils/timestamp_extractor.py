@@ -1,4 +1,3 @@
-from thor2timesketch.config.console_config import ConsoleConfig
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
 from dateutil import parser
@@ -14,9 +13,7 @@ class TimestampExtractor(ABC):
             ts_check = datetime1 == datetime2
             return ts_check
         except ValueError as e:
-            error_msg = f"Error parsing timestamps: {e}"
-            ConsoleConfig.error(error_msg)
-            raise MappingError(error_msg)
+            raise MappingError(f"Error parsing timestamps: {e}")
 
     @abstractmethod
     def extract(self, data: Dict[str, Any]) -> List[DatetimeField]:

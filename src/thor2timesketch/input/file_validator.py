@@ -20,31 +20,26 @@ class FileValidator:
         self._check_file_readable(file_path)
         self._check_file_not_empty(file_path)
         self._check_file_extension(file_path)
-        ConsoleConfig.info(f"File '{file_path}' is valid and ready for processing.")
         return file_path
 
     def _check_file_exists(self, file_path: Path) -> None:
         if not file_path.is_file():
-            error_msg = f"File '{file_path}' does not exist."
-            ConsoleConfig.error(error_msg)
-            raise FileNotFound(error_msg)
-        ConsoleConfig.debug(f"File '{file_path}' is valid.")
+            raise FileNotFound(f"File '{file_path}' does not exist.")
+        ConsoleConfig.debug(f"File '{file_path}' is found")
 
     def _check_file_readable(self, file_path: Path) -> None:
         try:
             with file_path.open("rb"):
                 pass
         except OSError as e:
-            error_msg = f"File '{file_path}' is not readable: {e}"
-            ConsoleConfig.error(error_msg)
-            raise FileNotReadableError(error_msg) from None
-        ConsoleConfig.debug(f"File '{file_path}' is readable.")
+            raise FileNotReadableError(
+                f"File '{file_path}' is not readable: {e}"
+            ) from e
+        ConsoleConfig.debug(f"File '{file_path}' has read permissions.")
 
     def _check_file_not_empty(self, file_path: Path) -> None:
         if file_path.stat().st_size == EMPTY_FILE:
-            error_msg = f"File '{file_path}' is empty."
-            ConsoleConfig.error(error_msg)
-            raise EmptyFileError(error_msg)
+            raise EmptyFileError(f"File '{file_path}' is empty.")
         ConsoleConfig.debug(f"File '{file_path}' is not empty.")
 
     def _check_file_extension(self, file_path: Path) -> None:
@@ -55,6 +50,5 @@ class FileValidator:
                 f"Invalid file extension for '{file_path}'. "
                 f"Expected one of: ['{expected}'], but got: '{ext!r}'"
             )
-            ConsoleConfig.error(error_msg)
             raise InvalidFileExtensionError(error_msg)
         ConsoleConfig.debug(f"File '{file_path}' has a valid extension: '{ext}'")

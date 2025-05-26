@@ -58,7 +58,7 @@ def main(
 
     ConsoleConfig.panel(
         "Convert THOR security scanner logs to Timesketch format",
-        title="thor2ts",
+        title="thor2ts powered by Nextron Systems",
         style="bold cyan",
     )
 

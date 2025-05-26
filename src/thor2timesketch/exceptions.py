@@ -67,5 +67,5 @@ class OutputError(Thor2tsError):
     pass
 
 
-class TimesketchError(OutputError):
+class TimesketchError(Thor2tsError):
     pass

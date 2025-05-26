@@ -1,7 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from thor2timesketch.config.console_config import ConsoleConfig
-from thor2timesketch.exceptions import MappingError
+from thor2timesketch.exceptions import (
+    MappingError,
+    TimestampError,
+    FlattenJsonError,
+    ProcessingError,
+)
 from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.normalizer import JsonNormalizer, IdentityNormalizer
@@ -64,12 +69,10 @@ class MapperJsonBase(ABC):
 
             ConsoleConfig.debug(f"Mapped {len(events)} events")
             return events
-        except (MappingError, TimeoutError, ValueError):
-            raise
+        except (MappingError, TimestampError, FlattenJsonError) as e:
+            raise ProcessingError(f"Error while mapping events: {e}") from e
         except Exception as e:
-            error_msg = f"Unexpected error while mapping events: {e}"
-            ConsoleConfig.error(error_msg)
-            raise MappingError(error_msg) from e
+            raise ProcessingError(f"Unexpected error while mapping events: {e}") from e
 
     def _create_thor_event(
         self, json_log: Dict[str, Any], event_group_id: str

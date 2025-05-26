@@ -18,9 +18,9 @@ class RegexTimestampExtractor(TimestampExtractor):
     def extract(self, data_json: Dict[str, Any]) -> List[DatetimeField]:
 
         if data_json is None:
-            error_msg = "Received an empty THOR log as input for timestamp extractor."
-            ConsoleConfig.error(error_msg)
-            raise TimestampError(error_msg)
+            raise TimestampError(
+                "Received an empty THOR log as input for timestamp extractor."
+            )
 
         timestamps: List[DatetimeField] = []
         queue: deque[Tuple[Dict[str, Any], str]] = deque([(data_json, "")])
@@ -50,13 +50,12 @@ class RegexTimestampExtractor(TimestampExtractor):
                                 DatetimeField(path=path, datetime=iso_data)
                             )
                         except (ValueError, TypeError) as e:
-                            error_msg = f"Error parsing date '{log_json}' at path '{path}': {str(e)}"
-                            ConsoleConfig.error(error_msg)
-                            raise TimestampError(error_msg)
+                            raise TimestampError(
+                                f"Error parsing date '{log_json}' at path '{path}': {str(e)}"
+                            )
 
         except Exception as e:
-            error_msg = f"Unexpected error during timestamp extraction: {str(e)}"
-            ConsoleConfig.error(error_msg)
-            raise TimestampError(error_msg)
-
+            raise TimestampError(
+                f"Unexpected error during timestamp extraction: {str(e)}"
+            )
         return timestamps

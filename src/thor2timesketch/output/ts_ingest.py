@@ -35,9 +35,9 @@ class TSIngest:
                     sketches[sketch.name] = int(sketch.id)
             return sketches
         except Exception as error:
-            error_msg = f"fFailed to retrieve sketches from Timesketch: {error}"
-            ConsoleConfig.error(error_msg)
-            raise TimesketchError(error_msg)
+            raise TimesketchError(
+                f"fFailed to retrieve sketches from Timesketch: {error}"
+            )
 
     def _load_sketch(self, sketch: Union[int, str]) -> Any:
         try:
@@ -64,18 +64,16 @@ class TSIngest:
             )
             return new_sketch
         except Exception as error:
-            error_msg = f"Failed to load sketch: {error}"
-            ConsoleConfig.error(error_msg)
-            raise TimesketchError(error_msg)
+            raise TimesketchError(f"Failed to load sketch: {error}")
 
     def ingest_events(self, events: Iterator[Dict[str, Any]]) -> None:
 
         try:
             self.ts_client.get_sketch(self.my_sketch.id)
         except Exception:
-            error_msg = f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest"
-            ConsoleConfig.error(error_msg)
-            TimesketchError(error_msg)
+            raise TimesketchError(
+                f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest"
+            )
 
         processed_count = error_count = 0
 
@@ -136,9 +134,7 @@ class TSIngest:
                 ConsoleConfig.warning("Timesketch ingestion interrupted by user")
                 raise
             except Exception as error:
-                error_msg = f"Failed to ingest events: {error}"
-                ConsoleConfig.error(error_msg)
-                raise TimesketchError(error_msg)
+                raise TimesketchError(f"Failed to ingest events: {error}")
 
         ConsoleConfig.success(
             f"Processed {processed_count} events for sketch '{self.my_sketch.name}'"

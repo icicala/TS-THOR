@@ -1,7 +1,5 @@
 import json
 from typing import Dict, Any, Iterator
-
-
 from thor2timesketch.config.console_config import ConsoleConfig
 from rich.progress import Progress, TextColumn, SpinnerColumn
 from thor2timesketch.constants import (
@@ -31,10 +29,9 @@ class FileWriter:
                 output_dir.mkdir(parents=True, exist_ok=True)
                 ConsoleConfig.info(f"Created output directory: '{output_dir}'")
             except OSError as e:
-                ConsoleConfig.error(
+                raise OutputError(
                     f"Failed to create output directory {output_dir}`: {e}"
                 )
-                raise OutputError(f"Cannot create output directory: {e}")
 
     def _cleanup_file(self) -> None:
         if self.output_file.exists():
@@ -42,8 +39,7 @@ class FileWriter:
                 self.output_file.unlink()
                 ConsoleConfig.debug(f"Removed output file: '{self.output_file}'")
             except OSError as e:
-                ConsoleConfig.error(f"Failed to remove output file: {e}")
-                raise OutputError(f"Cannot remove output file: {e}")
+                raise OutputError(f"Failed to remove output file: {e}")
 
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
         self._normalize_extension()
@@ -75,19 +71,20 @@ class FileWriter:
                             processed_count += 1
                         except (TypeError, ValueError, OSError) as e:
                             error_count += 1
-                            if error_count <= MAX_WRITE_ERRORS:
-                                ConsoleConfig.error(f"Error writing event to file: {e}")
+                            if error_count >= MAX_WRITE_ERRORS:
+                                raise OutputError(
+                                    f"Too many write errors: {error_count}"
+                                ) from e
                         finally:
                             progress.update(
                                 task, completed=processed_count, errors=error_count
                             )
 
             if error_count:
-                ConsoleConfig.error(
+                self._cleanup_file()
+                raise OutputError(
                     f"Encountered '{error_count}' errors while writing '{processed_count}' events"
                 )
-                self._cleanup_file()
-                raise OutputError(f"File processing failed with {error_count} errors")
             ConsoleConfig.success(
                 f"Successfully wrote '{processed_count}' events to '{self.output_file}'"
             )
@@ -98,6 +95,5 @@ class FileWriter:
             raise
 
         except Exception as e:
-            ConsoleConfig.error(f"Error writing to file: {e}")
             self._cleanup_file()
-            raise OutputError(str(e))
+            raise OutputError(f"Error writing to file: {e}")

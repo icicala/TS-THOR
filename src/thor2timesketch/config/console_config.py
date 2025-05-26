@@ -2,12 +2,17 @@ from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel
 from rich import box
+from rich.align import Align
 from rich.table import Table
 
 
 class ConsoleConfig:
     LEVELS = {
-        "DEBUG": 1, "INFO": 2, "SUCCESS": 3, "WARNING": 5, "ERROR": 8,
+        "DEBUG": 1,
+        "INFO": 2,
+        "SUCCESS": 3,
+        "WARNING": 5,
+        "ERROR": 8,
     }
     min_level = LEVELS["INFO"]
 
@@ -37,19 +42,36 @@ class ConsoleConfig:
         cls.console.print(table, markup=True, highlight=False)
 
     @classmethod
-    def info(cls, message: str)    -> None: cls._print("INFO", message)
+    def info(cls, message: str) -> None:
+        cls._print("INFO", message)
+
     @classmethod
-    def debug(cls, message: str)   -> None: cls._print("DEBUG", message)
+    def debug(cls, message: str) -> None:
+        cls._print("DEBUG", message)
+
     @classmethod
-    def warning(cls, message: str) -> None: cls._print("WARNING", message)
+    def warning(cls, message: str) -> None:
+        cls._print("WARNING", message)
+
     @classmethod
-    def error(cls, message: str)   -> None: cls._print("ERROR", message)
+    def error(cls, message: str) -> None:
+        cls._print("ERROR", message)
+
     @classmethod
-    def success(cls, message: str) -> None: cls._print("SUCCESS", message)
+    def success(cls, message: str) -> None:
+        cls._print("SUCCESS", message)
 
     @classmethod
     def panel(cls, msg: str, title: str = "thor2ts", style: str = "blue") -> None:
-        cls.console.print(Panel.fit(msg, title=title, style=style, box=box.ASCII2))
+        cls.console.print(
+            Panel(
+                Align(msg, align="center"),
+                title=title,
+                style=style,
+                box=box.ASCII2,
+                expand=True,
+            )
+        )
 
     @classmethod
     def set_verbose(cls, verbose: bool) -> None:

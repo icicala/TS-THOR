@@ -1,6 +1,11 @@
 from typing import Dict, Any, List
 from abc import abstractmethod
-from thor2timesketch.exceptions import MappingError
+from thor2timesketch.exceptions import (
+    MappingError,
+    ProcessingError,
+    TimestampError,
+    FlattenJsonError,
+)
 from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.utils.audit_timestamp_extractor import AuditTimestampExtractor
@@ -30,14 +35,12 @@ class MapperJsonAudit(MapperJsonBase):
                     normalized, time_data, event_group_id, primary
                 )
                 events.append(event.to_dict())
-            ConsoleConfig.debug("Mapped {len(events)} THOR audit events")
+            ConsoleConfig.debug(f"Mapped '{len(events)}' THOR audit events")
             return events
-        except MappingError:
-            raise
+        except (MappingError, TimestampError, FlattenJsonError) as e:
+            raise ProcessingError(f"Error while mapping audit events: {e}") from e
         except Exception as e:
-            error_msg = f"Unexpected error while mapping audit events: {e}"
-            ConsoleConfig.error(error_msg)
-            raise MappingError(error_msg) from e
+            raise ProcessingError(f"Unexpected error while mapping audit events: {e}")
 
     @abstractmethod
     def _create_audit_event(

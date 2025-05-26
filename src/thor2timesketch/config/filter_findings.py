@@ -24,9 +24,9 @@ class FilterFindings:
         filter_section = YamlConfigReader.load_yaml(config_filter)
 
         if not filter_section:
-            error_msg = f"Missing 'filters' section in filter config {config_filter}"
-            ConsoleConfig.error(error_msg)
-            raise FilterConfigError(error_msg)
+            raise FilterConfigError(
+                f"Missing 'filters' section in filter config {config_filter}"
+            )
 
         levels = {
             level.lower()
@@ -61,9 +61,9 @@ class FilterFindings:
         modules_final = modules_filtered | features_filtered
 
         if not levels and not modules_final:
-            error_msg = f"Empty filter config in {config_filter}: at least one filter include (levels or modules) must be provided"
-            ConsoleConfig.error(error_msg)
-            raise FilterConfigError(error_msg)
+            raise FilterConfigError(
+                f"Empty filter config in {config_filter}: at least one filter include (levels or modules) must be provided"
+            )
         ConsoleConfig.info(
             f"Filter config loaded from {config_filter}: levels={levels}, modules={modules_final}"
         )
