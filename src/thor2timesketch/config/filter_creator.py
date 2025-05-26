@@ -7,7 +7,10 @@ from thor2timesketch.constants import (
     DEFAULT_ENCODING,
     OUTPUT_YAML_FILE,
     DEFAULT_LEVELS,
-    DEFAULT_FILTER, VALID_JSON_EXTENSIONS, AUDIT_INFO, AUDIT_FINDING,
+    DEFAULT_FILTER,
+    VALID_JSON_EXTENSIONS,
+    AUDIT_INFO,
+    AUDIT_FINDING,
 )
 from thor2timesketch.exceptions import FilterConfigError
 from thor2timesketch.input.json_reader import JsonReader
@@ -17,6 +20,7 @@ from thor2timesketch.mappers.mapper_json_audit_findings import MapperJsonAuditFi
 from thor2timesketch.mappers.mapper_json_v1 import MapperJsonV1
 from thor2timesketch.mappers.mapper_json_v2 import MapperJsonV2
 from pathlib import Path
+
 
 class FilterCreator:
     def __init__(self, input_file: Path) -> None:
@@ -55,7 +59,7 @@ class FilterCreator:
                 "levels": list(DEFAULT_LEVELS),
                 "modules": {"include": [], "exclude": []},
                 "features": {"include": [], "exclude": []},
-                "audit": [AUDIT_INFO, AUDIT_FINDING]
+                "audit": [AUDIT_INFO, AUDIT_FINDING],
             }
         }
         for entry in itertools.chain([first], json_logs):
@@ -95,12 +99,12 @@ class FilterCreator:
             with output_file.open("w", encoding=DEFAULT_ENCODING) as file:
                 yaml.safe_dump(config, file, sort_keys=False)
         except Exception as e:
-            error_msg  = (
-                f"Failed to write filter configuration to '{output_file}': {e}"
-            )
+            error_msg = f"Failed to write filter configuration to '{output_file}': {e}"
             ConsoleConfig.error(error_msg)
             raise FilterConfigError(error_msg) from e
-        ConsoleConfig.success(f"Filter configuration successfully written to '{output_file}'")
+        ConsoleConfig.success(
+            f"Filter configuration successfully written to '{output_file}'"
+        )
 
     def _parse_filters(self, prefix: str, message: str) -> list[str]:
         modules_features = message[len(prefix) :].strip()

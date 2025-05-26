@@ -6,8 +6,9 @@ from thor2timesketch.exceptions import (
     FileNotFound,
     FileNotReadableError,
     EmptyFileError,
-    InvalidFileExtensionError
+    InvalidFileExtensionError,
 )
+
 
 class FileValidator:
     def __init__(self, valid_extensions: Sequence[str]) -> None:

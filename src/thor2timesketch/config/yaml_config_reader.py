@@ -6,6 +6,7 @@ import yaml
 from thor2timesketch.config.console_config import ConsoleConfig
 from pathlib import Path
 
+
 class YamlConfigReader:
 
     @staticmethod

@@ -9,6 +9,7 @@ from thor2timesketch.exceptions import TimestampError
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 
+
 class RegexTimestampExtractor(TimestampExtractor):
 
     def __init__(self) -> None:

@@ -6,6 +6,7 @@ from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import VALID_JSON_EXTENSIONS, DEFAULT_ENCODING
 from pathlib import Path
 
+
 class JsonReader:
 
     def __init__(self) -> None:
@@ -30,7 +31,9 @@ class JsonReader:
                         if json_data is not None:
                             yield json_data
                     except (JsonParseError, JsonValidationError) as error:
-                        ConsoleConfig.error(f"Error parsing JSON at line {line_num}: {error}")
+                        ConsoleConfig.error(
+                            f"Error parsing JSON at line {line_num}: {error}"
+                        )
                         raise
         except IOError as error:
             message_err = f"Error opening or reading file '{valid_file}': {error}"

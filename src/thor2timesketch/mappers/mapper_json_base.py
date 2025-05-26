@@ -9,6 +9,7 @@ from thor2timesketch.utils.regex_timestamp_extractor import RegexTimestampExtrac
 from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 from thor2timesketch.utils.thor_finding_id import ThorFindingId
 
+
 class MapperJsonBase(ABC):
     THOR_TIMESTAMP_FIELD: str = ""
     THOR_MESSAGE_FIELD: str = ""
@@ -52,7 +53,9 @@ class MapperJsonBase(ABC):
             ]
 
             if additional_timestamp:
-                ConsoleConfig.debug(f"Found {len(additional_timestamp)} additional timestamps")
+                ConsoleConfig.debug(
+                    f"Found {len(additional_timestamp)} additional timestamps"
+                )
                 for timestamp in additional_timestamp:
                     event = self._create_additional_timestamp_event(
                         normalized_json, timestamp, event_group_id

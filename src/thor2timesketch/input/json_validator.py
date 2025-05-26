@@ -3,6 +3,7 @@ from typing import Dict, Any, Optional
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.exceptions import JsonValidationError, JsonParseError
 
+
 class JsonValidator:
 
     def validate_json_log(self, json_log: str) -> Optional[Dict[str, Any]]:

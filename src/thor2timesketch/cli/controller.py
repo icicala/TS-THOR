@@ -56,10 +56,11 @@ def main(
     ),
 ) -> None:
 
-
-    ConsoleConfig.panel( "Convert THOR security scanner logs to Timesketch format",
+    ConsoleConfig.panel(
+        "Convert THOR security scanner logs to Timesketch format",
         title="thor2ts",
-        style="bold cyan")
+        style="bold cyan",
+    )
 
     ConsoleConfig.set_verbose(verbose)
 

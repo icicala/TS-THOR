@@ -4,11 +4,14 @@ from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
 from thor2timesketch.constants import AUDIT_INFO, AUDIT_FINDING, AUDIT_TRAIL
 
+
 class FilterAudit:
 
     def __init__(self, audit_trail: Set[str]) -> None:
         self._allowed_filters = {select.lower() for select in audit_trail}
-        ConsoleConfig.debug(f"Audit trail filter initialized with types={self._allowed_filters}")
+        ConsoleConfig.debug(
+            f"Audit trail filter initialized with types={self._allowed_filters}"
+        )
 
     @classmethod
     def read_audit_yaml(cls, config_path: Optional[Path]) -> "FilterAudit":

@@ -4,20 +4,24 @@ from thor2timesketch.config.yaml_config_reader import YamlConfigReader
 from thor2timesketch.exceptions import FilterConfigError
 from pathlib import Path
 
+
 class FilterFindings:
     def __init__(self, levels: set[str], modules: set[str]) -> None:
         self._levels = {level.lower() for level in levels}
         self._modules = {module.lower() for module in modules}
-        ConsoleConfig.debug(f"Filter initialized with levels={levels}, modules={modules}")
+        ConsoleConfig.debug(
+            f"Filter initialized with levels={levels}, modules={modules}"
+        )
 
     @classmethod
-    def read_filters_yaml(cls, config_filter: Optional[Path] = None) -> "FilterFindings":
+    def read_filters_yaml(
+        cls, config_filter: Optional[Path] = None
+    ) -> "FilterFindings":
 
         if config_filter is None:
             return cls.null_filter()
 
         filter_section = YamlConfigReader.load_yaml(config_filter)
-
 
         if not filter_section:
             error_msg = f"Missing 'filters' section in filter config {config_filter}"
@@ -80,11 +84,9 @@ class FilterFindings:
             return norm_module in self._modules
         return norm_level in self._levels and norm_module in self._modules
 
+
 class _NullFilterFindings(FilterFindings):
     def matches_filter_criteria(
         self, level: Optional[str], module: Optional[str]
     ) -> bool:
         return True
-
-
-

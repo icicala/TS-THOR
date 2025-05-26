@@ -3,6 +3,7 @@ from typing import Dict, Any
 from thor2timesketch.utils.json_flattener import JSONFlattener
 from thor2timesketch.config.console_config import ConsoleConfig
 
+
 class JsonNormalizer(ABC):
     @abstractmethod
     def normalize(self, data: Dict[str, Any]) -> Dict[str, Any]:

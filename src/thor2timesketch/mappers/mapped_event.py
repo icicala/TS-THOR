@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional, List
 
+
 class MappedEvent:
     def __init__(
         self,

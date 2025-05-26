@@ -4,6 +4,7 @@ from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import DELIMITER
 from thor2timesketch.exceptions import FlattenJsonError
 
+
 class JSONFlattener:
 
     @staticmethod

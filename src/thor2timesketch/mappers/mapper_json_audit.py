@@ -9,6 +9,7 @@ from thor2timesketch.utils.thor_finding_id import ThorFindingId
 from thor2timesketch.utils.datetime_field import DatetimeField
 from thor2timesketch.config.console_config import ConsoleConfig
 
+
 class MapperJsonAudit(MapperJsonBase):
 
     def __init__(self) -> None:

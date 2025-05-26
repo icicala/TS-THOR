@@ -8,6 +8,7 @@ from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import TS_SCOPE
 from thor2timesketch.exceptions import TimesketchError
 
+
 class TSIngest:
 
     def __init__(self, thor_file: Path, sketch: str) -> None:
@@ -20,7 +21,6 @@ class TSIngest:
         self.timeline_name: str = self.thor_file.stem
         sketch_type: Union[int, str] = self._identify_sketch_type(sketch)
         self.my_sketch: Any = self._load_sketch(sketch_type)
-
 
     def _identify_sketch_type(self, sketch: str) -> Union[int, str]:
         return int(sketch) if sketch.isdigit() else sketch
@@ -50,13 +50,13 @@ class TSIngest:
 
             if isinstance(sketch, str) and sketch in available_sketches.keys():
                 my_sketch = self.ts_client.get_sketch(available_sketches[sketch])
-                ConsoleConfig.info(f"Found sketch with name '{sketch}': ID {my_sketch.id}")
+                ConsoleConfig.info(
+                    f"Found sketch with name '{sketch}': ID {my_sketch.id}"
+                )
                 return my_sketch
 
             ConsoleConfig.info("Creating a new sketch with name `{sketch}`")
-            new_sketch = self.ts_client.create_sketch(
-                sketch, "Created by thor2ts"
-            )
+            new_sketch = self.ts_client.create_sketch(sketch, "Created by thor2ts")
             if not new_sketch or not hasattr(new_sketch, "id"):
                 raise TimesketchError("Failed to create sketch with name `{sketch}`")
             ConsoleConfig.info(
@@ -106,15 +106,15 @@ class TSIngest:
                             processed_count += 1
                         except Exception as e:
                             error_count += 1
-                            ConsoleConfig.debug(f"Error adding event to streamer: '{e}'")
+                            ConsoleConfig.debug(
+                                f"Error adding event to streamer: '{e}'"
+                            )
                         finally:
                             progress.update(
                                 task, completed=processed_count, errors=error_count
                             )
                 if not streamer.timeline:
-                    raise TimesketchError(
-                        "Error creating timeline, ingestion aborted"
-                    )
+                    raise TimesketchError("Error creating timeline, ingestion aborted")
 
                 progress.update(task, description="[bold yellow]Indexing timeline…")
                 deadline = time.time() + 60

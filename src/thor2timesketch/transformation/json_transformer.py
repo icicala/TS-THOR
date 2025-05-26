@@ -7,8 +7,11 @@ from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.mappers.mapper_loader import load_all_mappers
-from thor2timesketch.transformation.pretransformation_processor import PreTransformationProcessor
+from thor2timesketch.transformation.pretransformation_processor import (
+    PreTransformationProcessor,
+)
 from pathlib import Path
+
 
 class JsonTransformer:
 
@@ -43,7 +46,10 @@ class JsonTransformer:
                     yield from mapper.map_thor_events(json_log)
 
     def _is_eligible(
-        self, json_log: Dict[str, Any], mapper: MapperJsonBase, selectors: FilterFindings
+        self,
+        json_log: Dict[str, Any],
+        mapper: MapperJsonBase,
+        selectors: FilterFindings,
     ) -> bool:
         if not mapper.requires_filter():
             return True
@@ -52,7 +58,11 @@ class JsonTransformer:
 
     def _log_start(self, input_file: Path) -> None:
         size = os.path.getsize(input_file) / self.mb
-        ConsoleConfig.info(f"Starting transforming events from input file: `{input_file}` ({size:.2f} MB)")
+        ConsoleConfig.info(
+            f"Starting transforming events from input file: `{input_file}` ({size:.2f} MB)"
+        )
 
     def _log_end(self, input_file: Path) -> None:
-        ConsoleConfig.success(f"Finished transforming events from input file: `{input_file}`")
+        ConsoleConfig.success(
+            f"Finished transforming events from input file: `{input_file}`"
+        )

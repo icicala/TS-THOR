@@ -5,6 +5,7 @@ from dateutil import parser
 from thor2timesketch.exceptions import MappingError
 from thor2timesketch.utils.datetime_field import DatetimeField
 
+
 class TimestampExtractor(ABC):
     def is_same_timestamp(self, time1: str, time2: str) -> bool:
         try:

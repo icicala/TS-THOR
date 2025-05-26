@@ -4,9 +4,14 @@ from typing import Dict, Any, Iterator
 
 from thor2timesketch.config.console_config import ConsoleConfig
 from rich.progress import Progress, TextColumn, SpinnerColumn
-from thor2timesketch.constants import OUTPUT_FILE_EXTENSION, DEFAULT_ENCODING, MAX_WRITE_ERRORS
+from thor2timesketch.constants import (
+    OUTPUT_FILE_EXTENSION,
+    DEFAULT_ENCODING,
+    MAX_WRITE_ERRORS,
+)
 from thor2timesketch.exceptions import OutputError
 from pathlib import Path
+
 
 class FileWriter:
     def __init__(self, output_file: Path):
@@ -15,7 +20,9 @@ class FileWriter:
     def _normalize_extension(self) -> None:
         if self.output_file.suffix.lower() != OUTPUT_FILE_EXTENSION:
             self.output_path = self.output_file.with_suffix(OUTPUT_FILE_EXTENSION)
-            ConsoleConfig.info(f"Changed output file to '{self.output_path}' to ensure JSONL format")
+            ConsoleConfig.info(
+                f"Changed output file to '{self.output_path}' to ensure JSONL format"
+            )
 
     def _prepare_output_dir(self) -> None:
         output_dir = self.output_path.parent
@@ -24,7 +31,9 @@ class FileWriter:
                 output_dir.mkdir(parents=True, exist_ok=True)
                 ConsoleConfig.info(f"Created output directory: '{output_dir}'")
             except OSError as e:
-                ConsoleConfig.error(f"Failed to create output directory {output_dir}`: {e}")
+                ConsoleConfig.error(
+                    f"Failed to create output directory {output_dir}`: {e}"
+                )
                 raise OutputError(f"Cannot create output directory: {e}")
 
     def _cleanup_file(self) -> None:
@@ -79,7 +88,9 @@ class FileWriter:
                 )
                 self._cleanup_file()
                 raise OutputError(f"File processing failed with {error_count} errors")
-            ConsoleConfig.success(f"Successfully wrote '{processed_count}' events to '{self.output_file}'")
+            ConsoleConfig.success(
+                f"Successfully wrote '{processed_count}' events to '{self.output_file}'"
+            )
 
         except KeyboardInterrupt:
             ConsoleConfig.warning("Process interrupted by user")

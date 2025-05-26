@@ -4,6 +4,7 @@ from thor2timesketch.exceptions import VersionError
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.config.console_config import ConsoleConfig
 
+
 class JsonLogVersion:
 
     _mapper_log_version: Dict[str, Type["MapperJsonBase"]] = {}
@@ -18,6 +19,7 @@ class JsonLogVersion:
             cls._mapper_log_version[log_version.lower()] = mapper_cls
             ConsoleConfig.debug(f"Mapping log version {log_version} to {mapper_cls}")
             return mapper_cls
+
         return map_log_version
 
     def detect_log_version(self, json_line: Dict[str, Any]) -> str:
