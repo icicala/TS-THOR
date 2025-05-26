@@ -19,13 +19,13 @@ class FileWriter:
 
     def _normalize_extension(self) -> None:
         if self.output_file.suffix.lower() != OUTPUT_FILE_EXTENSION:
-            self.output_path = self.output_file.with_suffix(OUTPUT_FILE_EXTENSION)
+            self.output_file = self.output_file.with_suffix(OUTPUT_FILE_EXTENSION)
             ConsoleConfig.info(
-                f"Changed output file to '{self.output_path}' to ensure JSONL format"
+                f"Changed output file to '{self.output_file}' to ensure JSONL format"
             )
 
     def _prepare_output_dir(self) -> None:
-        output_dir = self.output_path.parent
+        output_dir = self.output_file.parent
         if output_dir and not output_dir.is_dir():
             try:
                 output_dir.mkdir(parents=True, exist_ok=True)
@@ -37,10 +37,10 @@ class FileWriter:
                 raise OutputError(f"Cannot create output directory: {e}")
 
     def _cleanup_file(self) -> None:
-        if self.output_path.exists():
+        if self.output_file.exists():
             try:
-                self.output_path.unlink()
-                ConsoleConfig.debug(f"Removed output file: '{self.output_path}'")
+                self.output_file.unlink()
+                ConsoleConfig.debug(f"Removed output file: '{self.output_file}'")
             except OSError as e:
                 ConsoleConfig.error(f"Failed to remove output file: {e}")
                 raise OutputError(f"Cannot remove output file: {e}")
@@ -48,7 +48,7 @@ class FileWriter:
     def write_to_file(self, events: Iterator[Dict[str, Any]]) -> None:
         self._normalize_extension()
         self._prepare_output_dir()
-        mode = "a" if self.output_path.exists() else "w"
+        mode = "a" if self.output_file.exists() else "w"
         action = "Appending to" if mode == "a" else "Writing to"
         ConsoleConfig.info(f"'{action}' file: '{self.output_file}'")
         try:
@@ -65,10 +65,10 @@ class FileWriter:
                     total=None,
                     completed=0,
                     errors=0,
-                    filename=self.output_path.name,
+                    filename=self.output_file.name,
                 )
 
-                with self.output_path.open(mode, encoding=DEFAULT_ENCODING) as file:
+                with self.output_file.open(mode, encoding=DEFAULT_ENCODING) as file:
                     for event in events:
                         try:
                             file.write(json.dumps(event) + "\n")
