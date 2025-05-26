@@ -86,9 +86,5 @@ class _NullFilterFindings(FilterFindings):
     ) -> bool:
         return True
 
-file_yaml = "thor2ts_filter.yaml"
-filter = FilterFindings.read_filters_yaml(Path(file_yaml))
-print(filter)
-
 
 
