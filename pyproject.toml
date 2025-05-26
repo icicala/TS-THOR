@@ -43,7 +43,13 @@ version_scheme = "no-guess-dev"
 
 
 [project.optional-dependencies]
-dev = ["pytest", "mypy", "ruff", "types-PyYAML"]
+dev = [
+  "pytest",
+  "mypy",
+  "ruff",
+  "types-PyYAML",
+  "black"
+]
 publish = ["build", "twine", "hatch-vcs"]
 
 [tool.hatch.build.sources]
