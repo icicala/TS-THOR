@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Optional, Set, Any
 from pathlib import Path
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
@@ -16,7 +16,8 @@ class FilterAudit:
             return cls.null_filter()
 
         filters_section = YamlConfigReader.load_yaml(config_path)
-        allowed_filters = set(selector for selector in filters_section.get(AUDIT_TRAIL))
+        audit_trail_fitlers = filters_section.get(AUDIT_TRAIL, [])
+        allowed_filters = set(audit_trail_fitlers)
         if not allowed_filters:
             allowed_filters = {AUDIT_INFO, AUDIT_FINDING}
         return cls(allowed_filters)
@@ -25,7 +26,7 @@ class FilterAudit:
     def null_filter(cls) -> "FilterAudit":
         return cls({AUDIT_INFO.lower(), AUDIT_FINDING.lower()})
 
-    def get_audit_trail_selector(self, audit_json: dict) -> Optional[str]:
+    def get_audit_trail_selector(self, audit_json: dict[str, Any]) -> Optional[str]:
 
         has_findings = AUDIT_FINDING in audit_json and isinstance(
             audit_json[AUDIT_FINDING], list

@@ -34,7 +34,7 @@ class JsonLogVersion:
             return AUDIT_FINDING
         if isinstance(json_line, dict) and "Name" in json_line and "Id" in json_line:
             return AUDIT_INFO
-        raise VersionError(f"Cannot detect log version")
+        raise VersionError("Cannot detect log version")
 
     def get_mapper_for_version(self, json_line: Dict[str, Any]) -> MapperJsonBase:
         version_key = self.detect_log_version(json_line)

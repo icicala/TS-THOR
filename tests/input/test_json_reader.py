@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from thor2timesketch.input.json_reader import JsonReader
-from thor2timesketch.exceptions import JsonParseError, JsonValidationError, InputError
+from thor2timesketch.exceptions import JsonParseError, InputError
 
 @pytest.fixture(autouse=True)
 def skip_file_validation(monkeypatch):

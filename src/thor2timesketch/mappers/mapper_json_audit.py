@@ -1,6 +1,7 @@
 from typing import Dict, Any, List
 from abc import abstractmethod
 from thor2timesketch.exceptions import MappingError
+from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.utils.audit_timestamp_extractor import AuditTimestampExtractor
 from thor2timesketch.utils.normalizer import AuditTrailNormalizer
@@ -44,5 +45,5 @@ class MapperJsonAudit(MapperJsonBase):
         time_data: DatetimeField,
         event_group_id: str,
         primary: bool,
-    ):
+    ) -> MappedEvent:
         pass

@@ -1,8 +1,6 @@
-import os
 import json
-from typing import Dict, Any, Iterator, Union
+from typing import Dict, Any, Iterator
 
-from pycparser.ply.yacc import error_count
 
 from thor2timesketch.config.console_config import ConsoleConfig
 from rich.progress import Progress, TextColumn, SpinnerColumn
@@ -69,7 +67,7 @@ class FileWriter:
                         except (TypeError, ValueError, OSError) as e:
                             error_count += 1
                             if error_count <= MAX_WRITE_ERRORS:
-                                logger.error(f"Error writing event to file: {e}")
+                                ConsoleConfig.error(f"Error writing event to file: {e}")
                         finally:
                             progress.update(
                                 task, completed=processed_count, errors=error_count

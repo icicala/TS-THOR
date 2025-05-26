@@ -1,7 +1,7 @@
 from thor2timesketch.constants import VALID_YAML_EXTENSIONS, DEFAULT_ENCODING
 from thor2timesketch.exceptions import FilterConfigError, FileValidationError
 from thor2timesketch.input.file_validator import FileValidator
-from typing import Dict, Any, Union
+from typing import Dict, Any
 import yaml
 from thor2timesketch.config.console_config import ConsoleConfig
 from pathlib import Path

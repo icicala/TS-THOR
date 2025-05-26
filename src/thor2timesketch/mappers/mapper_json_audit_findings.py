@@ -3,10 +3,7 @@ from thor2timesketch.exceptions import MappingError
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapped_event import MappedEvent
 from thor2timesketch.mappers.mapper_json_audit import MapperJsonAudit
-from thor2timesketch.utils.thor_finding_id import ThorFindingId
 from thor2timesketch.utils.datetime_field import DatetimeField
-from thor2timesketch.utils.audit_timestamp_extractor import AuditTimestampExtractor
-from thor2timesketch.utils.normalizer import AuditTrailNormalizer
 from thor2timesketch.constants import AUDIT_FINDING
 
 

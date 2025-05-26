@@ -5,6 +5,7 @@ from thor2timesketch.constants import MB_CONVERTER
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
+from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.mappers.mapper_loader import load_all_mappers
 from thor2timesketch.transformation.pretransformation_processor import PreTransformationProcessor
 from pathlib import Path
@@ -36,17 +37,17 @@ class JsonTransformer:
         pre_transform: PreTransformationProcessor,
     ) -> Iterator[Dict[str, Any]]:
         for entry in events:
-            for record in pre_transform.transformation(entry):
-                mapper = self.version_mapper.get_mapper_for_version(record)
-                if self._is_eligible(record, mapper, selectors):
-                    yield from mapper.map_thor_events(record)
+            for json_log in pre_transform.transformation(entry):
+                mapper = self.version_mapper.get_mapper_for_version(json_log)
+                if self._is_eligible(json_log, mapper, selectors):
+                    yield from mapper.map_thor_events(json_log)
 
     def _is_eligible(
-        self, record: Dict[str, Any], mapper, selectors: FilterFindings
+        self, json_log: Dict[str, Any], mapper: MapperJsonBase, selectors: FilterFindings
     ) -> bool:
         if not mapper.requires_filter():
             return True
-        level, module = mapper.get_filterable_fields(record)
+        level, module = mapper.get_filterable_fields(json_log)
         return selectors.matches_filter_criteria(level, module)
 
     def _log_start(self, input_file: Path) -> None:

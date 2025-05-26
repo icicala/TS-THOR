@@ -1,12 +1,9 @@
-
-import os
 from typing import Optional
 from importlib.metadata import version, PackageNotFoundError
 import typer
 from pathlib import Path
 from thor2timesketch.config.filter_creator import FilterCreator
 from thor2timesketch.config.console_config import ConsoleConfig
-from thor2timesketch.constants import OUTPUT_YAML_FILE
 from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.exceptions import Thor2tsError
@@ -60,7 +57,9 @@ def main(
 ) -> None:
 
 
-    ConsoleConfig.panel("")
+    ConsoleConfig.panel( "Convert THOR security scanner logs to Timesketch format",
+        title="thor2ts",
+        style="bold cyan")
 
     ConsoleConfig.set_verbose(verbose)
 

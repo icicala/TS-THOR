@@ -1,5 +1,3 @@
-import os
-from pathlib import Path
 from typer.testing import CliRunner
 from thor2timesketch.cli.controller import app
 

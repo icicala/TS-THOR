@@ -3,21 +3,37 @@ class Thor2tsError(Exception):
         self.error_msg = error_msg
         super().__init__(self.error_msg)
 # input errors
-class InputError(Thor2tsError): pass
-class FileValidationError(InputError): pass
-class FileNotFound(FileValidationError): pass
-class FileNotReadableError(FileValidationError): pass
-class EmptyFileError(FileValidationError): pass
-class InvalidFileExtensionError(FileValidationError): pass
-class FilterConfigError(FileValidationError): pass
-class JsonValidationError(InputError): pass
-class JsonParseError(InputError): pass
+class InputError(Thor2tsError):
+    pass
+class FileValidationError(InputError):
+    pass
+class FileNotFound(FileValidationError):
+    pass
+class FileNotReadableError(FileValidationError):
+    pass
+class EmptyFileError(FileValidationError):
+    pass
+class InvalidFileExtensionError(FileValidationError):
+    pass
+class FilterConfigError(FileValidationError):
+    pass
+class JsonValidationError(InputError):
+    pass
+class JsonParseError(InputError):
+    pass
 # processing errors
-class ProcessingError(Thor2tsError): pass
-class MappingError(ProcessingError): pass
-class VersionError(ProcessingError): pass
-class TimestampError(ProcessingError): pass
-class FlattenJsonError(ProcessingError): pass
+class ProcessingError(Thor2tsError):
+    pass
+class MappingError(ProcessingError):
+    pass
+class VersionError(ProcessingError):
+    pass
+class TimestampError(ProcessingError):
+    pass
+class FlattenJsonError(ProcessingError):
+    pass
 # output errors
-class OutputError(Thor2tsError): pass
-class TimesketchError(OutputError): pass
+class OutputError(Thor2tsError):
+    pass
+class TimesketchError(OutputError):
+    pass

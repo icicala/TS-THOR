@@ -1,4 +1,4 @@
-from typing import Iterator, Dict, Any, Union, Optional
+from typing import Iterator, Dict, Any, Union
 from thor2timesketch.exceptions import JsonValidationError, InputError, JsonParseError
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.input.json_validator import JsonValidator

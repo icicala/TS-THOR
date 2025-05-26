@@ -31,5 +31,5 @@ class JSONFlattener:
             error_msg = f"Error flattening JSON: {e}"
             ConsoleConfig.error(error_msg)
             raise FlattenJsonError(error_msg)
-        ConsoleConfig.debug("Successfully flattened JSON: %s", flattened)
+        ConsoleConfig.debug("Successfully flattened JSON: '{flattened}'")
         return flattened

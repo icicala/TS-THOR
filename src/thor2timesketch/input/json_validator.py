@@ -14,7 +14,12 @@ class JsonValidator:
 
     def _parse_json_log(self, json_log: str) -> Dict[str, Any]:
         try:
-            return json.loads(json_log)
+            result = json.loads(json_log)
+            if not isinstance(result, dict):
+                error_msg = "Not a valid JSON object: Expected a dictionary."
+                ConsoleConfig.error(error_msg)
+                raise JsonValidationError(error_msg)
+            return result
         except json.JSONDecodeError as e:
             error_msg = f"JSON decode error: {str(e)}"
             ConsoleConfig.error(error_msg)

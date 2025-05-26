@@ -10,7 +10,8 @@ from thor2timesketch.constants import (
     DEFAULT_FILTER, VALID_JSON_EXTENSIONS, AUDIT_INFO, AUDIT_FINDING,
 )
 from thor2timesketch.exceptions import FilterConfigError
-from thor2timesketch.input.json_reader import JsonReader, FileValidator
+from thor2timesketch.input.json_reader import JsonReader
+from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.mappers.mapper_json_audit_findings import MapperJsonAuditFindings
 from thor2timesketch.mappers.mapper_json_v1 import MapperJsonV1
@@ -91,8 +92,8 @@ class FilterCreator:
         output_file = Path.cwd() / OUTPUT_YAML_FILE
         ConsoleConfig.info(f"Creating filter configuration at `{output_file}`")
         try:
-            with output_file.open("w", encoding=DEFAULT_ENCODING) as output_file:
-                yaml.safe_dump(config, output_file, sort_keys=False)
+            with output_file.open("w", encoding=DEFAULT_ENCODING) as file:
+                yaml.safe_dump(config, file, sort_keys=False)
         except Exception as e:
             error_msg  = (
                 f"Failed to write filter configuration to '{output_file}': {e}"

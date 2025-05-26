@@ -23,30 +23,32 @@ class FilterFindings:
             error_msg = f"Missing 'filters' section in filter config {config_filter}"
             ConsoleConfig.error(error_msg)
             raise FilterConfigError(error_msg)
+
         levels = {
             level.lower()
             for level in filter_section.get("levels") or {}
             if isinstance(level, str)
         }
+        modules = filter_section.get("modules", {}) or {}
         modules_include = {
             module.lower()
-            for module in filter_section.get("modules").get("include") or {}
+            for module in modules.get("include", [])
             if isinstance(module, str)
         }
         modules_exclude = {
             module.lower()
-            for module in filter_section.get("modules").get("exclude") or {}
+            for module in modules.get("exclude", [])
             if isinstance(module, str)
         }
-
+        features = filter_section.get("features", {}) or {}
         features_include = {
             feature.lower()
-            for feature in filter_section.get("features").get("include") or {}
+            for feature in features.get("include", [])
             if isinstance(feature, str)
         }
         features_exclude = {
             feature.lower()
-            for feature in filter_section.get("features").get("exclude") or {}
+            for feature in features.get("exclude", []) or []
             if isinstance(feature, str)
         }
 
@@ -65,9 +67,7 @@ class FilterFindings:
 
     @classmethod
     def null_filter(cls) -> "FilterFindings":
-        no_filter = cls(set(), set())
-        no_filter.matches_filter_criteria = lambda level, module: True
-        return no_filter
+        return _NullFilterFindings(set(), set())
 
     def matches_filter_criteria(
         self, level: Optional[str], module: Optional[str]
@@ -79,3 +79,16 @@ class FilterFindings:
         if self._modules and not self._levels:
             return norm_module in self._modules
         return norm_level in self._levels and norm_module in self._modules
+
+class _NullFilterFindings(FilterFindings):
+    def matches_filter_criteria(
+        self, level: Optional[str], module: Optional[str]
+    ) -> bool:
+        return True
+
+file_yaml = "thor2ts_filter.yaml"
+filter = FilterFindings.read_filters_yaml(Path(file_yaml))
+print(filter)
+
+
+
