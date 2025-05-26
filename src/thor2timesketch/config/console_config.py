@@ -23,41 +23,41 @@ class ConsoleConfig:
         "level.ERROR": "bold red",
         "level.SUCCESS": "bold green",
     })
-    console = Console(theme=theme, markup=True, highlight=False)
+    console = Console(theme=theme, markup=True, highlight=False, force_terminal=True, color_system="truecolor")
 
     @staticmethod
     def _timestamp() -> str:
         return datetime.now().strftime("%d %b %Y %H:%M:%S")
 
     @classmethod
-    def _print(cls, level: str, message: str) -> None:
+    def _log(cls, level: str, message: str) -> None:
         if cls.LEVELS[level] < cls.min_level:
             return
         ts = cls._timestamp()
-        cls.console.print(
+        cls.console.log(
             f"[timestamp]{ts}[/timestamp] "
             f"[level.{level}]{level}[/level.{level}] {message}"
         )
 
     @classmethod
     def info(cls, message: str) -> None:
-        cls._print("INFO", message)
+        cls._log("INFO", message)
 
     @classmethod
     def debug(cls, message: str) -> None:
-        cls._print("DEBUG", message)
+        cls._log("DEBUG", message)
 
     @classmethod
     def warning(cls, message: str) -> None:
-        cls._print("WARNING", message)
+        cls._log("WARNING", message)
 
     @classmethod
     def error(cls, message: str) -> None:
-        cls._print("ERROR", message)
+        cls._log("ERROR", message)
 
     @classmethod
     def success(cls, message: str) -> None:
-        cls._print("SUCCESS", message)
+        cls._log("SUCCESS", message)
 
 
     @classmethod
