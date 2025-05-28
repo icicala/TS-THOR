@@ -12,22 +12,18 @@ class ElapsedColumn(ProgressColumn):
         return Text(f"{m:02d}:{s:02d}", style=ConsoleConfig.LEVEL_STYLES["INFO"])
 
 
-class LevelColumn(ProgressColumn):
-    def render(self, task: Task) -> Text:
-        return Text("", style=ConsoleConfig.LEVEL_STYLES["INFO"])
-
 
 class ProgressBar:
     def __init__(self, description: str):
         columns = [
+            TextColumn(" "),
             ElapsedColumn(),
-            LevelColumn(),
             SpinnerColumn(
-                spinner_name="line", style=ConsoleConfig.LEVEL_STYLES["INFO"]
+                spinner_name="line", style=ConsoleConfig.LEVEL_STYLES["SUCCESS"]
             ),
             TextColumn(" {task.description}", style=ConsoleConfig.LEVEL_STYLES["INFO"]),
             TextColumn(
-                "{task.completed} processed", style=ConsoleConfig.LEVEL_STYLES["INFO"]
+                "{task.completed} processed", style=ConsoleConfig.LEVEL_STYLES["SUCCESS"]
             ),
             TextColumn(
                 "• {task.fields[errors]} errors",

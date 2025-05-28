@@ -71,8 +71,10 @@ class FileWriter:
             )
 
         except KeyboardInterrupt:
-            ConsoleConfig.warning("Process interrupted by user")
             self._cleanup_file()
+            ConsoleConfig.warning(
+                f"Keyboard interrupt received. File '{self.output_file}' was not written."
+            )
             raise
 
         except Exception as e:
