@@ -16,7 +16,8 @@ class ElapsedColumn(ProgressColumn):
 class ProgressBar:
     def __init__(self, description: str):
         columns = [
-            TextColumn(" "),
+            TextColumn(" " * 20),
+            TextColumn(" " * 9),
             ElapsedColumn(),
             SpinnerColumn(
                 spinner_name="line", style=ConsoleConfig.LEVEL_STYLES["SUCCESS"]
