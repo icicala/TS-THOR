@@ -16,13 +16,12 @@ class ElapsedColumn(ProgressColumn):
 class ProgressBar:
     def __init__(self, description: str):
         columns = [
-            TextColumn(" " * 20),
-            TextColumn(" "),
+            TextColumn(" " * 22),
             ElapsedColumn(),
             SpinnerColumn(
                 spinner_name="line", style=ConsoleConfig.LEVEL_STYLES["SUCCESS"]
             ),
-            TextColumn(" {task.description}", style=ConsoleConfig.LEVEL_STYLES["INFO"]),
+            TextColumn("   {task.description}", style=ConsoleConfig.LEVEL_STYLES["INFO"]),
             TextColumn(
                 "{task.completed} processed", style=ConsoleConfig.LEVEL_STYLES["SUCCESS"]
             ),
