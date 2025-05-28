@@ -3,7 +3,7 @@ from collections import deque
 from datetime import timezone
 from typing import Dict, Any, List, Tuple
 from dateutil import parser
-from thor2timesketch import constants
+from thor2timesketch.constants import ISO8601_PATTERN
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.exceptions import TimestampError
 from thor2timesketch.utils.datetime_field import DatetimeField
@@ -13,7 +13,7 @@ from thor2timesketch.utils.timestamp_extractor import TimestampExtractor
 class RegexTimestampExtractor(TimestampExtractor):
 
     def __init__(self) -> None:
-        self.ISO8601 = re.compile(constants.ISO8601_PATTERN, re.IGNORECASE)
+        self.ISO8601 = re.compile(ISO8601_PATTERN, re.IGNORECASE)
 
     def extract(self, data_json: Dict[str, Any]) -> List[DatetimeField]:
 
@@ -51,11 +51,9 @@ class RegexTimestampExtractor(TimestampExtractor):
                             )
                         except (ValueError, TypeError) as e:
                             raise TimestampError(
-                                f"Error parsing date '{log_json}' at path '{path}': {str(e)}"
+                                f"Error parsing date '{log_json}' at path '{path}': {e}"
                             )
 
         except Exception as e:
-            raise TimestampError(
-                f"Unexpected error during timestamp extraction: {str(e)}"
-            )
+            raise TimestampError(f"Unexpected error during timestamp extraction: {e}")
         return timestamps

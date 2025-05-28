@@ -25,7 +25,7 @@ class MapperJsonAuditFindings(MapperJsonAudit):
             datetime=time_data.datetime,
             timestamp_desc=self._get_timestamp_desc(json_log, time_data),
             event_group_id=event_group_id,
-            tags=self._get_additional_tags(json_log),
+            tag=self._get_additional_tags(json_log),
         )
         if primary:
             event.add_additional(self._get_additional_fields(json_log))
@@ -43,7 +43,7 @@ class MapperJsonAuditFindings(MapperJsonAudit):
         module = json_log.get(MapperJsonAuditFindings.THOR_MODULE_FIELD)
         if not isinstance(module, str):
             raise MappingError(
-                "Missing required 'module' field for timestamp description"
+                f"Missing required {module} field for timestamp description"
             )
         return f"{module} - {time_data.path}"
 
@@ -67,5 +67,7 @@ class MapperJsonAuditFindings(MapperJsonAudit):
     def _get_additional_tags(self, json_log: Dict[str, Any]) -> List[str]:
         type_event = json_log.get(MapperJsonAuditFindings.THOR_LEVEL_FIELD)
         if not isinstance(type_event, str):
-            raise MappingError("Missing required 'level' field for additional tags")
+            raise MappingError(
+                f"Missing required {type_event} field for additional tags"
+            )
         return [AUDIT_FINDING, type_event]

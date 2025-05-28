@@ -17,13 +17,13 @@ app = typer.Typer(
 )
 
 
-def version_callback(value: bool) -> None:
+def get_version(value: bool) -> None:
     if value:
         try:
-            pkg_version = version("thor2timesketch")
+            tool_version = version("thor2timesketch")
         except PackageNotFoundError:
-            pkg_version = "0.0.0"
-        ConsoleConfig.info(f"thor2timesketch version: `{pkg_version}`")
+            tool_version = "unknown (development version)"
+        ConsoleConfig.info(f"thor2timesketch version: `{tool_version}`")
         raise typer.Exit()
 
 
@@ -50,7 +50,7 @@ def main(
     _version: bool = typer.Option(
         False,
         "--version",
-        callback=version_callback,
+        callback=get_version,
         is_eager=True,
         help="Show version and exit",
     ),

@@ -16,7 +16,7 @@ class ConsoleConfig:
     }
     min_level = LEVELS["INFO"]
 
-    console = Console(force_terminal=True, color_system="truecolor")
+    console = Console(force_terminal=True)
     LEVEL_STYLES = {
         "DEBUG": "magenta",
         "INFO": "green",
@@ -26,7 +26,7 @@ class ConsoleConfig:
     }
 
     @staticmethod
-    def _timestamp() -> str:
+    def timestamp() -> str:
         return datetime.now().strftime("%d %b %Y %H:%M:%S")
 
     @classmethod
@@ -37,7 +37,7 @@ class ConsoleConfig:
         table.add_column("timestamp", style=cls.LEVEL_STYLES[level], min_width=20)
         table.add_column("level", style=cls.LEVEL_STYLES[level], min_width=9)
         table.add_column("message", style=cls.LEVEL_STYLES[level])
-        ts = cls._timestamp()
+        ts = cls.timestamp()
         table.add_row(ts, f"[{level}]", message)
         cls.console.print(table, markup=True, highlight=False)
 

@@ -3,7 +3,7 @@ from thor2timesketch.exceptions import MappingError, TimestampError
 from thor2timesketch.mappers.mapper_json_base import MapperJsonBase
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
 from thor2timesketch.utils.datetime_field import DatetimeField
-from thor2timesketch import constants
+from thor2timesketch.constants import THOR_TAG, EXTRA_TAG
 from thor2timesketch.utils.normalizer import FlatteningNormalizer
 from thor2timesketch.utils.regex_timestamp_extractor import RegexTimestampExtractor
 
@@ -24,7 +24,7 @@ class MapperJsonV1(MapperJsonBase):
     def _get_message(self, json_log: Dict[str, Any]) -> str:
         message = json_log.get(self.__class__.THOR_MESSAGE_FIELD)
         if not isinstance(message, str):
-            raise MappingError("Missing required 'message' field in JSON log")
+            raise MappingError(f"Missing required {message} field in JSON log")
         return message
 
     def _get_timestamp_desc(
@@ -35,7 +35,7 @@ class MapperJsonV1(MapperJsonBase):
         module = json_log.get(self.__class__.THOR_MODULE_FIELD)
         if not isinstance(module, str):
             raise MappingError(
-                "Missing required 'module' field for timestamp description"
+                f"Missing required {module} field for timestamp description"
             )
         return f"{module} - {time_data.path}"
 
@@ -61,14 +61,16 @@ class MapperJsonV1(MapperJsonBase):
     def _get_thor_tags(self, json_log: Dict[str, Any]) -> List[str]:
         type_event = json_log.get(self.__class__.THOR_LEVEL_FIELD)
         if not isinstance(type_event, str):
-            raise MappingError("Missing required 'level' field for tags")
-        return [constants.THOR_TAG, type_event]
+            raise MappingError(f"Missing required {type_event} field for tags")
+        return [THOR_TAG, type_event]
 
     def _get_additional_tags(self, json_log: Dict[str, Any]) -> List[str]:
         type_event = json_log.get(self.__class__.THOR_LEVEL_FIELD)
         if not isinstance(type_event, str):
-            raise MappingError("Missing required 'level' field for additional tags")
-        return [constants.EXTRA_TAG, type_event]
+            raise MappingError(
+                f"Missing required {type_event} field for additional tags"
+            )
+        return [EXTRA_TAG, type_event]
 
     def get_filterable_fields(
         self, json_log: Dict[str, Any]

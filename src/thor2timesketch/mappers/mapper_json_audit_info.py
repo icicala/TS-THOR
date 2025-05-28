@@ -23,7 +23,7 @@ class MapperJsonAuditInfo(MapperJsonAudit):
             datetime=time_data.datetime,
             timestamp_desc=self._get_timestamp_desc(json_log, time_data),
             event_group_id=event_group_id,
-            tags=self._get_additional_tags(json_log),
+            tag=self._get_additional_tags(json_log),
         )
         if primary:
             event.add_additional(self._get_additional_fields(json_log))

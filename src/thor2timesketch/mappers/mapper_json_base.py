@@ -84,7 +84,7 @@ class MapperJsonBase(ABC):
                 json_log, self._get_thor_timestamp(json_log)
             ),
             event_group_id=event_group_id,
-            tags=self._get_thor_tags(json_log),
+            tag=self._get_thor_tags(json_log),
         )
 
         event.add_additional(self._get_additional_fields(json_log))
@@ -98,7 +98,7 @@ class MapperJsonBase(ABC):
             datetime=time_data.datetime,
             timestamp_desc=self._get_timestamp_desc(json_log, time_data),
             event_group_id=event_group_id,
-            tags=self._get_additional_tags(json_log),
+            tag=self._get_additional_tags(json_log),
         )
         return event
 

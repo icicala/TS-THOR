@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any, Iterator
 from thor2timesketch.config.console_config import ConsoleConfig
-from rich.progress import Progress, TextColumn, SpinnerColumn
+from thor2timesketch.utils.progress_bar import ProgressBar
 from thor2timesketch.constants import (
     OUTPUT_FILE_EXTENSION,
     DEFAULT_ENCODING,
@@ -45,48 +45,29 @@ class FileWriter:
         self._normalize_extension()
         self._prepare_output_dir()
         mode = "a" if self.output_file.exists() else "w"
-        action = "Appending to" if mode == "a" else "Writing to"
+        action = "Appending to " if mode == "a" else "Writing to "
         ConsoleConfig.info(f"'{action}' file: '{self.output_file}'")
         try:
-            processed_count = error_count = 0
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[bold green]Writing to '{task.fields[filename]}'"),
-                TextColumn("[green]{task.completed} processed"),
-                TextColumn("• [red]{task.fields[errors]} errors"),
-                transient=True,
-            ) as progress:
-                task = progress.add_task(
-                    "Writing",
-                    total=None,
-                    completed=0,
-                    errors=0,
-                    filename=self.output_file.name,
-                )
-
+            with ProgressBar(f"{action} {self.output_file.name} ...") as progress:
                 with self.output_file.open(mode, encoding=DEFAULT_ENCODING) as file:
                     for event in events:
                         try:
                             file.write(json.dumps(event) + "\n")
-                            processed_count += 1
+                            progress.advance()
                         except (TypeError, ValueError, OSError) as e:
-                            error_count += 1
-                            if error_count >= MAX_WRITE_ERRORS:
+                            progress.advance(step=0, error=1)
+                            if progress.errors >= MAX_WRITE_ERRORS:
                                 raise OutputError(
-                                    f"Too many write errors: {error_count}"
+                                    f"Too many errors encountered while writing to file: {e}"
                                 ) from e
-                        finally:
-                            progress.update(
-                                task, completed=processed_count, errors=error_count
-                            )
 
-            if error_count:
+            if progress.errors:
                 self._cleanup_file()
                 raise OutputError(
-                    f"Encountered '{error_count}' errors while writing '{processed_count}' events"
+                    f"Encountered '{progress.errors}' errors while writing '{progress.processed}' events"
                 )
             ConsoleConfig.success(
-                f"Successfully wrote '{processed_count}' events to '{self.output_file}'"
+                f"Successfully wrote '{progress.processed}' events to '{self.output_file}'"
             )
 
         except KeyboardInterrupt:

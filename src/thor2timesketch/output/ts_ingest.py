@@ -1,12 +1,12 @@
 import time
 from pathlib import Path
 from typing import Dict, Union, Any, Iterator
-from rich.progress import Progress, TextColumn, SpinnerColumn
 from timesketch_import_client import importer
 from timesketch_api_client import config as timesketch_config
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.constants import TS_SCOPE
 from thor2timesketch.exceptions import TimesketchError
+from thor2timesketch.utils.progress_bar import ProgressBar
 
 
 class TSIngest:
@@ -45,7 +45,9 @@ class TSIngest:
 
             if isinstance(sketch, int) and sketch in available_sketches.values():
                 my_sketch = self.ts_client.get_sketch(sketch)
-                ConsoleConfig.info(f"Found sketch with ID {sketch}: {my_sketch.name}")
+                ConsoleConfig.info(
+                    f"Found sketch with ID '{sketch}': '{my_sketch.name}'"
+                )
                 return my_sketch
 
             if isinstance(sketch, str) and sketch in available_sketches.keys():
@@ -55,12 +57,12 @@ class TSIngest:
                 )
                 return my_sketch
 
-            ConsoleConfig.info("Creating a new sketch with name `{sketch}`")
-            new_sketch = self.ts_client.create_sketch(sketch, "Created by thor2ts")
+            ConsoleConfig.info(f"Creating a new sketch with name '{sketch}'")
+            new_sketch = self.ts_client.create_sketch(str(sketch), "Created by thor2ts")
             if not new_sketch or not hasattr(new_sketch, "id"):
-                raise TimesketchError("Failed to create sketch with name `{sketch}`")
+                raise TimesketchError(f"Failed to create sketch with name '{sketch}'")
             ConsoleConfig.info(
-                f"New sketch has been created with name: '{new_sketch.name}' and ID: {new_sketch.id}"
+                f"New sketch has been created with name: '{new_sketch.name}' and ID: '{new_sketch.id}'"
             )
             return new_sketch
         except Exception as error:
@@ -72,25 +74,10 @@ class TSIngest:
             self.ts_client.get_sketch(self.my_sketch.id)
         except Exception:
             raise TimesketchError(
-                f"Sketch ID `{self.my_sketch.id}` not found, aborting ingest"
+                f"Sketch ID '{self.my_sketch.id}' not found, aborting ingest"
             )
 
-        processed_count = error_count = 0
-
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("{task.description}"),
-            TextColumn("[cyan]{task.completed} processed"),
-            TextColumn("• [red]{task.fields[errors]} errors"),
-            transient=True,
-        ) as progress:
-            task = progress.add_task(
-                f"[bold green]Ingesting to sketch '{self.my_sketch.name}'",
-                total=None,
-                completed=0,
-                errors=0,
-                sketch_name=self.my_sketch.name,
-            )
+        with ProgressBar(f"Ingesting to sketch '{self.my_sketch.name}'") as progress:
             try:
                 with importer.ImportStreamer() as streamer:
                     streamer.set_sketch(self.my_sketch)
@@ -101,34 +88,14 @@ class TSIngest:
                     for event in events:
                         try:
                             streamer.add_dict(event)
-                            processed_count += 1
+                            progress.advance()
                         except Exception as e:
-                            error_count += 1
+                            progress.advance(step=0, error=1)
                             ConsoleConfig.debug(
                                 f"Error adding event to streamer: '{e}'"
                             )
-                        finally:
-                            progress.update(
-                                task, completed=processed_count, errors=error_count
-                            )
                 if not streamer.timeline:
                     raise TimesketchError("Error creating timeline, ingestion aborted")
-
-                progress.update(task, description="[bold yellow]Indexing timeline…")
-                deadline = time.time() + 60
-                timeout_reached = False
-                while (
-                    streamer.state.lower() not in ("ready", "success")
-                    and not timeout_reached
-                ):
-                    if time.time() > deadline:
-                        ConsoleConfig.warning(
-                            "Indexing did not complete within 60 seconds - the timeline will continue to be indexed in the background"
-                        )
-                        timeout_reached = True
-                    time.sleep(1)
-                if not timeout_reached:
-                    progress.update(task, description="[bold green]Indexing complete")
 
             except KeyboardInterrupt:
                 ConsoleConfig.warning("Timesketch ingestion interrupted by user")
@@ -136,8 +103,30 @@ class TSIngest:
             except Exception as error:
                 raise TimesketchError(f"Failed to ingest events: {error}")
 
+        with ProgressBar(
+            f"Indexing timeline '{self.my_sketch.name}' ..."
+        ) as index_progress:
+            timeout = time.time() + 60
+            timeout_reached = False
+            while (
+                streamer.state.lower() not in ("ready", "success")
+                and not timeout_reached
+            ):
+                if time.time() > timeout:
+                    ConsoleConfig.warning(
+                        "Indexing did not complete within 60 seconds - the timeline will continue to be indexed in the background"
+                    )
+                    timeout_reached = True
+                time.sleep(1)
+            if not timeout_reached:
+                index_progress.update_description(
+                    f"Timeline '{self.my_sketch.name}' indexed successfully"
+                )
+
         ConsoleConfig.success(
-            f"Processed {processed_count} events for sketch '{self.my_sketch.name}'"
+            f"Processed {progress.processed} events for sketch '{self.my_sketch.name}'"
         )
-        if error_count > 0:
-            ConsoleConfig.warning(f"Encountered {error_count} errors during ingestion")
+        if progress.errors > 0:
+            ConsoleConfig.warning(
+                f"Encountered {progress.errors} errors during ingestion"
+            )

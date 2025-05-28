@@ -30,5 +30,5 @@ class JSONFlattener:
                     flattened[path] = current
         except Exception as e:
             raise FlattenJsonError(f"Error flattening JSON: {e}")
-        ConsoleConfig.debug("Successfully flattened JSON: '{flattened}'")
+        ConsoleConfig.debug(f"Successfully flattened JSON: '{flattened}'")
         return flattened
