@@ -71,7 +71,7 @@ def _filter_generation(input_file: Optional[Path]) -> None:
 @app.command()
 def main(
     input_file: Optional[Path] = typer.Argument(
-        None, help="Path to THOR JSON log file"
+        None, help="Path to THOR JSON log file", metavar="THOR JSON LOGS"
     ),
     output_file: Optional[Path] = typer.Option(
         None, "--output", "-o", help="Write converted THOR logs to specified JSONL file"

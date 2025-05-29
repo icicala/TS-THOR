@@ -106,7 +106,7 @@ class TSIngest:
                 raise TimesketchError(f"Failed to ingest events: {error}")
 
         with ProgressBar(
-            f"Indexing timeline '{self.my_sketch.name}' ..."
+            f"Indexing ingested events into sketch '{self.my_sketch.name}' this may take a few moments. Waiting on Timesketch ..."
         ) as index_progress:
             index_progress.processed = progress.processed
             index_progress.errors = progress.errors
