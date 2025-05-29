@@ -47,7 +47,7 @@ class FilterCreator:
                 config = self._load_default_config()
 
             self._write_config(config)
-        except VersionError as e:
+        except VersionError:
             ConsoleConfig.warning(
                 "Use -h or --help for finding more information to generate default filter configuration."
             )
