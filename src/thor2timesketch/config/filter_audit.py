@@ -2,7 +2,13 @@ from typing import Optional, Set, Any
 from pathlib import Path
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
-from thor2timesketch.constants import AUDIT_INFO, AUDIT_FINDING, AUDIT_TRAIL
+from thor2timesketch.constants import (
+    AUDIT_INFO,
+    AUDIT_FINDING,
+    AUDIT_TRAIL,
+    YAML_FILTERS,
+)
+from thor2timesketch.exceptions import FilterConfigError
 
 
 class FilterAudit:
@@ -18,9 +24,14 @@ class FilterAudit:
         if not config_path:
             return cls.null_filter()
 
-        filters_section = YamlConfigReader.load_yaml(config_path)
-        audit_trail_fitlers = filters_section.get(AUDIT_TRAIL, [])
-        allowed_filters = set(audit_trail_fitlers)
+        filters = YamlConfigReader.load_yaml(config_path)
+        filter_section = filters.get(YAML_FILTERS)
+        if not filter_section:
+            raise FilterConfigError(
+                f"Missing '{YAML_FILTERS}' section in filter config {config_path}"
+            )
+        audit_trail_filters = filter_section.get(AUDIT_TRAIL, [])
+        allowed_filters = set(audit_trail_filters)
         if not allowed_filters:
             allowed_filters = {AUDIT_INFO, AUDIT_FINDING}
         return cls(allowed_filters)

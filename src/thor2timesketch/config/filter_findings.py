@@ -1,6 +1,7 @@
 from typing import Optional
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
+from thor2timesketch.constants import YAML_FILTERS
 from thor2timesketch.exceptions import FilterConfigError
 from pathlib import Path
 
@@ -21,7 +22,8 @@ class FilterFindings:
         if config_filter is None:
             return cls.null_filter()
 
-        filter_section = YamlConfigReader.load_yaml(config_filter)
+        filters = YamlConfigReader.load_yaml(config_filter)
+        filter_section = filters.get(YAML_FILTERS)
 
         if not filter_section:
             raise FilterConfigError(

@@ -28,7 +28,7 @@ def _show_version(value: bool) -> None:
 
 
 def _validate_args(
-    input_file: Path,
+    input_file: Optional[Path],
     output_file: Optional[Path],
     sketch: Optional[str],
     filter_path: Optional[Path],
@@ -70,15 +70,17 @@ def _filter_generation(input_file: Optional[Path]) -> None:
 
 @app.command()
 def main(
-    input_file: Optional[Path] = typer.Argument(None, help="Path to THOR JSON log file"),
+    input_file: Optional[Path] = typer.Argument(
+        None, help="Path to THOR JSON log file"
+    ),
     output_file: Optional[Path] = typer.Option(
         None, "--output", "-o", help="Write output to JSONL file"
     ),
     sketch: Optional[str] = typer.Option(
-        None, "--sketch", help="Sketch ID or name for Timesketch ingest"
+        None, "--sketch", "-s", help="Sketch ID or name for Timesketch ingest"
     ),
     filter_path: Optional[Path] = typer.Option(
-        None, "--filter", "-f", help="Path to YAML filter configuration"
+        None, "--filter", "-F", help="Path to YAML filter configuration"
     ),
     generate_filters: bool = typer.Option(
         False, "--generate-filters", help="Generate a filter YAML and exit"
@@ -108,6 +110,8 @@ def main(
         raise typer.Exit()
 
     try:
+        if input_file is None:
+            raise Thor2tsError("Input file is required. Use -h for help.")
         events = JsonTransformer().transform_thor_logs(input_file, filter_path)
         OutputWriter(input_file, output_file, sketch).write(events)
         ConsoleConfig.success("✓ thor2ts successfully completed")

@@ -1,5 +1,5 @@
 import yaml
-from importlib.resources import files
+from importlib.resources import files, as_file
 import itertools
 from typing import Dict, Any, Iterator, Optional
 from thor2timesketch.config.console_config import ConsoleConfig
@@ -46,7 +46,6 @@ class FilterCreator:
                         f"Unsupported mapper for version: {mapper.__class__.__name__}"
                     )
             else:
-                ConsoleConfig.info("Default filter configuration will be generated.")
                 config = self._load_default_config()
 
             self._write_config(config)
@@ -88,12 +87,16 @@ class FilterCreator:
         return config
 
     def _load_default_config(self) -> Dict[str, Any]:
+        ConsoleConfig.info("Default filter configuration will be generated.")
         try:
-            default_filter_path = files("thor2timesketch.config").joinpath(DEFAULT_FILTERS_YAML)
-            return YamlConfigReader.load_yaml(default_filter_path)
+            default_filter_path = files("thor2timesketch.config").joinpath(
+                DEFAULT_FILTERS_YAML
+            )
+            with as_file(default_filter_path) as filter_file:
+                return YamlConfigReader.load_yaml(filter_file)
         except FilterConfigError as e:
             raise FilterConfigError(
-                f"Failed to load default filter '{default_filter_path}': {e}"
+                f"Failed to load default filter '{filter_file}': {e}"
             )
 
     def _write_config(self, config: Dict[str, Any]) -> None:
