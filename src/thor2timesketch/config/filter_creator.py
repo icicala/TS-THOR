@@ -39,8 +39,12 @@ class FilterCreator:
                 if isinstance(mapper, (MapperJsonV1, MapperJsonV2)):
                     config = self._build_filters_from_json_thor(first_event, events)
                 else:
-                    ConsoleConfig.warning(f"Use -h or --help for finding more information to generate default filter configuration.")
-                    raise FilterConfigError(f"'{self.input_file}' does not contains filters to be extracted.")
+                    ConsoleConfig.warning(
+                        "Use -h or --help for finding more information to generate default filter configuration."
+                    )
+                    raise FilterConfigError(
+                        f"'{self.input_file}' does not contains filters to be extracted."
+                    )
             else:
                 config = self._load_default_config()
 

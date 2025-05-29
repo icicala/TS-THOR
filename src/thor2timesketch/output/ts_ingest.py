@@ -110,7 +110,11 @@ class TSIngest:
         ) as index_progress:
             index_progress.processed = progress.processed
             index_progress.errors = progress.errors
-            index_progress.progress.update(index_progress.task_id, completed=index_progress.processed, errors=index_progress.errors)
+            index_progress.progress.update(
+                index_progress.task_id,
+                completed=index_progress.processed,
+                errors=index_progress.errors,
+            )
             timeout = time.time() + 60
             timeout_reached = False
             while (
