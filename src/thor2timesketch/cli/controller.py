@@ -8,7 +8,13 @@ from thor2timesketch.transformation.json_transformer import JsonTransformer
 from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.exceptions import Thor2tsError
 
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(
+    help="Convert THOR security scanner logs to Timesketch format",
+    no_args_is_help=True,
+    add_completion=True,
+    rich_markup_mode="rich",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
 
 def _show_version(value: bool) -> None:
@@ -88,6 +94,12 @@ def main(
         help="Show version and exit",
     ),
 ) -> None:
+    ConsoleConfig.panel(
+        "Convert THOR security scanner logs to Timesketch format",
+        title="thor2ts powered by Nextron Systems",
+        style="blue",
+    )
+
     ConsoleConfig.set_verbose(verbose)
     _validate_args(input_file, output_file, sketch, filter_path, generate_filters)
 
