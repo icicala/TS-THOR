@@ -46,7 +46,6 @@ class FileWriter:
         self._prepare_output_dir()
         mode = "a" if self.output_file.exists() else "w"
         action = "Appending to " if mode == "a" else "Writing to "
-        ConsoleConfig.info(f"'{action}' file: '{self.output_file}'")
         try:
             with ProgressBar(f"{action} {self.output_file.name} ...") as progress:
                 with self.output_file.open(mode, encoding=DEFAULT_ENCODING) as file:

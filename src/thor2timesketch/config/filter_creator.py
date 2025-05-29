@@ -17,7 +17,6 @@ from thor2timesketch.exceptions import FilterConfigError
 from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
-from thor2timesketch.mappers.mapper_json_audit_findings import MapperJsonAuditFindings
 from thor2timesketch.mappers.mapper_json_v1 import MapperJsonV1
 from thor2timesketch.mappers.mapper_json_v2 import MapperJsonV2
 from pathlib import Path
@@ -39,12 +38,9 @@ class FilterCreator:
                 mapper = self.mapper_resolver.get_mapper_for_version(first_event)
                 if isinstance(mapper, (MapperJsonV1, MapperJsonV2)):
                     config = self._build_filters_from_json_thor(first_event, events)
-                elif isinstance(mapper, MapperJsonAuditFindings):
-                    config = self._load_default_config()
                 else:
-                    raise FilterConfigError(
-                        f"Unsupported mapper for version: {mapper.__class__.__name__}"
-                    )
+                    ConsoleConfig.warning(f"Use -h or --help for finding more information to generate default filter configuration.")
+                    raise FilterConfigError(f"'{self.input_file}' does not contains filters to be extracted.")
             else:
                 config = self._load_default_config()
 
