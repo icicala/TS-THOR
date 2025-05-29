@@ -1,4 +1,5 @@
 import yaml
+from importlib.resources import files
 import itertools
 from typing import Dict, Any, Iterator, Optional
 from thor2timesketch.config.console_config import ConsoleConfig
@@ -7,7 +8,7 @@ from thor2timesketch.constants import (
     DEFAULT_ENCODING,
     OUTPUT_YAML_FILE,
     DEFAULT_LEVELS,
-    DEFAULT_FILTER,
+    DEFAULT_FILTERS_YAML,
     VALID_JSON_EXTENSIONS,
     AUDIT_INFO,
     AUDIT_FINDING,
@@ -87,10 +88,9 @@ class FilterCreator:
         return config
 
     def _load_default_config(self) -> Dict[str, Any]:
-        default_filter_path = Path(DEFAULT_FILTER)
         try:
-            filter_config = YamlConfigReader.load_yaml(default_filter_path)
-            return {"filters": filter_config}
+            default_filter_path = files("thor2timesketch.config").joinpath(DEFAULT_FILTERS_YAML)
+            return YamlConfigReader.load_yaml(default_filter_path)
         except FilterConfigError as e:
             raise FilterConfigError(
                 f"Failed to load default filter '{default_filter_path}': {e}"

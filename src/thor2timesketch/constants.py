@@ -20,6 +20,6 @@ AUDIT_INFO = "info"
 AUDIT_INFO_TAG = "audit_info"
 AUDIT_FINDING = "findings"
 AUDIT_FINDING_TAG = "audit_finding"
-DEFAULT_FILTER = "default_filter.yaml"
+DEFAULT_FILTERS_YAML = "default_filter.yaml"
 OUTPUT_YAML_FILE = "thor2ts_filter.yaml"
 DEFAULT_LEVELS = ["Alert", "Warning", "Notice", "Info"]
