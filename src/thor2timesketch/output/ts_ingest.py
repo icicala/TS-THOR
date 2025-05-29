@@ -98,7 +98,9 @@ class TSIngest:
                     raise TimesketchError("Error creating timeline, ingestion aborted")
 
             except KeyboardInterrupt:
-                ConsoleConfig.warning(f"Keyboard interrupt received. Until this point, {progress.processed} events were ingested successfully into sketch '{self.my_sketch.name}' for timeline '{self.timeline_name}'.")
+                ConsoleConfig.warning(
+                    f"Keyboard interrupt received. Until this point, {progress.processed} events were ingested successfully into sketch '{self.my_sketch.name}' for timeline '{self.timeline_name}'."
+                )
                 raise
             except Exception as error:
                 raise TimesketchError(f"Failed to ingest events: {error}")

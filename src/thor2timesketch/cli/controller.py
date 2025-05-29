@@ -1,103 +1,110 @@
-from typing import Optional
-from importlib.metadata import version, PackageNotFoundError
 import typer
+from typing import Optional
 from pathlib import Path
-from thor2timesketch.config.filter_creator import FilterCreator
+from importlib.metadata import version, PackageNotFoundError
 from thor2timesketch.config.console_config import ConsoleConfig
-from thor2timesketch.output.output_writer import OutputWriter
+from thor2timesketch.config.filter_creator import FilterCreator
 from thor2timesketch.transformation.json_transformer import JsonTransformer
+from thor2timesketch.output.output_writer import OutputWriter
 from thor2timesketch.exceptions import Thor2tsError
 
-app = typer.Typer(
-    help="Convert THOR security scanner logs to Timesketch format",
-    no_args_is_help=True,
-    add_completion=True,
-    rich_markup_mode="rich",
-    context_settings={"help_option_names": ["-h", "--help"]},
-)
+app = typer.Typer(no_args_is_help=True)
 
 
-def get_version(value: bool) -> None:
+def _show_version(value: bool) -> None:
     if value:
         try:
             tool_version = version("thor2timesketch")
         except PackageNotFoundError:
-            tool_version = "unknown (development version)"
-        ConsoleConfig.info(f"thor2timesketch version: `{tool_version}`")
+            tool_version = "unknown (development)"
+        ConsoleConfig.info(f"thor2ts version: `{tool_version}`")
         raise typer.Exit()
+
+
+def _validate_args(
+    input_file: Path,
+    output_file: Optional[Path],
+    sketch: Optional[str],
+    filter_path: Optional[Path],
+    generate_filters: bool,
+) -> None:
+    allowed = {
+        frozenset(["generate_filters"]),
+        frozenset(["input_file", "generate_filters"]),
+        frozenset(["input_file", "output_file"]),
+        frozenset(["input_file", "sketch"]),
+        frozenset(["input_file", "output_file", "filter"]),
+        frozenset(["input_file", "sketch", "filter"]),
+    }
+
+    active = set()
+    if input_file:
+        active.add("input_file")
+    if generate_filters:
+        active.add("generate_filters")
+    if output_file:
+        active.add("output_file")
+    if sketch:
+        active.add("sketch")
+    if filter_path:
+        active.add("filter")
+
+    if active not in allowed:
+        ConsoleConfig.error("Check -h for valid arguments")
+        raise typer.Exit(code=1)
+
+
+def _filter_generation(input_file: Optional[Path]) -> None:
+    try:
+        FilterCreator(input_file).generate_yaml_file()
+    except Thor2tsError as e:
+        ConsoleConfig.error(f"{e}")
+        raise typer.Exit(code=1)
 
 
 @app.command()
 def main(
-    input_file: Path = typer.Argument(
-        ..., help="Path to THOR JSON log file", metavar="INPUT_FILE"
-    ),
+    input_file: Path = typer.Argument(..., help="Path to THOR JSON log file"),
     output_file: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Write output to specified JSONL file"
+        None, "--output", "-o", help="Write output to JSONL file"
     ),
     sketch: Optional[str] = typer.Option(
-        None, "--sketch", help="Sketch ID or name for ingesting events into Timesketch"
+        None, "--sketch", help="Sketch ID or name for Timesketch ingest"
     ),
     filter_path: Optional[Path] = typer.Option(
         None, "--filter", "-f", help="Path to YAML filter configuration"
     ),
-    generate_filter: bool = typer.Option(
-        False, "--generate-filter", help="Generate a filter YAML and exit"
+    generate_filters: bool = typer.Option(
+        False, "--generate-filters", help="Generate a filter YAML and exit"
     ),
     verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Enable verbose debugging output"
+        False, "--verbose", "-v", help="Enable verbose output"
     ),
     _version: bool = typer.Option(
         False,
         "--version",
-        callback=get_version,
+        callback=_show_version,
         is_eager=True,
         help="Show version and exit",
     ),
 ) -> None:
-
-    ConsoleConfig.panel(
-        "Convert THOR security scanner logs to Timesketch format",
-        title="thor2ts powered by Nextron Systems",
-        style="bold cyan",
-    )
-
     ConsoleConfig.set_verbose(verbose)
+    _validate_args(input_file, output_file, sketch, filter_path, generate_filters)
 
-    if not input_file.is_file():
-        ConsoleConfig.error(f"Input file not found: '{input_file}'. Use -h for help.")
-        raise typer.Exit(code=1)
-
-    if generate_filter:
-        try:
-            FilterCreator(input_file).generate_yaml_file()
-            raise typer.Exit()
-        except Thor2tsError as e:
-            ConsoleConfig.error(f"{e}")
-            raise typer.Exit(code=1)
-
-    if not (output_file or sketch):
-        ConsoleConfig.error(
-            "Use -o/--output for file output or --sketch for Timesketch ingestion. Use -h for help."
-        )
-        raise typer.Exit(code=1)
+    if generate_filters:
+        _filter_generation(input_file)
+        raise typer.Exit()
 
     try:
-        mapped_events = JsonTransformer().transform_thor_logs(
-            input_file=input_file, filter_path=filter_path
-        )
-
-        writer = OutputWriter(input_file, output_file, sketch)
-        writer.write(mapped_events)
-
+        events = JsonTransformer().transform_thor_logs(input_file, filter_path)
+        OutputWriter(input_file, output_file, sketch).write(events)
         ConsoleConfig.success("✓ thor2ts successfully completed")
-
-    except KeyboardInterrupt:
-        ConsoleConfig.warning("⚠ Processing interrupted by user")
-        raise typer.Exit(code=130)
     except Thor2tsError as e:
         ConsoleConfig.error(f"{e}")
         raise typer.Exit(code=1)
+    except KeyboardInterrupt:
+        ConsoleConfig.warning("⚠ Processing interrupted by user")
+        raise typer.Exit(code=130)
     except Exception as e:
         ConsoleConfig.error(f"Unexpected error: {e}")
         raise typer.Exit(code=1)

@@ -1,6 +1,6 @@
 import yaml
 import itertools
-from typing import Dict, Any, Iterator
+from typing import Dict, Any, Iterator, Optional
 from thor2timesketch.config.console_config import ConsoleConfig
 from thor2timesketch.config.yaml_config_reader import YamlConfigReader
 from thor2timesketch.constants import (
@@ -23,26 +23,30 @@ from pathlib import Path
 
 
 class FilterCreator:
-    def __init__(self, input_file: Path) -> None:
+    def __init__(self, input_file: Optional[Path] = None) -> None:
         self.input_file = input_file
         self.json_reader = JsonReader()
         self.mapper_resolver = JsonLogVersion()
 
     def generate_yaml_file(self) -> None:
         try:
-            validator = FileValidator(valid_extensions=VALID_JSON_EXTENSIONS)
-            valid_input_file = validator.validate_file(self.input_file)
-            events = self.json_reader.get_valid_data(valid_input_file)
-            first_event = next(events)
-            mapper = self.mapper_resolver.get_mapper_for_version(first_event)
-            if isinstance(mapper, (MapperJsonV1, MapperJsonV2)):
-                config = self._build_filters_from_json_thor(first_event, events)
-            elif isinstance(mapper, MapperJsonAuditFindings):
-                config = self._load_default_config()
+            if self.input_file:
+                validator = FileValidator(valid_extensions=VALID_JSON_EXTENSIONS)
+                valid_input_file = validator.validate_file(self.input_file)
+                events = self.json_reader.get_valid_data(valid_input_file)
+                first_event = next(events)
+                mapper = self.mapper_resolver.get_mapper_for_version(first_event)
+                if isinstance(mapper, (MapperJsonV1, MapperJsonV2)):
+                    config = self._build_filters_from_json_thor(first_event, events)
+                elif isinstance(mapper, MapperJsonAuditFindings):
+                    config = self._load_default_config()
+                else:
+                    raise FilterConfigError(
+                        f"Unsupported mapper for version: {mapper.__class__.__name__}"
+                    )
             else:
-                raise FilterConfigError(
-                    f"Unsupported mapper for version: {mapper.__class__.__name__}"
-                )
+                ConsoleConfig.info("Default filter configuration will be generated.")
+                config = self._load_default_config()
 
             self._write_config(config)
 
