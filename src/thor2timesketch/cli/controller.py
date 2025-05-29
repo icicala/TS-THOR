@@ -74,26 +74,26 @@ def main(
         None, help="Path to THOR JSON log file"
     ),
     output_file: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Write output to JSONL file"
+        None, "--output", "-o", help="Write converted THOR logs to specified JSONL file"
     ),
     sketch: Optional[str] = typer.Option(
-        None, "--sketch", "-s", help="Sketch ID or name for Timesketch ingest"
+        None, "--sketch", "-s", help="Sketch ID or name for ingesting THOR logs into Timesketch"
     ),
     filter_path: Optional[Path] = typer.Option(
-        None, "--filter", "-F", help="Path to YAML filter configuration"
+        None, "--filter", "-F", help="Path to a YAML filter configuration file"
     ),
     generate_filters: bool = typer.Option(
-        False, "--generate-filters", help="Generate a filter YAML and exit"
+        False, "--generate-filters", help="Generate a default filters YAML file with name 'thor_filter.yaml'"
     ),
     verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Enable verbose output"
+        False, "--verbose", "-v", help="Enable verbose debugging output"
     ),
     _version: bool = typer.Option(
         False,
         "--version",
         callback=_show_version,
         is_eager=True,
-        help="Show version and exit",
+        help="thor2ts version",
     ),
 ) -> None:
     ConsoleConfig.panel(

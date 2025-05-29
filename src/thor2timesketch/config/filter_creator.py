@@ -13,7 +13,7 @@ from thor2timesketch.constants import (
     AUDIT_INFO,
     AUDIT_FINDING,
 )
-from thor2timesketch.exceptions import FilterConfigError
+from thor2timesketch.exceptions import FilterConfigError, VersionError
 from thor2timesketch.input.json_reader import JsonReader
 from thor2timesketch.input.file_validator import FileValidator
 from thor2timesketch.mappers.json_log_version import JsonLogVersion
@@ -40,16 +40,20 @@ class FilterCreator:
                     config = self._build_filters_from_json_thor(first_event, events)
                 else:
                     ConsoleConfig.warning(
-                        "Use -h or --help for finding more information to generate default filter configuration."
+                        f"This {self.input_file} isn’t supported filters extraction, generating default filter configuration."
                     )
-                    raise FilterConfigError(
-                        f"'{self.input_file}' does not contains filters to be extracted."
-                    )
+                    config = self._load_default_config()
             else:
                 config = self._load_default_config()
 
             self._write_config(config)
-
+        except VersionError as e:
+            ConsoleConfig.warning(
+                "Use -h or --help for finding more information to generate default filter configuration."
+            )
+            raise FilterConfigError(
+                f"'{self.input_file}' does not contains filters to be extracted."
+            )
         except Exception as e:
             raise FilterConfigError(
                 f"Failed to generate filter configuration: {e}"
