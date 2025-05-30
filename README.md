@@ -37,7 +37,7 @@ This log conversion utility makes it easy to import [THOR](https://www.nextron-s
 [![Build Status](https://github.com/icicala/thor-ts-mapper/actions/workflows/release-thor2ts.yml/badge.svg)](https://test.pypi.org/project/thor2timesketch/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 
-thor2ts is a lightweight CLI utility that converts THOR security scanner logs into Timesketch-compatible JSONL format by:
+**thor2ts** is a lightweight CLI utility that converts THOR security scanner logs into Timesketch-compatible JSONL format by:
 
 * Extracting relevant fields from **THOR** logs
 
