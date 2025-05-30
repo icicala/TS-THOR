@@ -71,7 +71,7 @@ def _filter_generation(input_file: Optional[Path]) -> None:
 @app.command()
 def main(
     input_file: Optional[Path] = typer.Argument(
-        None, help="Path to THOR JSON log file", metavar="THOR JSON LOGS"
+        None, help="Path to the THOR file", metavar="[THOR JSON LOGS]"
     ),
     output_file: Optional[Path] = typer.Option(
         None, "--output", "-o", help="Write converted THOR logs to specified JSONL file"
@@ -114,9 +114,10 @@ def main(
         _filter_generation(input_file)
         raise typer.Exit()
 
+    if not input_file:
+        ConsoleConfig.error("Input file is required")
+        raise typer.Exit(code=1)
     try:
-        if input_file is None:
-            raise Thor2tsError("Input file is required. Use -h for help.")
         events = JsonTransformer().transform_thor_logs(input_file, filter_path)
         OutputWriter(input_file, output_file, sketch).write(events)
         ConsoleConfig.success("✓ thor2ts successfully completed")

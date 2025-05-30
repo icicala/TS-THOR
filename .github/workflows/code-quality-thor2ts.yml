@@ -1,4 +1,4 @@
-name: Code Quality & Security Scan
+name: Code Checks
 on:
   push:
     branches: [master]
