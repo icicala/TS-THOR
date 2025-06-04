@@ -93,25 +93,28 @@ Once the virtual environment is active, you can run the tool from the command li
 thor2ts [input_file] [arguments]
 ```
 ### Command-Line Arguments
+
 | Argument                         | Description                                                                                                             |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | `<input-file>`                   | Path to the **THOR** JSON log file. **Required**.                                                                       |
 | `-o, --output-file <JSONL_FILE>` | Save the converted **THOR** logs to the specified JSONL output file. **Optional**.                                      |
 | `-s, --sketch <ID\|NAME>`        | Ingest directly into the specified Timesketch sketch (by ID or name). Auto-creates the sketch if missing. **Optional**. |
+| `--buffer-size <N>`              | Set the Timesketch importer buffer size (batch size) for ingestion. **Optional**.                                       |
 | `-F, --filter <YAML_FILE>`       | Specify a YAML filter to select which **THOR** events are ingested. **Optional**.                                       |
 | `--generate-filter`              | Generate `thor_filter.yaml` by extracting filters from **THOR** v1/v2 logs or using a default template. **Optional**.   |
 | `-v, --verbose`                  | Enable verbose debugging output. **Optional**.                                                                          |
 | `--version`                      | Display the current `thor2ts` version. **Optional**.                                                                    |
 
 ### Examples
-| Scenario                           | Command                                                         |
-|------------------------------------|-----------------------------------------------------------------|
-| Convert to JSONL Output File       | `thor2ts thor_scan.json -o mapped_events.jsonl`                 |
-| Convert & Ingest to Sketch         | `thor2ts thor_scan.json -s "THOR APT SCANNER"`                  |
-| Convert, Filter & Ingest to Sketch | `thor2ts thor_scan.json -F thor_filter.yaml -s "THOR APT SCANNER"` |
-| Extract Filter Template (file)     | `thor2ts input_v1.json --generate-filter`                       |
-| Generate Default Filter Template   | `thor2ts --generate-filter`                                     |
-| Enable Debug Mode                  | `thor2ts thor_scan.json --verbose`                              |
+| Scenario                           | Command                                                                   |
+|------------------------------------|---------------------------------------------------------------------------|
+| Convert to JSONL Output File       | `thor2ts thor_scan.json -o mapped_events.jsonl`                           |
+| Convert & Ingest to Sketch         | `thor2ts thor_scan.json -s "THOR APT SCANNER"`                            |
+| Set Custom Buffer Size             | `thor2ts thor_scan.json -s "THOR APT SCANNER" --buffer-size 100000`       |
+| Convert, Filter & Ingest to Sketch | `thor2ts thor_scan.json -F thor_filter.yaml -s "THOR APT SCANNER"`        |
+| Extract Filter Template (file)     | `thor2ts input_v1.json --generate-filter`                                 |
+| Generate Default Filter Template   | `thor2ts --generate-filter`                                               |
+| Enable Debug Mode                  | `thor2ts thor_scan.json -s "THOR APT SCANNER" --verbose`                  |
 
 ---
 ## Configuration for Timesketch Ingestion
@@ -221,6 +224,7 @@ Add `--sketch <ID|NAME>` to your `thor2ts` command and it will:
 3. **Wait** up to 60 seconds for indexing to finish  
    - If indexing completes in time, you can go to the sketch immediately
    - Otherwise, ingestion continues in the background
+4. **Buffer size** is set to 50,000 events by default, but you can adjust it with `--buffer-size <N>`.
 ___
 ## Technical Details
 ### Field Mapping Logic
@@ -275,11 +279,12 @@ _**Issues recorded on 20.05.2025**_
 - **Symptom:** Every ~50 000 events shows up as a separate data source in the sketch.  
 - **Cause:** The importer’s default batch size is [50 000 events](https://github.com/google/timesketch/blob/master/importer_client/python/timesketch_import_client/importer.py) per upload.  
 - **Solution:**
-  1. Convert to JSONL:  
+  1. Use the `--buffer-size` argument to increase the batch size, e.g. to 200 000 events.
+  2. Convert to JSONL:  
      ```bash
      thor2ts input.json --output mapped_events.jsonl
      ```
-  2. Ingest with CLI and set a larger batch size:  
+     Ingest the JSONL file into Timesketch using the CLI importer:
      ```bash
      timesketch_importer --sketch_id <ID> \
                         --threshold_entry 200000 \
@@ -289,7 +294,7 @@ _**Issues recorded on 20.05.2025**_
 
 ### 2. Host system unresponsive during ingest
 - **Symptom:** High memory/CPU use and system freeze while ingesting large THOR logs.
-- **Cause:** OpenSearch (Timesketch backend) allocates ~50 % of RAM for its heap; on < 16 GB systems this leaves too little memory for the OS.  
+- **Cause:** OpenSearch (Timesketch backend) [allocates ~50 % of RAM for its JVM heap](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/auto-tune.html?utm_source=chatgpt.com), on < 16 GB systems this leaves too little memory for the OS.  
 - **Solution:**  
   - Run on a host with ≥ 16 GB RAM (recommended). Timesketch explicitly states 8GB is a minimum and ["more the better"](https://timesketch.org/guides/admin/install/#:~:text=,setup%20SSL%20for%20the%20webserver)
 

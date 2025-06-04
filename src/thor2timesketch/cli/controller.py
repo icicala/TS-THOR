@@ -31,6 +31,7 @@ def _validate_args(
     input_file: Optional[Path],
     output_file: Optional[Path],
     sketch: Optional[str],
+    buffer_size: Optional[int],
     filter_path: Optional[Path],
     generate_filters: bool,
 ) -> None:
@@ -39,8 +40,10 @@ def _validate_args(
         frozenset(["input_file", "generate_filters"]),
         frozenset(["input_file", "output_file"]),
         frozenset(["input_file", "sketch"]),
+        frozenset(["input_file", "sketch", "buffer_size"]),
         frozenset(["input_file", "output_file", "filter"]),
         frozenset(["input_file", "sketch", "filter"]),
+        frozenset(["input_file", "sketch", "filter", "buffer_size"]),
     }
 
     active = set()
@@ -52,6 +55,8 @@ def _validate_args(
         active.add("output_file")
     if sketch:
         active.add("sketch")
+    if buffer_size:
+        active.add("buffer_size")
     if filter_path:
         active.add("filter")
 
@@ -81,6 +86,12 @@ def main(
         "--sketch",
         "-s",
         help="Sketch ID or name for ingesting THOR logs into Timesketch",
+    ),
+    buffer_size: Optional[int] = typer.Option(
+        None,
+        "--buffer-size",
+        "-b",
+        help="Number of events to buffer before sending to Timesketch (default: 50_000 events)",
     ),
     filter_path: Optional[Path] = typer.Option(
         None, "--filter", "-F", help="Path to a YAML filter configuration file"
@@ -119,7 +130,7 @@ def main(
         raise typer.Exit(code=1)
     try:
         events = JsonTransformer().transform_thor_logs(input_file, filter_path)
-        OutputWriter(input_file, output_file, sketch).write(events)
+        OutputWriter(input_file, output_file, sketch, buffer_size).write(events)
         ConsoleConfig.success("✓ thor2ts successfully completed")
     except Thor2tsError as e:
         ConsoleConfig.error(f"{e}")
