@@ -119,7 +119,9 @@ def main(
     )
 
     ConsoleConfig.set_verbose(verbose)
-    _validate_args(input_file, output_file, sketch, filter_path, generate_filters)
+    _validate_args(
+        input_file, output_file, sketch, buffer_size, filter_path, generate_filters
+    )
 
     if generate_filters:
         _filter_generation(input_file)
