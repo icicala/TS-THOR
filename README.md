@@ -311,7 +311,9 @@ _**Issues recorded on 20.05.2025**_
 ### 4. Web UI upload errors
 - **Symptom:** Web UI rejects large `JSONL entries` `“Unterminated string in JSON at position ...”`.  
 - **Cause:** Browser-based uploader [can’t handle very large files]((https://github.com/google/timesketch/issues/3243)) or large JSONL entries  
-- **Solution:** Use the [CLI importer](https://timesketch.org/guides/user/cli-client/):  
+- **Solution**:
+  - Ingest directly using `thor2ts` with the `-s, --sketch` argument.
+  - Import via [CLI importer](https://timesketch.org/guides/user/cli-client/) for already mapped THOR events from a `JSONL` file:
   ```bash
   timesketch_importer --sketch_id <ID> mapped_events.jsonl
   ```
