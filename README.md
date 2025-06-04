@@ -24,12 +24,12 @@ This log conversion utility makes it easy to import [THOR](https://www.nextron-s
 8. [Technical Details](#technical-details)
      - THOR JSON v1/v2
      - Audit-trail Logs
-8. [Troubleshooting](#troubleshooting) 
+9. [Troubleshooting](#troubleshooting) 
    - Issues and solutions
-9. [Contributing](#contributing)
+10. [Contributing](#contributing)
     - How to contribute
-10. [License](./license)
-11. [Support](#support)
+11. [License](./LICENSE)
+12. [Support](#support)
 
 ---
 ## Overview
@@ -58,32 +58,32 @@ Make sure you have the following installed on your system:
 ### Steps
 1. Create a virtual environment:
 
-* Linux / macOS (bash / zsh)
-```bash
-python3 -m venv thor2ts-venv
-```
-* Windows (cmd / powershell)
-```cmd
-py -3 -m venv thor2ts-venv
-```
+   * Linux / macOS (bash / zsh)
+    ```bash
+    python3 -m venv thor2ts-venv
+    ```
+   * Windows (cmd / powershell)
+    ```cmd
+    py -3 -m venv thor2ts-venv
+    ```
 2. Activate the virtual environment `thor2ts-venv`:
 
-* Linux / macOS (bash / zsh)
-```bash
-source thor2ts-venv/bin/activate
-```
-* Windows (cmd / powershell)
-```cmd
-thor2ts-venv\Scripts\activate
-```
+   * Linux / macOS (bash / zsh)
+    ```bash
+    source thor2ts-venv/bin/activate
+    ```
+   * Windows (cmd / powershell)
+    ```cmd
+    thor2ts-venv\Scripts\activate
+    ```
 3. Install thor2timesketch package:
-```bash
-pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple thor2timesketch
-```
+    ```bash
+    pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple thor2timesketch
+    ```
 
-3. Future Use
+4. Future Use
 
-To use `thor2ts` in the new terminal, activate the virtual environment, (see `step 2 - Activate the virtual environment` above).
+    To use `thor2ts` in the new terminal, activate the virtual environment, (see `step 2 - Activate the virtual environment` above).
 
 ---
 ## Usage
@@ -99,22 +99,22 @@ thor2ts [input_file] [arguments]
 | `<input-file>`                   | Path to the **THOR** JSON log file. **Required**.                                                                       |
 | `-o, --output-file <JSONL_FILE>` | Save the converted **THOR** logs to the specified JSONL output file. **Optional**.                                      |
 | `-s, --sketch <ID\|NAME>`        | Ingest directly into the specified Timesketch sketch (by ID or name). Auto-creates the sketch if missing. **Optional**. |
-| `--buffer-size <N>`              | Set the Timesketch importer buffer size (batch size) for ingestion. **Optional**.                                       |
+| `-b, --buffer-size <N>`          | Set the Timesketch importer buffer size (batch size) for ingestion. **Optional**.                                       |
 | `-F, --filter <YAML_FILE>`       | Specify a YAML filter to select which **THOR** events are ingested. **Optional**.                                       |
 | `--generate-filter`              | Generate `thor_filter.yaml` by extracting filters from **THOR** v1/v2 logs or using a default template. **Optional**.   |
 | `-v, --verbose`                  | Enable verbose debugging output. **Optional**.                                                                          |
 | `--version`                      | Display the current `thor2ts` version. **Optional**.                                                                    |
 
 ### Examples
-| Scenario                           | Command                                                                   |
-|------------------------------------|---------------------------------------------------------------------------|
-| Convert to JSONL Output File       | `thor2ts thor_scan.json -o mapped_events.jsonl`                           |
-| Convert & Ingest to Sketch         | `thor2ts thor_scan.json -s "THOR APT SCANNER"`                            |
-| Set Custom Buffer Size             | `thor2ts thor_scan.json -s "THOR APT SCANNER" --buffer-size 100000`       |
-| Convert, Filter & Ingest to Sketch | `thor2ts thor_scan.json -F thor_filter.yaml -s "THOR APT SCANNER"`        |
-| Extract Filter Template (file)     | `thor2ts input_v1.json --generate-filter`                                 |
-| Generate Default Filter Template   | `thor2ts --generate-filter`                                               |
-| Enable Debug Mode                  | `thor2ts thor_scan.json -s "THOR APT SCANNER" --verbose`                  |
+| Scenario                           | Command                                                            |
+|------------------------------------|--------------------------------------------------------------------|
+| Convert to JSONL Output File       | `thor2ts thor_scan.json -o mapped_events.jsonl`                    |
+| Convert & Ingest to Sketch         | `thor2ts thor_scan.json -s "THOR APT SCANNER"`                     |
+| Set Custom Buffer Size             | `thor2ts thor_scan.json -s "THOR APT SCANNER" -b 100000`           |
+| Convert, Filter & Ingest to Sketch | `thor2ts thor_scan.json -F thor_filter.yaml -s "THOR APT SCANNER"` |
+| Extract Filter Template (file)     | `thor2ts input_v1.json --generate-filter`                          |
+| Generate Default Filter Template   | `thor2ts --generate-filter`                                        |
+| Enable Debug Mode                  | `thor2ts thor_scan.json -s "THOR APT SCANNER" --verbose`           |
 
 ---
 ## Configuration for Timesketch Ingestion
@@ -137,15 +137,15 @@ When you ingest for the first time (`-s, --sketch`), it will be prompted to ente
 
 This creates two configuration files in the user's home directory $HOME/:
 
-| File                   | Purpose                                           |
-|------------------------|---------------------------------------------------|
-| `~/.timesketch.token`  | Encrypted authentication tokens                   |
-| `~/.timesketchrc`      | Connection settings (host, auth mode, credentials) |
+| File                   | Purpose                                             |
+|------------------------|-----------------------------------------------------|
+| `~/.timesketch.token`  | Encrypted authentication tokens                     |
+| `~/.timesketchrc`      | Connection settings (host, auth mode, credentials)  |
 
 ### `~/.timesketchrc`
 ```ini
 [timesketch]
-host_uri = http://timessketch.example.com
+host_uri = https://timesketch.example.com
 username = USERNAME
 verify = True
 client_id = 
@@ -217,14 +217,14 @@ Logs generated by [THOR APT SCANNER v10.7](https://www.nextron-systems.com/thor/
 - **Timesketch Web UI**
 - [**Timesketch command line client (CLI)**](https://timesketch.org/guides/user/cli-client/)
 ### 2. Automatic Ingestion (`-s, --sketch`)
-Add `--sketch <ID|NAME>` to your `thor2ts` command and it will:
+Add `-s, --sketch <ID|NAME>` to your `thor2ts` command and it will:
 
 1. **Create or find** the specified sketch  
 2. **Push** the mapped events directly  
 3. **Wait** up to 60 seconds for indexing to finish  
    - If indexing completes in time, you can go to the sketch immediately
    - Otherwise, ingestion continues in the background
-4. **Buffer size** is set to 50,000 events by default, but you can adjust it with `--buffer-size <N>`.
+4. **Buffer size** is set to 50,000 events by default, but you can adjust it with `-b, --buffer-size <N>`.
 ___
 ## Technical Details
 ### Field Mapping Logic
@@ -279,7 +279,7 @@ _**Issues recorded on 20.05.2025**_
 - **Symptom:** Every ~50 000 events shows up as a separate data source in the sketch.  
 - **Cause:** The importer’s default batch size is [50 000 events](https://github.com/google/timesketch/blob/master/importer_client/python/timesketch_import_client/importer.py) per upload.  
 - **Solution:**
-  1. Use the `--buffer-size` argument to increase the batch size, e.g. to 200 000 events.
+  1. Use the `-b, --buffer-size` argument to increase the batch size, e.g. to 200 000 events.
   2. Convert to JSONL:  
      ```bash
      thor2ts input.json --output mapped_events.jsonl
